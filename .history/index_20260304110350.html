@@ -1,0 +1,724 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <!-- ============================================================
+       PRIVACYFIRST CONVERT — index.html
+       Versión: 1.0 — Fase 1 (Estructura Base)
+       ============================================================ -->
+
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <!-- ── SEO BÁSICO ─────────────────────────────────────────── -->
+  <title>PrivacyFirst Convert — Convierte PDFs y Fotos GRATIS sin subir tus archivos</title>
+  <meta name="description"
+    content="Convierte WebP a JPG, une PDFs y más. Todo se procesa en tu navegador: tus archivos NUNCA salen de tu computadora. 100% privado, gratis y sin anuncios invasivos." />
+  <meta name="robots" content="index, follow" />
+  <link rel="canonical" href="https://TU-USUARIO.github.io/privacyfirst-convert/" />
+
+  <!-- ── OPEN GRAPH (para compartir en WhatsApp, Facebook, etc.) ─ -->
+  <meta property="og:type"        content="website" />
+  <meta property="og:title"       content="PrivacyFirst Convert — Conversión Privada en tu Navegador" />
+  <meta property="og:description" content="Tus archivos nunca salen de tu dispositivo. Convierte y une PDFs, transforma imágenes WebP a JPG, todo con Python corriendo en tu navegador." />
+  <meta property="og:url"         content="https://TU-USUARIO.github.io/privacyfirst-convert/" />
+  <meta property="og:image"       content="https://TU-USUARIO.github.io/privacyfirst-convert/og-image.png" />
+
+  <!-- ── TWITTER CARD ──────────────────────────────────────── -->
+  <meta name="twitter:card"        content="summary_large_image" />
+  <meta name="twitter:title"       content="PrivacyFirst Convert" />
+  <meta name="twitter:description" content="Convierte archivos sin subir NADA a ningún servidor. 100% privado." />
+
+  <!-- ── SCHEMA MARKUP (para Google) ──────────────────────── -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "PrivacyFirst Convert",
+    "url": "https://TU-USUARIO.github.io/privacyfirst-convert/",
+    "description": "Herramienta gratuita para convertir archivos 100% en el navegador. Sin servidores. Sin subir datos.",
+    "applicationCategory": "UtilitiesApplication",
+    "operatingSystem": "All",
+    "offers": {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "USD"
+    }
+  }
+  </script>
+
+  <!-- ══════════════════════════════════════════════════════════
+       SEGURIDAD — Content Security Policy (CSP)
+       Esto le dice al navegador qué puede y qué NO puede cargar.
+       Bloquea la mayoría de los ataques XSS e inyecciones.
+       ══════════════════════════════════════════════════════════ -->
+  <meta http-equiv="Content-Security-Policy" content="
+    default-src 'self';
+    script-src  'self' 'unsafe-inline' 'unsafe-eval'
+                https://cdn.tailwindcss.com
+                https://cdn.jsdelivr.net
+                https://pyscript.net;
+    style-src   'self' 'unsafe-inline'
+                https://cdn.tailwindcss.com
+                https://fonts.googleapis.com
+                https://pyscript.net;
+    font-src    'self'
+                https://fonts.gstatic.com;
+    connect-src 'self'
+                https://cdn.jsdelivr.net
+                https://pyscript.net
+                https://files.pythonhosted.org
+                https://pypi.org;
+    img-src     'self' data: blob:;
+    worker-src  'self' blob:;
+    frame-src   'none';
+    object-src  'none';
+    base-uri    'self';
+    form-action 'self';
+  " />
+
+  <!-- Protección extra: no permitir que esta página sea embebida en iframes -->
+  <meta http-equiv="X-Frame-Options" content="DENY" />
+  <!-- Evita que el navegador adivine el tipo de archivo (protege contra ataques MIME) -->
+  <meta http-equiv="X-Content-Type-Options" content="nosniff" />
+
+  <!-- ── TAILWIND CSS (diseño moderno sin instalar nada) ─────── -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    // Configuración personalizada de Tailwind
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50:  '#eef9f4',
+              100: '#d5f0e3',
+              200: '#aee0ca',
+              300: '#7ecaac',
+              400: '#4daf8b',
+              500: '#2e9471',   // ← color principal
+              600: '#21785b',
+              700: '#1c5f49',
+              800: '#194c3b',
+              900: '#163f31',
+            }
+          },
+          fontFamily: {
+            display: ['"DM Serif Display"', 'Georgia', 'serif'],
+            body:    ['"DM Sans"', 'system-ui', 'sans-serif'],
+          },
+          animation: {
+            'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- ── FUENTES DE GOOGLE ──────────────────────────────────── -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=DM+Serif+Display&display=swap"
+        rel="stylesheet" />
+
+  <!-- ── ESTILOS PERSONALIZADOS ─────────────────────────────── -->
+  <style>
+    body { font-family: 'DM Sans', system-ui, sans-serif; }
+    h1, h2, .font-display { font-family: 'DM Serif Display', Georgia, serif; }
+
+    /* Área de arrastrar archivos */
+    .drop-zone {
+      border: 2.5px dashed #aee0ca;
+      transition: all 0.25s ease;
+    }
+    .drop-zone:hover,
+    .drop-zone.drag-over {
+      border-color: #2e9471;
+      background-color: #eef9f4;
+      transform: scale(1.01);
+    }
+
+    /* Barra de progreso animada */
+    @keyframes progress-bar {
+      from { width: 0%; }
+      to   { width: 100%; }
+    }
+    .progress-animate {
+      animation: progress-bar 3s ease-in-out forwards;
+    }
+
+    /* Efecto de fondo sutil */
+    .hero-bg {
+      background:
+        radial-gradient(ellipse at 20% 50%, rgba(46,148,113,0.08) 0%, transparent 60%),
+        radial-gradient(ellipse at 80% 20%, rgba(78,202,172,0.06) 0%, transparent 50%),
+        #f9fafb;
+    }
+
+    /* Ocultar spinner nativo del input file */
+    input[type="file"] { display: none; }
+
+    /* Espacio reservado para AdSense (invisible de momento) */
+    .adsense-slot {
+      min-height: 90px;
+      background: repeating-linear-gradient(
+        45deg, #f3f4f6, #f3f4f6 10px, #e5e7eb 10px, #e5e7eb 20px
+      );
+      border: 1px dashed #d1d5db;
+    }
+  </style>
+</head>
+
+<body class="hero-bg min-h-screen text-gray-800">
+
+  <!-- ════════════════════════════════════════════════════════
+       HEADER / NAVEGACIÓN
+       ════════════════════════════════════════════════════════ -->
+  <header class="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-100 shadow-sm">
+    <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
+
+      <!-- Logo -->
+      <a href="#" class="flex items-center gap-2 group">
+        <div class="w-9 h-9 rounded-xl bg-brand-500 flex items-center justify-center shadow-md
+                    group-hover:bg-brand-600 transition-colors">
+          <svg class="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+            <path stroke-linecap="round" stroke-linejoin="round"
+              d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+          </svg>
+        </div>
+        <span class="font-display text-xl text-gray-900 leading-none">
+          PrivacyFirst <span class="text-brand-500">Convert</span>
+        </span>
+      </a>
+
+      <!-- Badges de confianza -->
+      <div class="hidden sm:flex items-center gap-3 text-xs font-medium text-gray-500">
+        <span class="flex items-center gap-1">
+          <svg class="w-3.5 h-3.5 text-brand-500" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd"/>
+          </svg>
+          Sin servidores
+        </span>
+        <span class="w-1 h-1 rounded-full bg-gray-300"></span>
+        <span class="flex items-center gap-1">
+          <svg class="w-3.5 h-3.5 text-brand-500" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+          </svg>
+          100% Gratis
+        </span>
+        <span class="w-1 h-1 rounded-full bg-gray-300"></span>
+        <span>Open Source</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- ════════════════════════════════════════════════════════
+       ESPACIO PARA ANUNCIO SUPERIOR (AdSense — dejar aquí)
+       ════════════════════════════════════════════════════════ -->
+  <div class="max-w-6xl mx-auto px-4 pt-4">
+    <div class="adsense-slot rounded-xl flex items-center justify-center text-xs text-gray-400 font-medium">
+      <!-- Aquí irá tu código de Google AdSense en el futuro -->
+      [ Espacio para anuncio — 728×90 ]
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════════════════════════════
+       HERO — Título principal y propuesta de valor
+       ════════════════════════════════════════════════════════ -->
+  <section class="max-w-6xl mx-auto px-4 pt-12 pb-8 text-center">
+    <div class="inline-flex items-center gap-2 bg-brand-50 text-brand-700 text-xs font-semibold
+                px-3 py-1.5 rounded-full border border-brand-100 mb-5">
+      <span class="w-2 h-2 rounded-full bg-brand-400 animate-pulse-slow"></span>
+      Procesamiento local — tus archivos nunca salen de tu dispositivo
+    </div>
+
+    <h1 class="font-display text-4xl sm:text-5xl lg:text-6xl text-gray-900 leading-tight mb-4">
+      Convierte archivos con<br />
+      <span class="text-brand-500">privacidad total</span>
+    </h1>
+
+    <p class="max-w-2xl mx-auto text-gray-500 text-lg mb-10">
+      Une PDFs, convierte imágenes WebP → JPG y más.
+      Python corre <strong>directamente en tu navegador</strong>.
+      Ningún archivo toca nuestros servidores. <em>Ni siquiera tenemos servidores.</em>
+    </p>
+
+    <!-- Tarjetas de herramientas disponibles -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-2xl mx-auto mb-12">
+
+      <!-- Tarjeta 1: Unir PDFs -->
+      <button onclick="selectTool('merge-pdf')"
+              id="btn-merge-pdf"
+              class="tool-card group relative bg-white rounded-2xl p-6 text-left border-2 border-gray-100
+                     hover:border-brand-400 hover:shadow-xl hover:shadow-brand-100
+                     transition-all duration-200 cursor-pointer">
+        <div class="w-12 h-12 rounded-xl bg-red-50 flex items-center justify-center mb-4
+                    group-hover:bg-red-100 transition-colors">
+          <svg class="w-6 h-6 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round"
+              d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+          </svg>
+        </div>
+        <h2 class="font-semibold text-gray-900 text-base mb-1">Unir PDFs</h2>
+        <p class="text-gray-400 text-sm">Combina múltiples PDFs en uno solo, en el orden que elijas.</p>
+        <span class="absolute top-4 right-4 text-xs bg-green-50 text-green-600 font-semibold px-2 py-0.5 rounded-full">
+          Disponible
+        </span>
+      </button>
+
+      <!-- Tarjeta 2: WebP → JPG -->
+      <button onclick="selectTool('webp-jpg')"
+              id="btn-webp-jpg"
+              class="tool-card group relative bg-white rounded-2xl p-6 text-left border-2 border-gray-100
+                     hover:border-brand-400 hover:shadow-xl hover:shadow-brand-100
+                     transition-all duration-200 cursor-pointer">
+        <div class="w-12 h-12 rounded-xl bg-blue-50 flex items-center justify-center mb-4
+                    group-hover:bg-blue-100 transition-colors">
+          <svg class="w-6 h-6 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round"
+              d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+          </svg>
+        </div>
+        <h2 class="font-semibold text-gray-900 text-base mb-1">WebP → JPG</h2>
+        <p class="text-gray-400 text-sm">Convierte imágenes WebP a JPG/PNG compatible con todo.</p>
+        <span class="absolute top-4 right-4 text-xs bg-green-50 text-green-600 font-semibold px-2 py-0.5 rounded-full">
+          Disponible
+        </span>
+      </button>
+    </div>
+  </section>
+
+  <!-- ════════════════════════════════════════════════════════
+       ÁREA DE TRABAJO — Zona de arrastrar archivos
+       (Se muestra al elegir una herramienta)
+       ════════════════════════════════════════════════════════ -->
+  <section id="workspace" class="hidden max-w-3xl mx-auto px-4 pb-12">
+
+    <!-- Título de la herramienta activa -->
+    <div class="flex items-center justify-between mb-4">
+      <h3 id="workspace-title" class="font-display text-2xl text-gray-900">
+        Selecciona tus archivos
+      </h3>
+      <button onclick="closeWorkspace()"
+              class="text-gray-400 hover:text-gray-700 text-sm flex items-center gap-1">
+        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+        </svg>
+        Cancelar
+      </button>
+    </div>
+
+    <!-- Zona de Drop -->
+    <div id="drop-zone"
+         class="drop-zone rounded-2xl bg-white p-10 text-center cursor-pointer"
+         onclick="triggerFileInput()"
+         ondragover="handleDragOver(event)"
+         ondragleave="handleDragLeave(event)"
+         ondrop="handleDrop(event)">
+
+      <div class="pointer-events-none">
+        <div class="w-16 h-16 rounded-2xl bg-brand-50 flex items-center justify-center mx-auto mb-4">
+          <svg class="w-8 h-8 text-brand-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+            <path stroke-linecap="round" stroke-linejoin="round"
+              d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+          </svg>
+        </div>
+        <p class="text-gray-700 font-semibold text-base mb-1">
+          Arrastra tus archivos aquí
+        </p>
+        <p class="text-gray-400 text-sm mb-4">
+          o haz clic para seleccionarlos desde tu computadora
+        </p>
+        <span class="inline-block bg-brand-500 text-white text-sm font-semibold
+                     px-5 py-2.5 rounded-xl hover:bg-brand-600 transition-colors">
+          Elegir archivos
+        </span>
+        <p id="drop-zone-hint" class="text-xs text-gray-300 mt-3">
+          Formatos aceptados: PDF • Máximo 50 MB por archivo
+        </p>
+      </div>
+    </div>
+
+    <!-- Input file real (oculto) -->
+    <input type="file" id="file-input" multiple />
+
+    <!-- Lista de archivos seleccionados -->
+    <div id="file-list" class="hidden mt-4 space-y-2"></div>
+
+    <!-- Botón de conversión (aparece cuando hay archivos) -->
+    <div id="convert-btn-area" class="hidden mt-6 text-center">
+      <button id="convert-btn"
+              onclick="startConversion()"
+              class="bg-brand-500 text-white font-semibold px-10 py-3.5 rounded-xl
+                     hover:bg-brand-600 active:scale-95 transition-all shadow-lg
+                     shadow-brand-200 text-base">
+        ⚡ Iniciar conversión
+      </button>
+      <p class="text-xs text-gray-400 mt-2">
+        🔒 Todo se procesa en tu navegador. Nada se envía a ningún servidor.
+      </p>
+    </div>
+
+    <!-- Barra de progreso -->
+    <div id="progress-area" class="hidden mt-6">
+      <div class="flex justify-between text-sm text-gray-500 mb-1">
+        <span id="progress-label">Cargando Python...</span>
+        <span id="progress-pct">0%</span>
+      </div>
+      <div class="h-2.5 bg-gray-100 rounded-full overflow-hidden">
+        <div id="progress-bar" class="h-full bg-brand-400 rounded-full transition-all duration-300" style="width:0%"></div>
+      </div>
+    </div>
+
+    <!-- Área de resultado / descarga -->
+    <div id="result-area" class="hidden mt-6 bg-white border-2 border-brand-200 rounded-2xl p-6 text-center">
+      <div class="w-12 h-12 rounded-full bg-brand-50 flex items-center justify-center mx-auto mb-3">
+        <svg class="w-6 h-6 text-brand-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+        </svg>
+      </div>
+      <p class="font-semibold text-gray-900 mb-1">¡Conversión completada!</p>
+      <p class="text-gray-400 text-sm mb-4">Tu archivo está listo para descargar.</p>
+      <a id="download-link" href="#" download
+         class="inline-block bg-brand-500 text-white font-semibold px-8 py-3 rounded-xl
+                hover:bg-brand-600 transition-colors">
+        ⬇ Descargar archivo
+      </a>
+    </div>
+
+    <!-- Mensajes de error amigables -->
+    <div id="error-area" class="hidden mt-4 bg-red-50 border border-red-200 rounded-xl p-4">
+      <p class="text-red-700 font-medium text-sm" id="error-msg">Error desconocido.</p>
+    </div>
+  </section>
+
+  <!-- ════════════════════════════════════════════════════════
+       SECCIÓN DE CONFIANZA / FEATURES
+       ════════════════════════════════════════════════════════ -->
+  <section class="max-w-6xl mx-auto px-4 py-12 border-t border-gray-100">
+    <h2 class="font-display text-2xl text-center text-gray-700 mb-8">
+      ¿Por qué confiar en nosotros?
+    </h2>
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
+
+      <div class="bg-white rounded-2xl p-6 border border-gray-100 text-center">
+        <div class="text-3xl mb-3">🔒</div>
+        <h3 class="font-semibold text-gray-900 mb-2">Privacidad absoluta</h3>
+        <p class="text-gray-400 text-sm">
+          Python corre dentro de tu navegador con WebAssembly/Pyodide.
+          Cero transmisión de datos.
+        </p>
+      </div>
+
+      <div class="bg-white rounded-2xl p-6 border border-gray-100 text-center">
+        <div class="text-3xl mb-3">⚡</div>
+        <h3 class="font-semibold text-gray-900 mb-2">Rápido y sin límites</h3>
+        <p class="text-gray-400 text-sm">
+          No hay cola de servidores. Tu CPU procesa los archivos
+          directamente, a máxima velocidad.
+        </p>
+      </div>
+
+      <div class="bg-white rounded-2xl p-6 border border-gray-100 text-center">
+        <div class="text-3xl mb-3">💰</div>
+        <h3 class="font-semibold text-gray-900 mb-2">Siempre gratis</h3>
+        <p class="text-gray-400 text-sm">
+          Sin suscripciones, sin marcas de agua, sin límite de archivos.
+          Para siempre.
+        </p>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ════════════════════════════════════════════════════════
+       ESPACIO PARA ANUNCIO INFERIOR (AdSense)
+       ════════════════════════════════════════════════════════ -->
+  <div class="max-w-6xl mx-auto px-4 pb-8">
+    <div class="adsense-slot rounded-xl flex items-center justify-center text-xs text-gray-400 font-medium">
+      [ Espacio para anuncio — 728×90 ]
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════════════════════════════
+       FOOTER
+       ════════════════════════════════════════════════════════ -->
+  <footer class="border-t border-gray-100 bg-white">
+    <div class="max-w-6xl mx-auto px-4 py-6 flex flex-col sm:flex-row
+                items-center justify-between gap-3 text-sm text-gray-400">
+      <span>© 2025 PrivacyFirst Convert — Código abierto</span>
+      <div class="flex gap-4">
+        <a href="#" class="hover:text-gray-700 transition-colors">Privacidad</a>
+        <a href="#" class="hover:text-gray-700 transition-colors">Términos</a>
+        <a href="https://github.com/TU-USUARIO/privacyfirst-convert" target="_blank" rel="noopener noreferrer"
+           class="hover:text-gray-700 transition-colors">GitHub</a>
+      </div>
+    </div>
+  </footer>
+
+  <!-- ════════════════════════════════════════════════════════
+       JAVASCRIPT DE INTERACCIÓN (sin frameworks externos)
+       Solo maneja la UI — la conversión real vendrá en Fase 2
+       ════════════════════════════════════════════════════════ -->
+  <script>
+    // ── Estado de la aplicación ─────────────────────────────
+    let currentTool  = null;   // 'merge-pdf' o 'webp-jpg'
+    let selectedFiles = [];    // archivos que el usuario eligió
+
+    // ── TIPOS DE ARCHIVO PERMITIDOS (seguridad MIME) ────────
+    // Solo permitimos exactamente estos tipos. Cualquier otro
+    // archivo (incluyendo .exe, .zip maliciosos) será rechazado.
+    const ALLOWED_TYPES = {
+      'merge-pdf': {
+        mime:      ['application/pdf'],
+        extension: ['.pdf'],
+        label:     'PDF',
+        hint:      'Formatos aceptados: PDF • Máximo 50 MB por archivo',
+        maxSize:   50 * 1024 * 1024,   // 50 MB
+        maxFiles:  20,
+      },
+      'webp-jpg': {
+        mime:      ['image/webp', 'image/png', 'image/jpeg'],
+        extension: ['.webp', '.png', '.jpg', '.jpeg'],
+        label:     'WebP, PNG o JPG',
+        hint:      'Formatos aceptados: WebP, PNG, JPG • Máximo 20 MB por archivo',
+        maxSize:   20 * 1024 * 1024,   // 20 MB
+        maxFiles:  50,
+      }
+    };
+
+    // ── Seleccionar herramienta ─────────────────────────────
+    function selectTool(tool) {
+      currentTool  = tool;
+      selectedFiles = [];
+
+      // Resaltar la tarjeta activa
+      document.querySelectorAll('.tool-card').forEach(c => {
+        c.classList.remove('border-brand-400', 'shadow-xl', 'shadow-brand-100');
+        c.classList.add('border-gray-100');
+      });
+      const activeCard = document.getElementById('btn-' + tool);
+      if (activeCard) {
+        activeCard.classList.remove('border-gray-100');
+        activeCard.classList.add('border-brand-400', 'shadow-xl', 'shadow-brand-100');
+      }
+
+      // Configurar el workspace para la herramienta elegida
+      const cfg = ALLOWED_TYPES[tool];
+      document.getElementById('workspace-title').textContent =
+        tool === 'merge-pdf' ? '📄 Unir PDFs' : '🖼 WebP → JPG';
+      document.getElementById('drop-zone-hint').textContent = cfg.hint;
+
+      // Configurar el input file
+      const input = document.getElementById('file-input');
+      input.accept  = cfg.extension.join(',');
+      input.multiple = true;
+      input.onchange = (e) => handleFiles(Array.from(e.target.files));
+
+      // Mostrar workspace, ocultar resultados previos
+      resetWorkspace(false);
+      document.getElementById('workspace').classList.remove('hidden');
+
+      // Scroll suave al workspace
+      document.getElementById('workspace').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    // ── Cerrar workspace ────────────────────────────────────
+    function closeWorkspace() {
+      currentTool   = null;
+      selectedFiles = [];
+      document.getElementById('workspace').classList.add('hidden');
+      document.querySelectorAll('.tool-card').forEach(c => {
+        c.classList.remove('border-brand-400', 'shadow-xl', 'shadow-brand-100');
+        c.classList.add('border-gray-100');
+      });
+    }
+
+    // ── Limpiar workspace (sin cerrar) ──────────────────────
+    function resetWorkspace(keepFiles) {
+      if (!keepFiles) {
+        document.getElementById('file-list').classList.add('hidden');
+        document.getElementById('file-list').innerHTML = '';
+        document.getElementById('convert-btn-area').classList.add('hidden');
+      }
+      document.getElementById('progress-area').classList.add('hidden');
+      document.getElementById('result-area').classList.add('hidden');
+      document.getElementById('error-area').classList.add('hidden');
+      document.getElementById('progress-bar').style.width = '0%';
+    }
+
+    // ── Trigger del input oculto ────────────────────────────
+    function triggerFileInput() {
+      document.getElementById('file-input').click();
+    }
+
+    // ── Drag & Drop ─────────────────────────────────────────
+    function handleDragOver(e) {
+      e.preventDefault();
+      document.getElementById('drop-zone').classList.add('drag-over');
+    }
+    function handleDragLeave(e) {
+      document.getElementById('drop-zone').classList.remove('drag-over');
+    }
+    function handleDrop(e) {
+      e.preventDefault();
+      document.getElementById('drop-zone').classList.remove('drag-over');
+      const files = Array.from(e.dataTransfer.files);
+      handleFiles(files);
+    }
+
+    // ── Validación y manejo de archivos ─────────────────────
+    function handleFiles(files) {
+      if (!currentTool) return;
+      const cfg = ALLOWED_TYPES[currentTool];
+
+      const errors  = [];
+      const valid   = [];
+
+      files.forEach(file => {
+        // 1. Validar tipo MIME real (no solo la extensión)
+        if (!cfg.mime.includes(file.type)) {
+          errors.push(`"${escapeHtml(file.name)}" no es un tipo de archivo permitido (${file.type || 'desconocido'}).`);
+          return;
+        }
+        // 2. Validar extensión
+        const ext = '.' + file.name.split('.').pop().toLowerCase();
+        if (!cfg.extension.includes(ext)) {
+          errors.push(`"${escapeHtml(file.name)}" tiene una extensión no permitida.`);
+          return;
+        }
+        // 3. Validar tamaño
+        if (file.size > cfg.maxSize) {
+          errors.push(`"${escapeHtml(file.name)}" supera el límite de ${cfg.maxSize / 1024 / 1024} MB.`);
+          return;
+        }
+        // 4. Validar que el archivo no esté vacío
+        if (file.size === 0) {
+          errors.push(`"${escapeHtml(file.name)}" está vacío.`);
+          return;
+        }
+        valid.push(file);
+      });
+
+      // Límite de cantidad de archivos
+      const combined = [...selectedFiles, ...valid];
+      if (combined.length > cfg.maxFiles) {
+        errors.push(`Máximo ${cfg.maxFiles} archivos permitidos.`);
+        valid.splice(cfg.maxFiles - selectedFiles.length);
+      }
+
+      if (errors.length > 0) {
+        showError(errors.join('<br>'));
+      }
+
+      if (valid.length > 0) {
+        selectedFiles = [...selectedFiles, ...valid];
+        renderFileList();
+        document.getElementById('error-area').classList.add('hidden');
+      }
+    }
+
+    // ── Renderizar lista de archivos ────────────────────────
+    function renderFileList() {
+      const list = document.getElementById('file-list');
+      list.innerHTML = '';
+
+      selectedFiles.forEach((file, i) => {
+        const size = (file.size / 1024).toFixed(1);
+        const item = document.createElement('div');
+        item.className = 'flex items-center justify-between bg-white border border-gray-100 rounded-xl px-4 py-3';
+        item.innerHTML = `
+          <div class="flex items-center gap-3 min-w-0">
+            <span class="text-lg">${currentTool === 'merge-pdf' ? '📄' : '🖼'}</span>
+            <span class="text-sm text-gray-700 font-medium truncate max-w-xs">
+              ${escapeHtml(file.name)}
+            </span>
+            <span class="text-xs text-gray-400 shrink-0">${size} KB</span>
+          </div>
+          <button onclick="removeFile(${i})"
+                  class="text-gray-300 hover:text-red-400 transition-colors ml-2 shrink-0"
+                  title="Eliminar">
+            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>`;
+        list.appendChild(item);
+      });
+
+      list.classList.remove('hidden');
+
+      const btnArea = document.getElementById('convert-btn-area');
+      if (selectedFiles.length > 0) {
+        btnArea.classList.remove('hidden');
+        const label = currentTool === 'merge-pdf'
+          ? `⚡ Unir ${selectedFiles.length} PDF${selectedFiles.length > 1 ? 's' : ''}`
+          : `⚡ Convertir ${selectedFiles.length} imagen${selectedFiles.length > 1 ? 'es' : ''}`;
+        document.getElementById('convert-btn').textContent = label;
+      } else {
+        btnArea.classList.add('hidden');
+      }
+    }
+
+    // ── Eliminar archivo de la lista ────────────────────────
+    function removeFile(index) {
+      selectedFiles.splice(index, 1);
+      if (selectedFiles.length === 0) {
+        document.getElementById('file-list').classList.add('hidden');
+        document.getElementById('convert-btn-area').classList.add('hidden');
+      } else {
+        renderFileList();
+      }
+    }
+
+    // ── Iniciar conversión (PLACEHOLDER — se implementa en Fase 2) ──
+    function startConversion() {
+      resetWorkspace(true);
+      document.getElementById('progress-area').classList.remove('hidden');
+      updateProgress(5, 'Iniciando Python en el navegador...');
+
+      // ⚠️ NOTA: Aquí se conectará PyScript/Pyodide en la Fase 2.
+      // Por ahora solo mostramos la demo de la interfaz.
+      setTimeout(() => updateProgress(30,  'Cargando librerías...'),   800);
+      setTimeout(() => updateProgress(65,  'Procesando archivos...'), 1800);
+      setTimeout(() => updateProgress(90,  'Generando resultado...'), 3000);
+      setTimeout(() => {
+        updateProgress(100, '¡Completado!');
+        setTimeout(showDemoResult, 400);
+      }, 3800);
+    }
+
+    function updateProgress(pct, label) {
+      document.getElementById('progress-bar').style.width  = pct + '%';
+      document.getElementById('progress-label').textContent = label;
+      document.getElementById('progress-pct').textContent   = pct + '%';
+    }
+
+    // Demo temporal de resultado (se reemplaza en Fase 2)
+    function showDemoResult() {
+      document.getElementById('progress-area').classList.add('hidden');
+      document.getElementById('result-area').classList.remove('hidden');
+      // En Fase 2 el link real apuntará al blob URL del archivo generado
+    }
+
+    // ── Mostrar error ────────────────────────────────────────
+    function showError(msg) {
+      const area = document.getElementById('error-area');
+      document.getElementById('error-msg').innerHTML = '⚠️ ' + msg;
+      area.classList.remove('hidden');
+    }
+
+    // ── Sanitizador XSS: escapa caracteres peligrosos ────────
+    // Nunca insertes texto de usuario directamente en el DOM.
+    // Esta función convierte caracteres especiales en entidades HTML
+    // para que no se ejecuten como código malicioso.
+    function escapeHtml(str) {
+      return String(str)
+        .replace(/&/g,  '&amp;')
+        .replace(/</g,  '&lt;')
+        .replace(/>/g,  '&gt;')
+        .replace(/"/g,  '&quot;')
+        .replace(/'/g,  '&#039;');
+    }
+  </script>
+
+</body>
+</html>
