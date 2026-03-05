@@ -1,0 +1,292 @@
+════════════════════════════════════════════════════════════════
+LOG MAESTRO v6.8 — NOSERVERTOOLS
+PEGAR EN CUALQUIER AI PARA CONTINUAR SIN PREGUNTAS
+════════════════════════════════════════════════════════════════
+
+PROYECTO: NoServerTools
+Tipo: App web estática — un HTML por herramienta, CERO servidores
+Hosting: GitHub Pages — GRATIS — $0 forever
+URL RAIZ: https://noservertools.com/
+Repo: https://github.com/Fio42/noservertools
+Carpeta local: C:/Users/fiocc/OneDrive/Desktop/noservertools/
+Usuario GitHub: Fio42
+Último deploy: v6.8 — compress bug fix, rotate con preview, delete-pages nueva,
+                       language switcher en todas las tools
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+REGLAS PERMANENTES — NUNCA ROMPER
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+1.  CERO servidores propios. Todo corre en el browser del usuario.
+2.  NUNCA usar em dash en textos visibles del HTML.
+3.  SIEMPRE usar esc() antes de insertar texto del usuario en el DOM.
+4.  Cada herramienta = su propia carpeta + index.html. Nunca mezclar.
+5.  SIEMPRE actualizar sitemap.xml al agregar herramienta nueva.
+6.  SIEMPRE actualizar nav y footer de TODAS las pages al agregar tool.
+7.  SIEMPRE entregar el LOG actualizado al final de cada sesión como .txt.
+8.  El usuario es principiante — pasos simples, uno a la vez.
+9.  NUNCA inventar estadísticas ni reviews falsos.
+10. La marca es NoServerTools — no limitada a PDF.
+11. Todos los HTML deben incluir: CSP meta, X-Frame-Options, X-Content-Type-Options.
+12. SIEMPRE usar 'use strict' en todos los bloques <script>.
+13. SIEMPRE usar esc() — nunca innerHTML con datos del usuario.
+14. translate-pdf ELIMINADA en v6.0. No recrear, no referenciar.
+15. NUNCA agregar tools que envíen datos a servidores externos sin aviso.
+16. NUNCA agregar <base href> a ningún HTML.
+17. Links nav/footer: rutas absolutas /tool-name/ — EXCEPTO rotate que usa ../tool-name/
+18. SIEMPRE dar LOG + git commands completos al final de cada sesión.
+19. rotate-pdf: rutas ../ Y nav con .nav-inner (max-width centrado).
+20. FAVICON: inline SVG data URI en todas las tools — NO archivo .ico:
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%231f45e0'/><rect x='4' y='4' width='10' height='10' rx='2' fill='white'/><rect x='18' y='4' width='10' height='10' rx='2' fill='white' opacity='.6'/><rect x='4' y='18' width='10' height='10' rx='2' fill='white' opacity='.6'/><rect x='18' y='18' width='10' height='10' rx='2' fill='white' opacity='.3'/></svg>">
+21. LANGUAGE SWITCHER: incluir en CADA nueva tool (ver sección LANG SWITCHER).
+22. COMPRESS: instalar ['pypdf','pillow'] juntos. Wrap img.replace en try/except.
+23. edit-pdf texto: estructura .text-box. NUNCA modificar buildPDFFromJpegs sin leer LOG.
+24. NUEVAS TOOLS: siempre incluir favicon + lang switcher + nav/footer 10 tools.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ESTRUCTURA DE ARCHIVOS — ESTADO v6.8
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+noservertools/
+  index.html               [v6.8] hub — 10 tools live
+  sitemap.xml              [ACTUALIZAR — agregar /delete-pages/]
+  robots.txt
+  CNAME
+  LOG.txt
+
+  merge-pdf/index.html     [v6.8] favicon + lang switcher
+  compress-pdf/index.html  [v6.8] BUG FIXED: Pillow instalado, try/except en img.replace
+  split-pdf/index.html     [v6.8] favicon + lang switcher
+  pdf-to-jpg/index.html    [v6.8] favicon + lang switcher
+  rotate-pdf/index.html    [v6.8] REESCRITO: preview visual, botones Left/Flip/Right,
+                                   acumulación de rotaciones por página
+  protect-pdf/index.html   [v6.8] favicon + lang switcher
+  unlock-pdf/index.html    [v6.8] favicon + lang switcher
+  edit-pdf/index.html      [v6.8] favicon + lang switcher + texto movible
+  delete-pages/index.html  [v6.8] NUEVA TOOL: thumbnails visuales, selección por click
+
+  -- PENDIENTES (prioridad SEO) --
+  watermark-pdf/           PRIORIDAD 1 — alto volumen búsquedas
+  pdf-to-text/             PRIORIDAD 2 — alto volumen búsquedas
+  reorder-pages/           PRIORIDAD 3
+  view-pdf-metadata/       PRIORIDAD 4
+  remove-metadata/         PRIORIDAD 5
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+FAVICON — SOLUCIÓN DEFINITIVA (v6.7+)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Técnica: inline SVG data URI. Sin archivo .ico. Sin rutas. Sin CSP problems.
+Va justo después de <meta charset="UTF-8"> en todas las tools.
+Ver Regla #20 para el snippet exacto.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+LANGUAGE SWITCHER — IMPLEMENTACIÓN (v6.8)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Idiomas: EN (default), ES, PT, FR, DE
+Posición: fixed top-right, z-index:9999 — no interfiere con nav
+Persistencia: localStorage key 'nst_lang'
+Auto-detección: navigator.language al primer visit (si no hay guardado)
+
+CSS id: #ls, #ls-btn, #ls-menu, .ls-opt
+HTML: <div id="ls"> con button + dropdown de 5 opciones
+JS: window.lsToggle(), window.lsSet(lang), window.i18n(key)
+    El script completo va antes de </body> como bloque inline.
+
+Elementos traducidos vía data-i18n="key":
+  badge, why_title, why_uploads, why_uploads_d, why_storage, why_storage_d,
+  why_tracking, why_tracking_d, why_offline, why_offline_d, footer_strip
+
+El snippet completo del script está en /home/claude/i18n_block.js
+Para nueva tool: copiar el bloque <script>'use strict';(function(){...})();</script>
+completo del archivo rotate o delete-pages y pegarlo antes de </body>.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+BUG FIX: COMPRESS-PDF (v6.8)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+CAUSA: pypdf._xobj_image_helpers importa PIL (Pillow) en el módulo.
+       El código anterior instalaba solo 'pypdf'. Al intentar
+       img.replace(img.image, quality=N), PIL no estaba disponible.
+
+FIX EN initPyodide():
+  ANTES: await micropip.install('pypdf')
+  DESPUÉS: await micropip.install(['pypdf','pillow'])
+
+FIX EN el código Python:
+  for page in writer.pages:
+      for img in page.images:
+          try:
+              img.replace(img.image, quality=int(img_quality))
+          except Exception:
+              pass  # skip images that can't be recompressed
+
+El try/except es importante porque algunos PDFs tienen imágenes
+en formatos que pypdf no puede re-comprimir (e.g. JBIG2, CCITT).
+Sin try/except, un solo imagen problemática rompía toda la compresión.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ROTATE-PDF — ARQUITECTURA NUEVA (v6.8)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Layout: 2 columnas en desktop — izquierda controles, derecha preview
+Preview: PDF.js renderiza la página actual con rotación acumulada aplicada
+         Navegación prev/next para ver diferentes páginas
+
+Rotación:
+  pageRotations = {} — dict {pageNum: angle} — ángulo acumulado
+  rotatePreview(delta): suma delta al ángulo de todas las páginas target
+                        y re-renderiza el preview inmediatamente
+  Botones: Left (-90°), Flip (180°), Right (+90°)
+  Scope: 'all' (todas las páginas) o 'range' (páginas específicas)
+
+Download (doRotate()):
+  Pasa rot_map_json = {pageIndex_0based: angle} a Python
+  Python itera reader.pages, aplica page.rotate(angle) y construye writer
+  Solo se rotan páginas con angle != 0
+
+Comportamiento UX:
+  - Al subir PDF: preview se carga inmediatamente (no espera Pyodide)
+  - Al hacer clic en botón: preview se actualiza al instante (solo re-render JS)
+  - Pyodide carga en background mientras el usuario ve el preview
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+DELETE-PAGES — ARQUITECTURA (v6.8)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Flujo:
+  1. Usuario sube PDF → PDF.js renderiza thumbnails de todas las páginas
+  2. Click en thumbnail → se marca en rojo (selectedPages Set)
+  3. Click otra vez → se desmarca
+  4. Botones: "Select all" / "Deselect all"
+  5. "Delete selected pages" → Pyodide construye nuevo PDF sin esas páginas
+  6. Validación: no se puede eliminar TODAS las páginas (remaining > 0)
+
+DOM: #thumbGrid con .thumb-item divs, cada uno con:
+  - canvas (renderizado por PDF.js)
+  - .thumb-overlay (icono X rojo, visible cuando selected)
+  - .thumb-num (número de página)
+
+Python: itera reader.pages, agrega al writer solo si (i+1) not in to_delete
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ANALÍTICAS PRIVACY-FIRST — RECOMENDACIÓN
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+OPCIÓN RECOMENDADA: Plausible Analytics (https://plausible.io)
+  - Sin cookies. Cumple GDPR/CCPA sin banner de cookies.
+  - Solo cuenta pageviews, países, referrers, páginas populares.
+  - No recolecta IPs ni datos personales.
+  - Script: <script defer data-domain="noservertools.com"
+              src="https://plausible.io/js/script.js"></script>
+  - Plan: $9/mes (o self-host gratis en tu propio servidor)
+  - Compatible con sitio estático GitHub Pages.
+
+ALTERNATIVA GRATIS: Umami (https://umami.is)
+  - Open source, self-hosted o cloud.
+  - Sin cookies, GDPR compliant.
+  - Cloud gratis hasta 100k pageviews/mes.
+
+PARA AGREGAR A NOSERVERTOOLS:
+  - Actualizar CSP de cada tool para permitir el dominio de analytics
+  - Ejemplo con Plausible: añadir 'plausible.io' al script-src de CSP
+  - El script va en <head> de todas las tools
+
+NO USAR: Google Analytics (recolecta datos personales),
+          Cloudflare Web Analytics (ok pero limitado),
+          hotjar/mixpanel (muy invasivos).
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+PATRÓN NAV — 10 TOOLS (v6.8)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Orden: Merge | Compress | Split | JPG | Rotate | Protect | Unlock | Edit | Delete | [All tools]
+
+ESTILO A (merge/compress/split) — Tailwind classes
+ESTILO B (hub/pdftojpg/protect/unlock/edit/delete) — .nav-link class con rutas absolutas
+ESTILO C (rotate) — rutas ../ relativas + .nav-inner centrado
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+DISEÑO VISUAL
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Background: #0e1117 | Fuentes: Syne (.fd) / Outfit / DM Mono (.fm)
+brand-400: #5a87ff | brand-500: #3363f5 | brand-600: #1f45e0
+green: #4ade80 | red: #f87171 | yellow: #fbbf24
+Botón descarga: bg #4ade80 texto #0e1117
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+RECETAS TÉCNICAS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Stack: Pyodide v0.25.0 + pypdf via micropip (+ pillow donde necesario)
+CDN Pyodide: https://cdn.jsdelivr.net/pyodide/v0.25.0/full/pyodide.js
+CDN PDF.js: https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js
+
+MERGE:       PdfWriter.append(BytesIO) x N → merged.pdf
+COMPRESS:    compress_identical_objects + pillow img.replace(quality=N) + try/except
+SPLIT:       writer.add_page por rango → split.pdf
+PDF→JPG:     PDF.js render → canvas → jpeg
+JPG→PDF:     Pillow Image.save(format='PDF')
+ROTATE:      page.rotate(angle) por mapa de ángulos acumulados, preview con PDF.js
+PROTECT:     writer.encrypt(user_password, use_128bit=True)
+UNLOCK:      reader.decrypt(pw) → ok/wrong_password/not_encrypted
+EDIT PDF:    PDF.js + canvas draw/highlight + .text-box divs + buildPDFFromJpegs
+DELETE:      PDF.js thumbnails → Set de páginas a borrar → PdfWriter sin esas páginas
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+HISTORIAL COMPLETO
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+v1-v5.9:  Construcción inicial, merge/compress/split, rebrand, hardening
+v6.0:     translate-pdf ELIMINADA. rotate-pdf nueva.
+v6.1:     protect-pdf + unlock-pdf. HUB 8 tools.
+v6.2:     Dominio noservertools.com. base href eliminado.
+v6.3:     edit-pdf NUEVA. 9 tools. sitemap 9 URLs.
+v6.4:     protect-pdf reconstruido (confirm password).
+v6.5:     unlock canonical fix. rotate nav centrado (.nav-inner).
+v6.6:     Primer intento favicon + i18n (sesión anterior).
+v6.7:     Favicon inline SVG definitivo. edit-pdf texto movible reescrito.
+v6.8:     [ESTA SESIÓN]
+          BUG FIX compress-pdf: instalar pillow junto con pypdf,
+            try/except en img.replace para imágenes no recomprimibles.
+          ROTATE-PDF REESCRITO: layout 2 cols, preview visual con PDF.js,
+            botones Left/Flip/Right en lugar de grados, rotación acumulada
+            por página, preview se actualiza al instante al hacer clic.
+          DELETE-PAGES NUEVA TOOL: thumbnails de todas las páginas con PDF.js,
+            clic para marcar en rojo, delete via Pyodide+pypdf, validación
+            de que quede al menos 1 página.
+          LANGUAGE SWITCHER en todas las tools: botón pill fixed top-right,
+            dropdown 5 idiomas (EN/ES/PT/FR/DE), localStorage persistente,
+            auto-detección navigator.language, data-i18n attributes.
+          HUB: Delete Pages = Live (de Soon), contador 10 live.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ACCIÓN REQUERIDA POST-DEPLOY
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+1. Crear carpeta delete-pages/ en el repo
+2. Copiar index_delete.html → delete-pages/index.html
+3. Actualizar sitemap.xml — agregar:
+   <url>
+     <loc>https://noservertools.com/delete-pages/</loc>
+     <changefreq>monthly</changefreq>
+     <priority>0.8</priority>
+   </url>
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+PARA EL PRÓXIMO AI — LEER ESTO PRIMERO
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+1.  NoServerTools. GitHub Pages. noservertools.com. CERO servidores.
+2.  Fondo #0e1117. Syne/Outfit/DM-Mono. Brand #5a87ff/#3363f5/#1f45e0.
+3.  10 tools activas: merge, compress, split, pdf-to-jpg, rotate, protect,
+    unlock, edit-pdf, delete-pages.
+4.  Nav orden: Merge|Compress|Split|JPG|Rotate|Protect|Unlock|Edit|Delete|[All tools CTA]
+5.  3 estilos de nav — respetar el existente de cada archivo.
+6.  rotate-pdf usa rutas ../ Y .nav-inner.
+7.  Pyodide v0.25.0 + pypdf para: merge,compress,split,rotate,protect,unlock,delete
+    PDF.js 3.11.174 para: pdf-to-jpg, edit-pdf, rotate (preview), delete (thumbnails)
+8.  COMPRESS: instalar ['pypdf','pillow'] — ver Regla #22.
+9.  ROTATE: ver sección ROTATE-PDF para la lógica de pageRotations.
+10. DELETE: ver sección DELETE-PAGES para la lógica de selectedPages.
+11. translate-pdf ELIMINADA v6.0.
+12. Nueva tool: favicon + lang switcher + nav/footer 10 tools + hub + sitemap.
+13. CSP + X-Frame + X-Content-Type + 'use strict' + esc() en todo HTML nuevo.
+14. NUNCA estadísticas inventadas. NUNCA reviews falsos.
+15. Usuario principiante. Pasos exactos. Git commands listos.
+16. LOG completo al final de cada sesión.
+17. edit-pdf texto: leer sección EDIT-PDF antes de modificar.
+18. ANALYTICS: ver sección ANALÍTICAS. Plausible recomendado.
+
+════════════════════════════════════════════════════════════════
+FIN DEL LOG MAESTRO v6.8 — NoServerTools
+════════════════════════════════════════════════════════════════

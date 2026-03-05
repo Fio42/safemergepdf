@@ -50,6 +50,16 @@
     input[type=text]{background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.12);border-radius:10px;color:white;padding:10px 14px;width:100%;outline:none;font-family:'DM Mono',monospace;font-size:13px}
     input[type=text]:focus{border-color:#5a87ff}
     input[type=text]::placeholder{color:rgba(255,255,255,0.25)}
+  
+    /* lang switcher */
+    #ls{position:fixed;top:12px;right:12px;z-index:9999;font-family:'DM Mono',monospace}
+    #ls-btn{display:flex;align-items:center;gap:5px;padding:5px 10px;background:rgba(14,17,23,.88);border:1px solid rgba(90,135,255,.32);border-radius:8px;color:rgba(255,255,255,.7);font-size:11px;cursor:pointer;backdrop-filter:blur(12px);letter-spacing:.04em;transition:border-color .15s}
+    #ls-btn:hover{border-color:rgba(90,135,255,.7);color:#fff}
+    #ls-menu{display:none;position:absolute;top:calc(100% + 5px);right:0;background:rgba(14,17,23,.97);border:1px solid rgba(90,135,255,.18);border-radius:10px;overflow:hidden;box-shadow:0 8px 32px rgba(0,0,0,.55);min-width:138px}
+    #ls-menu.open{display:block}
+    .ls-opt{display:flex;align-items:center;gap:9px;width:100%;padding:9px 14px;background:none;border:none;color:rgba(255,255,255,.65);font-size:12px;font-family:'DM Mono',monospace;cursor:pointer;text-align:left;letter-spacing:.03em;transition:background .12s,color .12s}
+    .ls-opt:hover{background:rgba(90,135,255,.1);color:#fff}
+    .ls-opt.active{color:#5a87ff;background:rgba(90,135,255,.08)}
   </style>
 </head>
 <body class="bg-grid min-h-screen">
@@ -368,5 +378,38 @@ o=BytesIO(); w.write(o); range_result=o.getvalue()
   }
 </script>
 <script src="https://cdn.jsdelivr.net/pyodide/v0.25.0/full/pyodide.js"></script>
+<script>
+'use strict';
+(function(){
+  var FLAGS={'en':'🇺🇸','es':'🇪🇸','pt':'🇧🇷','fr':'🇫🇷','de':'🇩🇪'};
+  var LABELS={'en':'EN','es':'ES','pt':'PT','fr':'FR','de':'DE'};
+  var T={
+    en:{badge:'No upload · 100% local',why_title:'Why NoServerTools?',why_uploads:'Zero uploads',why_uploads_d:'We never receive your files.',why_storage:'Zero storage',why_storage_d:'Nothing is saved anywhere.',why_tracking:'Zero tracking',why_tracking_d:"We don't know what you process.",why_offline:'Works offline',why_offline_d:'Once loaded, no internet needed.',footer_strip:'NO UPLOADS · NO ACCOUNTS · NO TRACKING · NO SERVERS'},
+    es:{badge:'Sin subir · 100% local',why_title:'¿Por qué NoServerTools?',why_uploads:'Cero subidas',why_uploads_d:'Nunca recibimos tus archivos.',why_storage:'Cero almacenamiento',why_storage_d:'Nada se guarda en ningún lugar.',why_tracking:'Cero rastreo',why_tracking_d:'No sabemos qué procesas.',why_offline:'Funciona sin internet',why_offline_d:'Sin conexión necesaria.',footer_strip:'SIN SUBIDAS · SIN CUENTAS · SIN RASTREO · SIN SERVIDORES'},
+    pt:{badge:'Sem upload · 100% local',why_title:'Por que NoServerTools?',why_uploads:'Zero uploads',why_uploads_d:'Nunca recebemos seus arquivos.',why_storage:'Zero armazenamento',why_storage_d:'Nada é salvo em lugar algum.',why_tracking:'Zero rastreamento',why_tracking_d:'Não sabemos o que você processa.',why_offline:'Funciona offline',why_offline_d:'Sem internet necessária.',footer_strip:'SEM UPLOADS · SEM CONTAS · SEM RASTREIO · SEM SERVIDORES'},
+    fr:{badge:'Sans envoi · 100% local',why_title:'Pourquoi NoServerTools?',why_uploads:'Zéro envoi',why_uploads_d:'Nous ne recevons jamais vos fichiers.',why_storage:'Zéro stockage',why_storage_d:"Rien n'est sauvegardé nulle part.",why_tracking:'Zéro pistage',why_tracking_d:'Nous ne savons pas ce que vous traitez.',why_offline:'Fonctionne hors ligne',why_offline_d:"Pas d'internet requis.",footer_strip:'SANS ENVOI · SANS COMPTE · SANS SUIVI · SANS SERVEURS'},
+    de:{badge:'Kein Upload · 100% lokal',why_title:'Warum NoServerTools?',why_uploads:'Null Uploads',why_uploads_d:'Wir erhalten Ihre Dateien nie.',why_storage:'Null Speicherung',why_storage_d:'Nichts wird irgendwo gespeichert.',why_tracking:'Null Tracking',why_tracking_d:'Wir wissen nicht, was Sie verarbeiten.',why_offline:'Funktioniert offline',why_offline_d:'Kein Internet nötig.',footer_strip:'KEIN UPLOAD · KEIN KONTO · KEIN TRACKING · KEIN SERVER'}
+  };
+  var SAVED='nst_lang';
+  var cur='en';
+  function detect(){var s=localStorage.getItem(SAVED);if(s&&T[s])return s;var n=(navigator.language||'en').toLowerCase().slice(0,2);return T[n]?n:'en';}
+  function apply(lang){
+    cur=lang;var t=T[lang];
+    var f=document.getElementById('ls-flag');var l=document.getElementById('ls-lbl');
+    if(f)f.textContent=FLAGS[lang];if(l)l.textContent=LABELS[lang];
+    document.querySelectorAll('.ls-opt').forEach(function(b,i){b.classList.toggle('active',['en','es','pt','fr','de'][i]===lang);});
+    document.querySelectorAll('[data-i18n]').forEach(function(el){var k=el.getAttribute('data-i18n');if(t[k]!==undefined)el.textContent=t[k];});
+  }
+  window.lsToggle=function(){
+    var m=document.getElementById('ls-menu');var b=document.getElementById('ls-btn');
+    var o=m.classList.toggle('open');b.setAttribute('aria-expanded',o);
+    if(o){setTimeout(function(){document.addEventListener('click',function c(e){if(!document.getElementById('ls').contains(e.target)){m.classList.remove('open');b.setAttribute('aria-expanded','false');document.removeEventListener('click',c);}});},10);}
+  };
+  window.lsSet=function(lang){localStorage.setItem(SAVED,lang);apply(lang);document.getElementById('ls-menu').classList.remove('open');document.getElementById('ls-btn').setAttribute('aria-expanded','false');};
+  window.i18n=function(k){return(T[cur]||T.en)[k]||k;};
+  document.addEventListener('DOMContentLoaded',function(){apply(detect());});
+})();
+</script>
+
 </body>
 </html>

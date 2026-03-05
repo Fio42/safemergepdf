@@ -74,16 +74,9 @@
     #pageContainer{position:relative;box-shadow:0 8px 40px rgba(0,0,0,.5);border-radius:4px;overflow:hidden;flex-shrink:0}
     #pdfCanvas{display:block}
     #annotationCanvas{position:absolute;top:0;left:0;cursor:crosshair;touch-action:none}
-    /* text box draggable wrapper */
-    .text-box{position:absolute;z-index:50;min-width:80px;cursor:default}
-    .text-box-bar{height:22px;background:var(--brand-dark);border-radius:5px 5px 0 0;display:flex;align-items:center;padding:0 6px;gap:4px;cursor:grab;user-select:none}
-    .text-box-bar:active{cursor:grabbing}
-    .text-box-bar-icon{color:rgba(255,255,255,.7);font-size:10px;flex:1;font-family:'DM Mono',monospace;letter-spacing:.03em}
-    .text-box-del{background:none;border:none;color:rgba(255,255,255,.6);cursor:pointer;font-size:15px;line-height:1;padding:0;width:16px;height:16px;display:flex;align-items:center;justify-content:center;border-radius:3px;flex-shrink:0}
-    .text-box-del:hover{color:#f87171;background:rgba(248,113,113,.15)}
-    .text-input-overlay{display:block;width:100%;background:rgba(255,255,255,.92);border:none;border-radius:0 0 4px 4px;outline:none;font-family:'Outfit',sans-serif;color:#111;resize:none;min-height:28px;padding:4px 7px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,.3)}
-    .text-input-overlay:focus{background:#fff;box-shadow:0 0 0 2px var(--brand),0 2px 8px rgba(0,0,0,.3)}
-    .text-box.dragging{opacity:.85;box-shadow:0 6px 24px rgba(0,0,0,.4)}
+    /* text inputs on canvas */
+    .text-input-overlay{position:absolute;background:transparent;border:1.5px dashed rgba(90,135,255,.6);outline:none;font-family:'Outfit',sans-serif;color:#000;resize:none;min-width:60px;min-height:24px;padding:2px 4px;z-index:50;border-radius:3px;overflow:hidden}
+    .text-input-overlay:focus{border-color:var(--brand);background:rgba(255,255,255,.08)}
     /* image overlay */
     .img-overlay{position:absolute;cursor:move;border:1.5px dashed rgba(90,135,255,.6);z-index:50}
     .img-overlay img{display:block;width:100%;height:100%}
@@ -115,9 +108,34 @@
     .fu{animation:fadeUp .4s ease both} .fu2{animation:fadeUp .4s .07s ease both} .fu3{animation:fadeUp .4s .14s ease both}
     @keyframes spin{to{transform:rotate(360deg)}}
     .spin{display:inline-block;width:14px;height:14px;border:2px solid var(--border);border-top-color:var(--brand);border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle;margin-right:6px}
+  
+    /* lang switcher */
+    #ls{position:fixed;top:12px;right:12px;z-index:9999;font-family:'DM Mono',monospace}
+    #ls-btn{display:flex;align-items:center;gap:5px;padding:5px 10px;background:rgba(14,17,23,.88);border:1px solid rgba(90,135,255,.32);border-radius:8px;color:rgba(255,255,255,.7);font-size:11px;cursor:pointer;backdrop-filter:blur(12px);letter-spacing:.04em;transition:border-color .15s}
+    #ls-btn:hover{border-color:rgba(90,135,255,.7);color:#fff}
+    #ls-menu{display:none;position:absolute;top:calc(100% + 5px);right:0;background:rgba(14,17,23,.97);border:1px solid rgba(90,135,255,.18);border-radius:10px;overflow:hidden;box-shadow:0 8px 32px rgba(0,0,0,.55);min-width:138px}
+    #ls-menu.open{display:block}
+    .ls-opt{display:flex;align-items:center;gap:9px;width:100%;padding:9px 14px;background:none;border:none;color:rgba(255,255,255,.65);font-size:12px;font-family:'DM Mono',monospace;cursor:pointer;text-align:left;letter-spacing:.03em;transition:background .12s,color .12s}
+    .ls-opt:hover{background:rgba(90,135,255,.1);color:#fff}
+    .ls-opt.active{color:#5a87ff;background:rgba(90,135,255,.08)}
   </style>
 </head>
 <body>
+
+<!-- LANG SWITCHER -->
+<div id="ls" role="navigation" aria-label="Language selector">
+  <button id="ls-btn" onclick="lsToggle()" aria-haspopup="true" aria-expanded="false">
+    <span id="ls-flag">🌐</span><span id="ls-lbl">EN</span>
+    <svg width="9" height="6" viewBox="0 0 9 6" fill="none"><path d="M1 1l3.5 4L8 1" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+  </button>
+  <div id="ls-menu" role="menu">
+    <button class="ls-opt" onclick="lsSet('en')" role="menuitem">🇺🇸&nbsp; English</button>
+    <button class="ls-opt" onclick="lsSet('es')" role="menuitem">🇪🇸&nbsp; Español</button>
+    <button class="ls-opt" onclick="lsSet('pt')" role="menuitem">🇧🇷&nbsp; Português</button>
+    <button class="ls-opt" onclick="lsSet('fr')" role="menuitem">🇫🇷&nbsp; Français</button>
+    <button class="ls-opt" onclick="lsSet('de')" role="menuitem">🇩🇪&nbsp; Deutsch</button>
+  </div>
+</div>
 <div class="blob blob-a"></div>
 <div class="blob blob-b"></div>
 
@@ -203,7 +221,7 @@
   <!-- TOOLBAR -->
   <div id="toolbar">
     <!-- Mode buttons -->
-    <button class="tool-btn active" id="btnSelect" onclick="setMode('select')" title="Select mode: drag text boxes by their blue bar">
+    <button class="tool-btn active" id="btnSelect" onclick="setMode('select')" title="Select / Move">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 3l14 9-7 1-3 7z"/></svg>Select
     </button>
     <button class="tool-btn" id="btnText" onclick="setMode('text')" title="Add Text">
@@ -377,7 +395,7 @@ async function renderPage(num){
   setStatus('Rendering page '+num+'...');
   // Hide text/image overlays for other pages, show for current
   Object.keys(textInputs).forEach(p=>{
-    textInputs[p].forEach(box=>box.style.display=parseInt(p)===num?'block':'none');
+    textInputs[p].forEach(el=>el.style.display=parseInt(p)===num?'block':'none');
   });
   Object.keys(imageOverlays).forEach(p=>{
     imageOverlays[p].forEach(el=>el.style.display=parseInt(p)===num?'block':'none');
@@ -444,18 +462,11 @@ async function changePage(d){
 // ─── MODE ─────────────────────────────────────────────────────
 function setMode(m){
   mode=m;
-  ['select','text','draw','highlight'].forEach(id=>{
+  ['select','text','draw','highlight','image','sign'].forEach(id=>{
     const btn=document.getElementById('btn'+id.charAt(0).toUpperCase()+id.slice(1));
     if(btn) btn.classList.toggle('active',id===m);
   });
-  // In select mode: disable the annotation canvas so clicks reach text-boxes below it
-  if(m==='select'){
-    annCanvas.style.pointerEvents='none';
-    annCanvas.style.cursor='default';
-  } else {
-    annCanvas.style.pointerEvents='auto';
-    annCanvas.style.cursor = m==='text'?'text':'crosshair';
-  }
+  annCanvas.style.cursor = m==='select'?'default': m==='text'?'text':'crosshair';
   document.getElementById('brushWrap').style.display=(m==='draw'||m==='highlight')?'flex':'none';
 }
 
@@ -472,7 +483,6 @@ function getTouchPos(e){
 }
 
 function onCanvasDown(e){
-  if(mode==='select') return; // canvas is pointer-events:none in select — this never fires anyway
   const pos=getPos(e);
   if(mode==='text'){addTextInput(pos);return}
   if(mode==='draw'||mode==='highlight'){
@@ -510,76 +520,20 @@ function addTextInput(pos){
   const container=document.getElementById('pageContainer');
   const scaleX=annCanvas.offsetWidth/annCanvas.width;
   const scaleY=annCanvas.offsetHeight/annCanvas.height;
-
-  // Outer draggable box
-  const box=document.createElement('div');
-  box.className='text-box';
-  box.style.left=(pos.x*scaleX)+'px';
-  box.style.top=(pos.y*scaleY)+'px';
-  box.setAttribute('data-page',currentPage);
-
-  // Blue drag bar at top
-  const bar=document.createElement('div');
-  bar.className='text-box-bar';
-  const icon=document.createElement('span');
-  icon.className='text-box-bar-icon';
-  icon.textContent='\u2630 drag to move';
-  const delBtn=document.createElement('button');
-  delBtn.className='text-box-del';
-  delBtn.innerHTML='&times;';
-  delBtn.title='Delete text box';
-  delBtn.addEventListener('click',e=>{
-    e.stopPropagation();
-    box.remove();
-    if(textInputs[currentPage]) textInputs[currentPage]=textInputs[currentPage].filter(b=>b!==box);
-  });
-  bar.appendChild(icon); bar.appendChild(delBtn);
-  box.appendChild(bar);
-
-  // Textarea
   const inp=document.createElement('textarea');
   inp.className='text-input-overlay';
+  inp.style.left=(pos.x*scaleX)+'px';
+  inp.style.top=(pos.y*scaleY)+'px';
   inp.style.fontSize=document.getElementById('fontSize').value+'px';
   inp.style.color=document.getElementById('colorPicker').value;
-  inp.rows=2; inp.placeholder='Type here...';
+  inp.rows=1;
+  inp.setAttribute('data-page', currentPage);
   inp.addEventListener('input',()=>{inp.style.height='auto';inp.style.height=inp.scrollHeight+'px'});
-  inp.addEventListener('keydown',e=>{if(e.key==='Escape'){inp.blur();setMode('select')}});
-  inp.addEventListener('mousedown',e=>e.stopPropagation()); // don't steal drag
-  box.appendChild(inp);
-
-  // Drag logic — works via the bar AND when in select mode via the box
-  makeDraggableBox(box, bar);
-
-  container.appendChild(box);
+  inp.addEventListener('keydown',e=>{if(e.key==='Escape'){inp.blur()}});
+  container.appendChild(inp);
   inp.focus();
   if(!textInputs[currentPage]) textInputs[currentPage]=[];
-  textInputs[currentPage].push(box);
-  // Auto-switch to select after placing so user can immediately drag
-  setTimeout(()=>setMode('select'),50);
-}
-
-function makeDraggableBox(box, handle){
-  let startX, startY, startLeft, startTop;
-  function onDown(e){
-    if(e.target.classList.contains('text-box-del')) return;
-    e.preventDefault(); e.stopPropagation();
-    startLeft=parseFloat(box.style.left)||0;
-    startTop=parseFloat(box.style.top)||0;
-    startX=e.clientX; startY=e.clientY;
-    box.classList.add('dragging');
-    document.addEventListener('mousemove',onMove);
-    document.addEventListener('mouseup',onUp);
-  }
-  function onMove(e){
-    box.style.left=(startLeft+e.clientX-startX)+'px';
-    box.style.top=(startTop+e.clientY-startY)+'px';
-  }
-  function onUp(){
-    box.classList.remove('dragging');
-    document.removeEventListener('mousemove',onMove);
-    document.removeEventListener('mouseup',onUp);
-  }
-  handle.addEventListener('mousedown',onDown);
+  textInputs[currentPage].push(inp);
 }
 
 // ─── IMAGE ────────────────────────────────────────────────────
@@ -679,7 +633,7 @@ function undoLast(){
   else{
     // undo last text input
     const txts=textInputs[currentPage];
-    if(txts&&txts.length){txts[txts.length-1].remove();txts.pop();return}
+    if(txts&&txts.length){txts[txts.length-1].remove();txts.pop()}
     // undo last image
     const imgs=imageOverlays[currentPage];
     if(imgs&&imgs.length){imgs[imgs.length-1].remove();imgs.pop()}
@@ -688,7 +642,7 @@ function undoLast(){
 function clearPage(){
   annotations[currentPage]=[];
   redrawAnnotations(currentPage);
-  (textInputs[currentPage]||[]).forEach(box=>box.remove());
+  (textInputs[currentPage]||[]).forEach(el=>el.remove());
   textInputs[currentPage]=[];
   (imageOverlays[currentPage]||[]).forEach(el=>el.remove());
   imageOverlays[currentPage]=[];
@@ -731,18 +685,16 @@ async function downloadPDF(){
       });
       // Draw text inputs for this page
       const txts=textInputs[n]||[];
-      for(const box of txts){
-        const inp=box.querySelector('textarea');
-        if(!inp||!inp.value.trim()) continue;
+      for(const inp of txts){
+        if(!inp.value.trim())continue;
         const dispW=annCanvas.offsetWidth; const dispH=annCanvas.offsetHeight;
         const sx=vp.width/dispW; const sy=vp.height/dispH;
-        const BAR_H=22; // height of blue drag bar in display pixels
-        const x=parseFloat(box.style.left)*sx;
-        const y=(parseFloat(box.style.top)+BAR_H)*sy;
+        const x=parseFloat(inp.style.left)*sx;
+        const y=parseFloat(inp.style.top)*sy;
         const fs=parseFloat(inp.style.fontSize||'16')*scale;
         offCtx.save();
         offCtx.font=`${fs}px Outfit,sans-serif`;
-        offCtx.fillStyle=inp.style.color||'#111';
+        offCtx.fillStyle=inp.style.color||'#000';
         const lines=inp.value.split('\n');
         lines.forEach((line,i)=>offCtx.fillText(line,x,y+fs*(i+1)));
         offCtx.restore();
@@ -868,7 +820,7 @@ function resetAll(){
   currentFile=null; pendingSigDataUrl=null;
   // Clear any leftover overlays in container
   const container=document.getElementById('pageContainer');
-  container.querySelectorAll('.text-box,.img-overlay').forEach(el=>el.remove());
+  container.querySelectorAll('.text-input-overlay,.img-overlay').forEach(el=>el.remove());
   annCtx.clearRect(0,0,annCanvas.width,annCanvas.height);
   pdfCtx.clearRect(0,0,pdfCanvas.width,pdfCanvas.height);
   document.getElementById('appWrap').style.display='none';
@@ -878,5 +830,38 @@ function resetAll(){
   setMode('select');
 }
 </script>
+<script>
+'use strict';
+(function(){
+  var FLAGS={'en':'🇺🇸','es':'🇪🇸','pt':'🇧🇷','fr':'🇫🇷','de':'🇩🇪'};
+  var LABELS={'en':'EN','es':'ES','pt':'PT','fr':'FR','de':'DE'};
+  var T={
+    en:{badge:'No upload · 100% local',why_title:'Why NoServerTools?',why_uploads:'Zero uploads',why_uploads_d:'We never receive your files.',why_storage:'Zero storage',why_storage_d:'Nothing is saved anywhere.',why_tracking:'Zero tracking',why_tracking_d:"We don't know what you process.",why_offline:'Works offline',why_offline_d:'Once loaded, no internet needed.',footer_strip:'NO UPLOADS · NO ACCOUNTS · NO TRACKING · NO SERVERS'},
+    es:{badge:'Sin subir · 100% local',why_title:'¿Por qué NoServerTools?',why_uploads:'Cero subidas',why_uploads_d:'Nunca recibimos tus archivos.',why_storage:'Cero almacenamiento',why_storage_d:'Nada se guarda en ningún lugar.',why_tracking:'Cero rastreo',why_tracking_d:'No sabemos qué procesas.',why_offline:'Funciona sin internet',why_offline_d:'Sin conexión necesaria.',footer_strip:'SIN SUBIDAS · SIN CUENTAS · SIN RASTREO · SIN SERVIDORES'},
+    pt:{badge:'Sem upload · 100% local',why_title:'Por que NoServerTools?',why_uploads:'Zero uploads',why_uploads_d:'Nunca recebemos seus arquivos.',why_storage:'Zero armazenamento',why_storage_d:'Nada é salvo em lugar algum.',why_tracking:'Zero rastreamento',why_tracking_d:'Não sabemos o que você processa.',why_offline:'Funciona offline',why_offline_d:'Sem internet necessária.',footer_strip:'SEM UPLOADS · SEM CONTAS · SEM RASTREIO · SEM SERVIDORES'},
+    fr:{badge:'Sans envoi · 100% local',why_title:'Pourquoi NoServerTools?',why_uploads:'Zéro envoi',why_uploads_d:'Nous ne recevons jamais vos fichiers.',why_storage:'Zéro stockage',why_storage_d:"Rien n'est sauvegardé nulle part.",why_tracking:'Zéro pistage',why_tracking_d:'Nous ne savons pas ce que vous traitez.',why_offline:'Fonctionne hors ligne',why_offline_d:"Pas d'internet requis.",footer_strip:'SANS ENVOI · SANS COMPTE · SANS SUIVI · SANS SERVEURS'},
+    de:{badge:'Kein Upload · 100% lokal',why_title:'Warum NoServerTools?',why_uploads:'Null Uploads',why_uploads_d:'Wir erhalten Ihre Dateien nie.',why_storage:'Null Speicherung',why_storage_d:'Nichts wird irgendwo gespeichert.',why_tracking:'Null Tracking',why_tracking_d:'Wir wissen nicht, was Sie verarbeiten.',why_offline:'Funktioniert offline',why_offline_d:'Kein Internet nötig.',footer_strip:'KEIN UPLOAD · KEIN KONTO · KEIN TRACKING · KEIN SERVER'}
+  };
+  var SAVED='nst_lang';
+  var cur='en';
+  function detect(){var s=localStorage.getItem(SAVED);if(s&&T[s])return s;var n=(navigator.language||'en').toLowerCase().slice(0,2);return T[n]?n:'en';}
+  function apply(lang){
+    cur=lang;var t=T[lang];
+    var f=document.getElementById('ls-flag');var l=document.getElementById('ls-lbl');
+    if(f)f.textContent=FLAGS[lang];if(l)l.textContent=LABELS[lang];
+    document.querySelectorAll('.ls-opt').forEach(function(b,i){b.classList.toggle('active',['en','es','pt','fr','de'][i]===lang);});
+    document.querySelectorAll('[data-i18n]').forEach(function(el){var k=el.getAttribute('data-i18n');if(t[k]!==undefined)el.textContent=t[k];});
+  }
+  window.lsToggle=function(){
+    var m=document.getElementById('ls-menu');var b=document.getElementById('ls-btn');
+    var o=m.classList.toggle('open');b.setAttribute('aria-expanded',o);
+    if(o){setTimeout(function(){document.addEventListener('click',function c(e){if(!document.getElementById('ls').contains(e.target)){m.classList.remove('open');b.setAttribute('aria-expanded','false');document.removeEventListener('click',c);}});},10);}
+  };
+  window.lsSet=function(lang){localStorage.setItem(SAVED,lang);apply(lang);document.getElementById('ls-menu').classList.remove('open');document.getElementById('ls-btn').setAttribute('aria-expanded','false');};
+  window.i18n=function(k){return(T[cur]||T.en)[k]||k;};
+  document.addEventListener('DOMContentLoaded',function(){apply(detect());});
+})();
+</script>
+
 </body>
 </html>

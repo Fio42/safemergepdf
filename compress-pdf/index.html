@@ -47,6 +47,16 @@
     .fade-up-2{animation:fadeUp 0.5s 0.08s ease both}
     .fade-up-3{animation:fadeUp 0.5s 0.16s ease both}
     .badge{display:inline-flex;align-items:center;gap:6px;background:rgba(83,99,255,0.12);border:1px solid rgba(83,99,255,0.25);border-radius:999px;padding:5px 14px;font-family:'DM Mono',monospace;font-size:11px;letter-spacing:0.06em;color:#8aaeff;text-transform:uppercase}
+  
+    /* ── lang switcher ── */
+    #ls{position:fixed;top:12px;right:12px;z-index:9999;font-family:'DM Mono',monospace}
+    #ls-btn{display:flex;align-items:center;gap:5px;padding:5px 10px;background:rgba(14,17,23,.88);border:1px solid rgba(90,135,255,.32);border-radius:8px;color:rgba(255,255,255,.7);font-size:11px;cursor:pointer;backdrop-filter:blur(12px);letter-spacing:.04em;transition:border-color .15s}
+    #ls-btn:hover{border-color:rgba(90,135,255,.7);color:#fff}
+    #ls-menu{display:none;position:absolute;top:calc(100% + 5px);right:0;background:rgba(14,17,23,.97);border:1px solid rgba(90,135,255,.18);border-radius:10px;overflow:hidden;box-shadow:0 8px 32px rgba(0,0,0,.55);min-width:138px}
+    #ls-menu.open{display:block}
+    .ls-opt{display:flex;align-items:center;gap:9px;width:100%;padding:9px 14px;background:none;border:none;color:rgba(255,255,255,.65);font-size:12px;font-family:'DM Mono',monospace;cursor:pointer;text-align:left;letter-spacing:.03em;transition:background .12s,color .12s}
+    .ls-opt:hover{background:rgba(90,135,255,.1);color:#fff}
+    .ls-opt.active{color:var(--brand,#5a87ff);background:rgba(90,135,255,.08)}
   </style>
 </head>
 <body class="bg-grid min-h-screen">
@@ -238,7 +248,7 @@
       pyodide = await loadPyodide({ indexURL:'https://cdn.jsdelivr.net/pyodide/v0.25.0/full/' });
       setProgress(60, 'Installing pypdf...');
       await pyodide.loadPackage('micropip');
-      await pyodide.runPythonAsync(`import micropip; await micropip.install('pypdf')`);
+      await pyodide.runPythonAsync(`import micropip; await micropip.install(['pypdf','pillow'])`);
       pyodideReady = true;
       setProgress(100, 'Ready');
       setTimeout(() => { document.getElementById('progress-area').classList.add('hidden'); }, 600);
@@ -274,7 +284,10 @@ writer.append(reader)
 writer.compress_identical_objects(remove_identicals=True, remove_orphans=True)
 for page in writer.pages:
     for img in page.images:
-        img.replace(img.image, quality=int(img_quality))
+        try:
+            img.replace(img.image, quality=int(img_quality))
+        except Exception:
+            pass  # skip images that can't be recompressed
 out = BytesIO()
 writer.write(out)
 result_bytes = out.getvalue()
@@ -317,5 +330,141 @@ result_bytes = out.getvalue()
   }
 </script>
 <script src="https://cdn.jsdelivr.net/pyodide/v0.25.0/full/pyodide.js"></script>
+
+<script>
+'use strict';
+(function(){
+  var FLAGS={'en':'🇺🇸','es':'🇪🇸','pt':'🇧🇷','fr':'🇫🇷','de':'🇩🇪'};
+  var LABELS={'en':'EN','es':'ES','pt':'PT','fr':'FR','de':'DE'};
+  var T={
+    en:{
+      badge:'No upload · 100% local',
+      why_title:'Why NoServerTools?',
+      why_uploads:'Zero uploads',why_uploads_d:'We never receive your files.',
+      why_storage:'Zero storage',why_storage_d:'Nothing is saved anywhere.',
+      why_tracking:'Zero tracking',why_tracking_d:"We don't know what you process.",
+      why_offline:'Works offline',why_offline_d:'Once loaded, no internet needed.',
+      footer_strip:'NO UPLOADS · NO ACCOUNTS · NO TRACKING · NO SERVERS',
+      step1:'Drop your PDF',step1d:'Your file stays on your computer.',
+      step2:'Choose options',step2d:'Configure the settings below.',
+      step3:'Download result',step3d:'Ready in seconds. No account. No limits.',
+      all_tools:'All tools',change_file:'Change file',processing:'Processing...'
+    },
+    es:{
+      badge:'Sin subir · 100% local',
+      why_title:'¿Por qué NoServerTools?',
+      why_uploads:'Cero subidas',why_uploads_d:'Nunca recibimos tus archivos.',
+      why_storage:'Cero almacenamiento',why_storage_d:'Nada se guarda en ningún lugar.',
+      why_tracking:'Cero rastreo',why_tracking_d:'No sabemos qué procesas.',
+      why_offline:'Funciona sin internet',why_offline_d:'Una vez cargado, sin conexión necesaria.',
+      footer_strip:'SIN SUBIDAS · SIN CUENTAS · SIN RASTREO · SIN SERVIDORES',
+      step1:'Sube tu PDF',step1d:'Tu archivo se queda en tu computadora.',
+      step2:'Elige opciones',step2d:'Configura los ajustes a continuación.',
+      step3:'Descarga el resultado',step3d:'Listo en segundos. Sin cuenta. Sin límites.',
+      all_tools:'Todas las tools',change_file:'Cambiar archivo',processing:'Procesando...'
+    },
+    pt:{
+      badge:'Sem upload · 100% local',
+      why_title:'Por que NoServerTools?',
+      why_uploads:'Zero uploads',why_uploads_d:'Nunca recebemos seus arquivos.',
+      why_storage:'Zero armazenamento',why_storage_d:'Nada é salvo em lugar algum.',
+      why_tracking:'Zero rastreamento',why_tracking_d:'Não sabemos o que você processa.',
+      why_offline:'Funciona offline',why_offline_d:'Após carregar, sem internet necessária.',
+      footer_strip:'SEM UPLOADS · SEM CONTAS · SEM RASTREIO · SEM SERVIDORES',
+      step1:'Envie seu PDF',step1d:'Seu arquivo fica no seu computador.',
+      step2:'Escolha opções',step2d:'Configure as definições abaixo.',
+      step3:'Baixe o resultado',step3d:'Pronto em segundos. Sem conta. Sem limites.',
+      all_tools:'Todas as ferramentas',change_file:'Trocar arquivo',processing:'Processando...'
+    },
+    fr:{
+      badge:'Sans envoi · 100% local',
+      why_title:'Pourquoi NoServerTools?',
+      why_uploads:'Zéro envoi',why_uploads_d:'Nous ne recevons jamais vos fichiers.',
+      why_storage:'Zéro stockage',why_storage_d:"Rien n'est sauvegardé nulle part.",
+      why_tracking:'Zéro pistage',why_tracking_d:'Nous ne savons pas ce que vous traitez.',
+      why_offline:'Fonctionne hors ligne',why_offline_d:"Une fois chargé, pas d'internet requis.",
+      footer_strip:'SANS ENVOI · SANS COMPTE · SANS SUIVI · SANS SERVEURS',
+      step1:'Déposez votre PDF',step1d:'Votre fichier reste sur votre ordinateur.',
+      step2:'Choisissez les options',step2d:'Configurez les paramètres ci-dessous.',
+      step3:'Téléchargez le résultat',step3d:'Prêt en secondes. Sans compte. Sans limites.',
+      all_tools:'Tous les outils',change_file:'Changer de fichier',processing:'Traitement...'
+    },
+    de:{
+      badge:'Kein Upload · 100% lokal',
+      why_title:'Warum NoServerTools?',
+      why_uploads:'Null Uploads',why_uploads_d:'Wir erhalten Ihre Dateien nie.',
+      why_storage:'Null Speicherung',why_storage_d:'Nichts wird irgendwo gespeichert.',
+      why_tracking:'Null Tracking',why_tracking_d:'Wir wissen nicht, was Sie verarbeiten.',
+      why_offline:'Funktioniert offline',why_offline_d:'Einmal geladen, kein Internet nötig.',
+      footer_strip:'KEIN UPLOAD · KEIN KONTO · KEIN TRACKING · KEIN SERVER',
+      step1:'PDF ablegen',step1d:'Ihre Datei bleibt auf Ihrem Computer.',
+      step2:'Optionen wählen',step2d:'Einstellungen unten konfigurieren.',
+      step3:'Ergebnis herunterladen',step3d:'In Sekunden fertig. Kein Konto. Keine Limits.',
+      all_tools:'Alle Tools',change_file:'Datei wechseln',processing:'Verarbeitung...'
+    }
+  };
+
+  var SAVED_KEY='nst_lang';
+  var curLang='en';
+
+  function detectLang(){
+    var saved=localStorage.getItem(SAVED_KEY);
+    if(saved&&T[saved]) return saved;
+    var nav=(navigator.language||navigator.userLanguage||'en').toLowerCase().slice(0,2);
+    return T[nav]?nav:'en';
+  }
+
+  function applyLang(lang){
+    curLang=lang;
+    var t=T[lang];
+    // update button
+    var flag=document.getElementById('ls-flag');
+    var lbl=document.getElementById('ls-lbl');
+    if(flag) flag.textContent=FLAGS[lang];
+    if(lbl) lbl.textContent=LABELS[lang];
+    // mark active option
+    document.querySelectorAll('.ls-opt').forEach(function(btn,i){
+      var langs=['en','es','pt','fr','de'];
+      btn.classList.toggle('active',langs[i]===lang);
+    });
+    // apply all data-i18n
+    document.querySelectorAll('[data-i18n]').forEach(function(el){
+      var k=el.getAttribute('data-i18n');
+      if(t[k]!==undefined) el.textContent=t[k];
+    });
+  }
+
+  window.lsToggle=function(){
+    var menu=document.getElementById('ls-menu');
+    var btn=document.getElementById('ls-btn');
+    var open=menu.classList.toggle('open');
+    btn.setAttribute('aria-expanded',open);
+    if(open){
+      setTimeout(function(){
+        document.addEventListener('click',function close(e){
+          if(!document.getElementById('ls').contains(e.target)){
+            menu.classList.remove('open');
+            btn.setAttribute('aria-expanded','false');
+            document.removeEventListener('click',close);
+          }
+        });
+      },10);
+    }
+  };
+
+  window.lsSet=function(lang){
+    localStorage.setItem(SAVED_KEY,lang);
+    applyLang(lang);
+    document.getElementById('ls-menu').classList.remove('open');
+    document.getElementById('ls-btn').setAttribute('aria-expanded','false');
+  };
+
+  window.i18n=function(key){ return (T[curLang]||T.en)[key]||key; };
+
+  document.addEventListener('DOMContentLoaded',function(){
+    applyLang(detectLang());
+  });
+})();
+</script>
 </body>
 </html>
