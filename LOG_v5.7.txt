@@ -1,5 +1,5 @@
 ════════════════════════════════════════════════════════════════
-LOG MAESTRO v5.7 — NOSERVERTOOLS
+LOG MAESTRO v5.8 — NOSERVERTOOLS
 PEGAR EN CUALQUIER AI PARA CONTINUAR SIN PREGUNTAS
 ════════════════════════════════════════════════════════════════
 
@@ -10,7 +10,7 @@ URL RAIZ: https://fio42.github.io/noservertools/
 Repo: https://github.com/Fio42/noservertools
 Carpeta local: C:/Users/fiocc/OneDrive/Desktop/noservertools/
 Usuario GitHub: Fio42
-Ultimo deploy: v5.7 — Translate PDF + HUB actualizado
+Ultimo deploy: v5.8 — translate-pdf: descarga PDF real via jsPDF
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 IDENTIDAD DE MARCA
@@ -39,6 +39,8 @@ REGLAS PERMANENTES — NUNCA ROMPER
 14. EXCEPCION a regla 1: translate-pdf usa MyMemory API externa para traduccion.
     El ARCHIVO nunca sale del dispositivo. Solo el TEXTO extraido va a la API.
     Siempre declarar esto claramente en la UI con aviso amarillo.
+15. EXCEPCION a regla 1: translate-pdf usa jsPDF (CDN cdnjs) para generar PDF
+    en el cliente. CERO servidores. El PDF se genera 100% en el browser.
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 COMO SUBIR CAMBIOS
@@ -50,7 +52,7 @@ git push
 Esperar 1-2 minutos y recargar.
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-ESTRUCTURA — ESTADO ACTUAL v5.7
+ESTRUCTURA — ESTADO ACTUAL v5.8
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 noservertools/
@@ -63,7 +65,7 @@ noservertools/
   compress-pdf/index.html [VIVO] Compress PDF v5.4
   split-pdf/index.html    [VIVO] Split PDF v5.4
   pdf-to-jpg/index.html   [VIVO] PDF<->JPG combinado v5.6
-  translate-pdf/index.html [VIVO] Translate PDF v5.7 (NUEVO)
+  translate-pdf/index.html [VIVO] Translate PDF v5.8 — PDF real con jsPDF
 
   -- PENDIENTES (orden prioridad SEO) --
   rotate-pdf/             prioridad 1
@@ -76,35 +78,28 @@ noservertools/
   repair-pdf/             prioridad 8
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-PARA DEPLOY v5.7 — QUE COPIAR DONDE
+PARA DEPLOY v5.8 — QUE COPIAR DONDE
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-1. index.html             -> noservertools/index.html (reemplazar)
-2. CREAR carpeta: noservertools/translate-pdf/
-3. translate-pdf/index.html -> noservertools/translate-pdf/index.html
-4. LOG_v5.7.txt           -> noservertools/LOG.txt (reemplazar)
-5. git add . && git commit -m "v5.7 translate-pdf + hub updated" && git push
+1. translate-pdf/index.html -> noservertools/translate-pdf/index.html (reemplazar)
+2. LOG_v5.8.txt             -> noservertools/LOG.txt (reemplazar)
+3. git add . && git commit -m "v5.8 translate-pdf: real PDF download via jsPDF" && git push
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-DISENO VISUAL v5.7
+DISENO VISUAL v5.8
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-Mismo sistema que v5.6:
+Sin cambios visuales en v5.8. Mismo sistema que v5.7:
   Bg #0e1117, Syne+Outfit+DM Mono, brand #5a87ff/#1f45e0
   CSS variables en :root para consistencia
   Mobile-first con media queries
   Body::before para grid background
   Blobs fijos con radial-gradient
-
-translate-pdf adicional:
-  Lang bar debajo del nav (switch idioma de UI)
-  Steps indicator (1-2-3) con estados: inactive/active/done
-  Step dots: .step-dot, .step-dot.active, .step-dot.done (check)
+  Lang bar debajo del nav
+  Steps indicator (1-2-3)
   Side-by-side panels para original vs traducido
   Privacy note en amarillo con icono warning
-  Deteccion automatica de idioma via navigator.language
-  Animacion .pulse en step progress emoji
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-TRANSLATE-PDF — ARQUITECTURA TECNICA
+TRANSLATE-PDF — ARQUITECTURA TECNICA v5.8
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 EXTRACCION (100% local):
   - PDF: Pyodide + pypdf -> page.extract_text() -> string
@@ -117,12 +112,12 @@ TRADUCCION (API externa - solo texto):
   - Limite free: ~5000 chars/request, ~50 requests/dia
   - Chunking: texto dividido en partes <= 450 chars por oracion
   - Rate limiting: 300ms delay entre chunks
-  - Lang pair format: "en|es" o "|es" para autodetect
+  - Lang pair format: "en|es" — siempre con codigo explicito, sin autodetect
 
 IDIOMAS SOPORTADOS (28 total):
-  autodetect, en, es, fr, de, pt, it, nl, pl, ru, tr,
+  en, es, fr, de, pt, it, nl, pl, ru, tr,
   ar, zh, ja, ko, sv, da, fi, no, ro, uk, cs, hu, el, he,
-  id, th, vi
+  id, th, vi (+ autodetect eliminado en v5.7 — causaba INVALID LANGUAGE PAIR)
 
 UI MULTIIDIOMA (5 idiomas de interfaz):
   English, Espanol, Francais, Deutsch, Portugues
@@ -130,17 +125,29 @@ UI MULTIIDIOMA (5 idiomas de interfaz):
   Strings: objeto I18N con todas las traducciones
   Todos los textos tienen data-i18n attribute
 
-DESCARGA:
-  - TXT original: Blob text/plain + URL.createObjectURL
-  - TXT traducido: Blob text/plain + URL.createObjectURL
-  - "PDF": genera HTML con el texto y se descarga como .html
-    (usuario puede abrir y File > Print > Save as PDF)
-  NOTA FUTURA: para PDF real usar jsPDF o reportlab via Pyodide
+DESCARGA v5.8:
+  - TXT original:    Blob text/plain + URL.createObjectURL
+  - TXT traducido:   Blob text/plain + URL.createObjectURL
+  - PDF traducido:   jsPDF v2.5.1 via CDN (cdnjs.cloudflare.com) — PDF REAL
+    * Genera .pdf directo, sin pasar por HTML intermedio
+    * Titulo del documento en header
+    * Par de idiomas (FROM -> TO) + "Translated by NoServerTools.com"
+    * Linea separadora debajo del header
+    * Parrafos con espaciado correcto (10pt entre parrafos)
+    * Saltos de pagina automaticos cuando el contenido no cabe
+    * Footer en cada pagina: nombre archivo a la izquierda, N/Total a la derecha
+    * Linea separadora encima del footer
+    * Fallback a .txt si jsPDF falla por cualquier razon
 
-LIMITACION CONOCIDA:
-  - PDFs basados en imagenes (escaneados) no tienen texto extraible
-  - Mostrar error claro: "This PDF appears to be image-based (scanned)"
-  - Solucion futura: OCR con tesseract.js
+  LIMITACION CONOCIDA (sin solucion posible sin servidor):
+    - Imagenes del PDF original no se incluyen (pypdf extrae solo texto)
+    - Layout de columnas exacto no se puede reconstruir (texto es lineal)
+    - PDFs escaneados (imagen) no tienen texto extraible -> error claro en UI
+
+DEPENDENCIAS NUEVAS EN v5.8:
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  Agregar ANTES del script de Pyodide en el HTML.
+  Acceso via: const { jsPDF } = window.jspdf;
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 SEGURIDAD — TODOS LOS HTML
@@ -150,6 +157,7 @@ JS: 'use strict', esc() para datos de usuario, createElement
 Validacion: tipo de archivo + tamano antes de procesar
 Blob URLs: URL.revokeObjectURL() despues de uso
 API calls: solo a dominios declarados en CSP
+CDN scripts: solo cdnjs.cloudflare.com, cdn.jsdelivr.net, unpkg.com
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 PYTHON RECETAS
@@ -159,7 +167,7 @@ COMPRESS:   compress_identical_objects + img.replace(quality=N)
 SPLIT:      PdfWriter().add_page(page) por rango -> write(out)
 JPG->PDF:   Pillow Image.open -> img.save(buf, format='PDF') -> append
 PDF->JPG:   PDF.js + canvas.toDataURL (NO Pyodide)
-TRANSLATE:  pypdf page.extract_text() -> MyMemory API chunks
+TRANSLATE:  pypdf page.extract_text() -> MyMemory API chunks -> jsPDF download
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 FASES COMPLETADAS
@@ -173,11 +181,18 @@ v5.6:     HUB revamp (tools primero) + PDF<->JPG combinado + hardening
 v5.7:     Translate PDF (Pyodide + MyMemory) + UI en 5 idiomas
           Deteccion automatica idioma via navigator.language
           Steps indicator guiado, side-by-side panels, descarga TXT/HTML
-se arreglo bug en translate git add .
-Eliminé "Auto-detect" del selector — MyMemory no lo soporta y era el origen del error INVALID LANGUAGE PAIR
-Ahora el par siempre tiene formato válido: es|en, en|fr, etc.
-Defaults inteligentes: si la UI está en español → viene Español → Inglés preseleccionado automáticamente
-Validación: si seleccionas el mismo idioma en ambos lados, te avisa antes de intentar
+          Fix bug: eliminado Auto-detect del selector (INVALID LANGUAGE PAIR)
+          Defaults inteligentes segun idioma de UI
+          Validacion: mismo idioma en ambos lados avisa antes de traducir
+v5.8:     Fix descarga PDF — reemplazado HTML fake por PDF real con jsPDF
+          Script jsPDF v2.5.1 agregado via cdnjs CDN
+          downloadPdf() completamente reescrita:
+            - Genera .pdf real (no .html)
+            - Header con titulo + par de idiomas
+            - Parrafos con espaciado correcto
+            - Saltos de pagina automaticos
+            - Footer con nombre archivo + paginacion N/Total
+            - Fallback a .txt si jsPDF no carga
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 PROXIMOS PASOS
@@ -185,9 +200,9 @@ PROXIMOS PASOS
 INMEDIATO:  rotate-pdf (simple, alto trafico SEO)
 DESPUES:    protect-pdf + unlock-pdf
 MEJORAS TRANSLATE:
-  - PDF real en descarga (jsPDF via CDN o reportlab Pyodide)
   - OCR para PDFs escaneados (tesseract.js)
   - Aumentar limite con API key de MyMemory (gratis con email)
+  - Fuentes no-latinas en jsPDF (chino, japones, arabe requieren font embed)
 FUTURO:
   - Comprar noservertools.com (quitar base href de todos los HTML)
   - Google Search Console + sitemap
@@ -201,15 +216,18 @@ PARA EL PROXIMO AI
 2.  CSS variables en :root. Mobile-first.
 3.  Pyodide/WASM o PDF.js para procesamiento. CERO servidores propios.
 4.  EXCEPCION: translate-pdf envia TEXTO (no archivo) a MyMemory API.
-5.  PDF<->JPG = una sola pagina en pdf-to-jpg/ con switch de modo.
-6.  Translate PDF = translate-pdf/ con UI en 5 idiomas + 28 lang pairs.
-7.  Deteccion de idioma: navigator.language (sin API).
-8.  CSP + X-Frame + 'use strict' + esc() + createElement en todo HTML nuevo.
-9.  HUB: tools grid primero, hero compacto arriba.
-10. NUNCA estadisticas inventadas. NUNCA reviews falsos.
-11. Usuario principiante: pasos exactos de que va donde.
-12. LOG actualizado AL FINAL de cada sesion.
+5.  EXCEPCION: translate-pdf usa jsPDF (cdnjs CDN) para generar PDF en cliente.
+6.  PDF<->JPG = una sola pagina en pdf-to-jpg/ con switch de modo.
+7.  Translate PDF = translate-pdf/ con UI en 5 idiomas + 28 lang pairs.
+8.  Deteccion de idioma UI: navigator.language (sin API).
+9.  Auto-detect ELIMINADO del selector de idioma — MyMemory no lo soporta.
+10. jsPDF: acceder via window.jspdf.jsPDF — script antes de Pyodide en HTML.
+11. CSP + X-Frame + 'use strict' + esc() + createElement en todo HTML nuevo.
+12. HUB: tools grid primero, hero compacto arriba.
+13. NUNCA estadisticas inventadas. NUNCA reviews falsos.
+14. Usuario principiante: pasos exactos de que va donde.
+15. LOG actualizado AL FINAL de cada sesion — entregar como .txt descargable.
 
 ════════════════════════════════════════════════════════════════
-FIN DEL LOG MAESTRO v5.7 — NoServerTools
+FIN DEL LOG MAESTRO v5.8 — NoServerTools
 ════════════════════════════════════════════════════════════════

@@ -458,9 +458,11 @@
   </div>
 </footer>
 
+<!-- PDF.js for rendering pages as images + text position extraction -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <!-- jsPDF for real PDF generation -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-<!-- Pyodide -->
+<!-- Pyodide (kept for TXT fallback only) -->
 <script src="https://cdn.jsdelivr.net/pyodide/v0.25.0/full/pyodide.js"></script>
 <script>
 'use strict';
@@ -667,6 +669,9 @@ let pyodide = null, pyReady = false;
 let extractedText = '';
 let translatedText = '';
 let currentStep = 1;
+// PDF.js page data: array of { imageDataUrl, textItems, viewport, width, height }
+let pdfPageData = [];
+let isPdfFile = false;
 
 /* ─── UI Language detection ─────────────────────────────────────────────── */
 (function detectLang() {
@@ -788,6 +793,78 @@ function setProg(pct, label, sub, pages) {
   if (pages !== undefined) document.getElementById('p-pages').textContent = pages;
 }
 
+/* ─── PDF.js extraction: renders pages as images + captures text positions ── */
+async function extractWithPdfJs(arrayBuffer) {
+  // Configure PDF.js worker
+  if (!pdfjsLib.GlobalWorkerOptions.workerSrc) {
+    pdfjsLib.GlobalWorkerOptions.workerSrc =
+      'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+  }
+
+  const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+  const numPages = pdf.numPages;
+  pdfPageData = [];
+  const allText = [];
+
+  // Render scale: higher = better image quality but more memory
+  const SCALE = 2.0;
+
+  for (let pageNum = 1; pageNum <= numPages; pageNum++) {
+    setProg(
+      5 + Math.round((pageNum / numPages) * 30),
+      `Rendering page ${pageNum} of ${numPages}...`,
+      'Capturing visual layout locally'
+    );
+
+    const page = await pdf.getPage(pageNum);
+    const viewport = page.getViewport({ scale: SCALE });
+
+    // Render page to canvas (captures all visual elements: colors, images, fonts)
+    const canvas = document.createElement('canvas');
+    canvas.width  = viewport.width;
+    canvas.height = viewport.height;
+    const ctx = canvas.getContext('2d');
+    await page.render({ canvasContext: ctx, viewport }).promise;
+    const imageDataUrl = canvas.toDataURL('image/jpeg', 0.92);
+
+    // Extract text items WITH positions (normalized 0-1 relative to page)
+    const textContent = await page.getTextContent();
+    const vp1 = page.getViewport({ scale: 1.0 }); // unscaled for position math
+    const textItems = textContent.items
+      .filter(item => item.str && item.str.trim().length > 0)
+      .map(item => {
+        // PDF coordinate system: origin bottom-left, y increases upward
+        // item.transform = [scaleX, skewX, skewY, scaleY, tx, ty]
+        const tx = item.transform[4];
+        const ty = item.transform[5];
+        const fontSize = Math.abs(item.transform[3]); // scaleY = fontSize in PDF coords
+        // Convert to top-left origin, normalize to 0-1
+        return {
+          str:      item.str,
+          x:        tx / vp1.width,
+          y:        1 - (ty / vp1.height),  // flip Y axis
+          fontSize: fontSize / vp1.height,   // normalized font size
+          width:    (item.width || 0) / vp1.width
+        };
+      });
+
+    // Collect page text for translation (preserve reading order)
+    const pageText = textContent.items.map(i => i.str).join(' ').trim();
+    if (pageText) allText.push(pageText);
+
+    pdfPageData.push({
+      imageDataUrl,
+      textItems,
+      pageWidth:  vp1.width,
+      pageHeight: vp1.height,
+      canvasWidth:  canvas.width,
+      canvasHeight: canvas.height
+    });
+  }
+
+  return allText.join('\n\n');
+}
+
 async function startTranslation() {
   if (!currentFile) return;
   clearErr();
@@ -796,47 +873,32 @@ async function startTranslation() {
   const strings = I18N[uiLang] || I18N.en;
 
   try {
-    // Step 1: Extract text
     setProg(5, strings.p_extracting, strings.p_local);
     document.getElementById('p-emoji').textContent = '📄';
+    pdfPageData = [];
 
     if (currentFile.name.toLowerCase().endsWith('.txt')) {
+      isPdfFile = false;
       extractedText = await currentFile.text();
       setProg(40, strings.p_extracting, strings.p_local);
     } else {
-      // PDF extraction via Pyodide
-      if (!pyReady) {
-        setProg(10, 'Loading engine...', 'First load takes a moment');
-        await initPyodide();
-        if (!pyReady) throw new Error('Failed to load Pyodide. Please refresh and try again.');
-      }
-      setProg(20, strings.p_extracting, strings.p_local);
+      isPdfFile = true;
+      // Use PDF.js for both rendering AND text extraction
+      setProg(8, 'Loading PDF...', 'Reading your file locally');
       const buf = await currentFile.arrayBuffer();
-      const arr = new Uint8Array(buf);
-      pyodide.globals.set('pdf_bytes_js', arr);
-      await pyodide.runPythonAsync(`
-from pypdf import PdfReader
-from io import BytesIO
-reader = PdfReader(BytesIO(bytes(pdf_bytes_js)))
-pages_text = []
-for page in reader.pages:
-    t = page.extract_text()
-    if t:
-        pages_text.append(t.strip())
-extracted = "\\n\\n".join(pages_text)
-      `);
-      extractedText = pyodide.globals.get('extracted');
-      setProg(40, strings.p_extracting, strings.p_local, `${document.getElementById('p-pages').textContent}`);
+      extractedText = await extractWithPdfJs(buf);
+      setProg(40, strings.p_extracting, strings.p_local, `${pdfPageData.length} pages`);
     }
 
     if (!extractedText || extractedText.trim().length < 5) {
       throw new Error('Could not extract text from this PDF. The file may be image-based (scanned). Try a PDF with real text.');
     }
 
-    // Show original text immediately
+    // Show original text preview
     showSection('s-results');
     const origPanel = document.getElementById('panel-original');
     origPanel.textContent = extractedText;
+
     const fromCode = document.getElementById('lang-from').value;
     const toCode   = document.getElementById('lang-to').value;
     if (!fromCode || !toCode) throw new Error('Please select both languages.');
@@ -849,7 +911,7 @@ extracted = "\\n\\n".join(pages_text)
     document.getElementById('r-title').textContent = '✅ ' + (strings.btn_translate || 'Translation complete');
     document.getElementById('r-sub').textContent = `${fromLabel} → ${toLabel} · ${currentFile.name}`;
 
-    // Step 2: Translate via MyMemory API in chunks
+    // Translate via MyMemory API in chunks
     const transPanel = document.getElementById('panel-translated');
     transPanel.innerHTML = `<span class="panel-placeholder pulse">${strings.translating || 'Translating...'}</span>`;
 
@@ -858,10 +920,7 @@ extracted = "\\n\\n".join(pages_text)
     for (let i = 0; i < chunks.length; i++) {
       const result = await translateChunk(chunks[i], langPair);
       translated.push(result);
-      // Show partial result
       transPanel.textContent = translated.join('\n\n') + (i < chunks.length - 1 ? '\n\n...' : '');
-      const pct = Math.round(((i + 1) / chunks.length) * 100);
-      // small delay to avoid rate limit
       if (i < chunks.length - 1) await sleep(300);
     }
     translatedText = translated.join('\n\n');
@@ -934,10 +993,16 @@ function downloadTxt(which) {
   setTimeout(() => URL.revokeObjectURL(url), 2000);
 }
 
-function downloadPdf() {
+async function downloadPdf() {
   if (!translatedText) return;
 
-  const toCode  = document.getElementById('lang-to').value;
+  const btn = document.getElementById('dl-pdf-btn');
+  const span = btn.querySelector('span');
+  const origLabel = span ? span.textContent : '';
+  if (span) span.textContent = 'Building PDF...';
+  btn.disabled = true;
+
+  const toCode   = document.getElementById('lang-to').value;
   const fromCode = document.getElementById('lang-from').value;
   const toLabel  = LANGS.find(l => l.code === toCode)?.label  || toCode;
   const fromLabel = LANGS.find(l => l.code === fromCode)?.label || fromCode;
@@ -945,96 +1010,187 @@ function downloadPdf() {
 
   try {
     const { jsPDF } = window.jspdf;
-    const doc = new jsPDF({ unit: 'pt', format: 'a4' });
 
-    const pageW   = doc.internal.pageSize.getWidth();
-    const pageH   = doc.internal.pageSize.getHeight();
-    const marginL = 56;
-    const marginR = 56;
-    const marginT = 60;
-    const marginB = 60;
-    const contentW = pageW - marginL - marginR;
-    let y = marginT;
-
-    // ── Header: document title ──────────────────────────────────────────
-    doc.setFont('helvetica', 'bold');
-    doc.setFontSize(15);
-    doc.setTextColor(30, 30, 30);
-    const titleLines = doc.splitTextToSize(base, contentW);
-    doc.text(titleLines, marginL, y);
-    y += titleLines.length * 20 + 4;
-
-    // ── Subtitle: lang pair + tool name ────────────────────────────────
-    doc.setFont('helvetica', 'normal');
-    doc.setFontSize(9);
-    doc.setTextColor(120, 120, 120);
-    doc.text(`${fromLabel} → ${toLabel}  ·  Translated by NoServerTools.com`, marginL, y);
-    y += 14;
-
-    // ── Divider line ────────────────────────────────────────────────────
-    doc.setDrawColor(210, 210, 220);
-    doc.setLineWidth(0.5);
-    doc.line(marginL, y, pageW - marginR, y);
-    y += 18;
-
-    // ── Body text ───────────────────────────────────────────────────────
-    doc.setFont('helvetica', 'normal');
-    doc.setFontSize(11);
-    doc.setTextColor(40, 40, 40);
-
-    // Split into paragraphs to preserve document structure
-    const paragraphs = translatedText.split(/\n\n+/);
-
-    for (const para of paragraphs) {
-      if (!para.trim()) continue;
-
-      const lines = doc.splitTextToSize(para.trim(), contentW);
-      const blockH = lines.length * 15;
-
-      // Page break if needed
-      if (y + blockH > pageH - marginB) {
-        doc.addPage();
-        y = marginT;
-      }
-
-      doc.text(lines, marginL, y);
-      y += blockH + 10; // 10pt gap between paragraphs
+    // ── VISUAL MODE: PDF has page images + translated text overlay ──────
+    if (isPdfFile && pdfPageData.length > 0) {
+      await buildVisualPdf(base, fromLabel, toLabel, jsPDF);
+    } else {
+      // ── TEXT MODE: TXT file, plain formatted PDF ─────────────────────
+      buildTextPdf(base, fromLabel, toLabel, jsPDF);
     }
-
-    // ── Footer on every page ────────────────────────────────────────────
-    const totalPages = doc.internal.getNumberOfPages();
-    for (let i = 1; i <= totalPages; i++) {
-      doc.setPage(i);
-      doc.setFont('helvetica', 'normal');
-      doc.setFontSize(8);
-      doc.setTextColor(170, 170, 170);
-      doc.text(
-        `${base} — ${fromLabel} to ${toLabel}`,
-        marginL,
-        pageH - 28
-      );
-      doc.text(
-        `${i} / ${totalPages}`,
-        pageW - marginR,
-        pageH - 28,
-        { align: 'right' }
-      );
-      // Footer line
-      doc.setDrawColor(220, 220, 225);
-      doc.setLineWidth(0.4);
-      doc.line(marginL, pageH - 38, pageW - marginR, pageH - 38);
-    }
-
-    doc.save(base + '-translated.pdf');
 
   } catch (err) {
-    // Fallback: if jsPDF fails for any reason, download as TXT
-    console.error('jsPDF error:', err);
+    console.error('PDF generation error:', err);
     downloadTxt('translated');
-    const btn = document.getElementById('dl-pdf-btn');
-    const span = btn.querySelector('span');
-    if (span) { span.textContent = 'Saved as .txt (PDF engine error)'; }
+    if (span) span.textContent = 'Saved as .txt (error)';
+  } finally {
+    btn.disabled = false;
+    if (span) span.textContent = origLabel;
   }
+}
+
+/* ── Visual PDF: page image as background + translated text overlay ──────── */
+async function buildVisualPdf(base, fromLabel, toLabel, jsPDF) {
+  // Build a word-level translation map:
+  // original words -> translated words, distributed proportionally
+  const origWords  = extractedText.trim().split(/\s+/);
+  const transWords = translatedText.trim().split(/\s+/);
+
+  // Map: for each original word index, what's the translated equivalent?
+  // We distribute translated words proportionally across original positions
+  function getTranslatedWordAt(origIdx) {
+    if (origWords.length === 0) return '';
+    const ratio = origIdx / Math.max(origWords.length - 1, 1);
+    const transIdx = Math.round(ratio * (transWords.length - 1));
+    return transWords[Math.min(transIdx, transWords.length - 1)] || '';
+  }
+
+  // Build per-page translated segments proportionally
+  // Count total original text items across all pages
+  let totalItems = 0;
+  pdfPageData.forEach(p => { totalItems += p.textItems.length; });
+
+  let globalItemIdx = 0;
+
+  // Determine PDF page size from first page (use original aspect ratio)
+  const firstPage = pdfPageData[0];
+  const pdfW = firstPage.pageWidth;   // points (PDF units)
+  const pdfH = firstPage.pageHeight;
+
+  // Create jsPDF with first page dimensions
+  const doc = new jsPDF({
+    unit: 'pt',
+    format: [pdfW, pdfH],
+    orientation: pdfW > pdfH ? 'landscape' : 'portrait'
+  });
+
+  for (let pi = 0; pi < pdfPageData.length; pi++) {
+    const pageData = pdfPageData[pi];
+    if (pi > 0) {
+      doc.addPage([pageData.pageWidth, pageData.pageHeight],
+        pageData.pageWidth > pageData.pageHeight ? 'landscape' : 'portrait');
+    }
+
+    const pw = pageData.pageWidth;
+    const ph = pageData.pageHeight;
+
+    // 1. Draw full-page background image (preserves ALL visual design)
+    doc.addImage(
+      pageData.imageDataUrl,
+      'JPEG',
+      0, 0,
+      pw, ph,
+      undefined,
+      'FAST'
+    );
+
+    // 2. Overlay translated text at original text positions
+    const items = pageData.textItems;
+
+    for (let ii = 0; ii < items.length; ii++) {
+      const item = items[ii];
+
+      // Calculate how many translated words map to this original item
+      // Original item may have multiple words; distribute proportionally
+      const origItemWords = item.str.trim().split(/\s+/).filter(Boolean);
+      if (origItemWords.length === 0) { globalItemIdx++; continue; }
+
+      // Gather translated words for this item's proportion
+      const startRatio = globalItemIdx / Math.max(totalItems - 1, 1);
+      const endRatio   = (globalItemIdx + origItemWords.length) / Math.max(totalItems - 1, 1);
+      const startTIdx  = Math.round(startRatio * (transWords.length - 1));
+      const endTIdx    = Math.round(endRatio   * (transWords.length - 1));
+      const transSlice = transWords.slice(
+        Math.min(startTIdx, transWords.length - 1),
+        Math.min(endTIdx + 1, transWords.length)
+      ).join(' ');
+
+      globalItemIdx += origItemWords.length;
+
+      if (!transSlice.trim()) continue;
+
+      // Convert normalized coords back to PDF points
+      const x = item.x * pw;
+      // item.y is top-relative (0=top), PDF y is from top in our setup
+      const y = item.y * ph;
+
+      // Font size: normalized back to points, clamped to readable range
+      const fs = Math.max(6, Math.min(item.fontSize * ph, 72));
+
+      // Draw white knockout behind text for readability
+      // (small semi-transparent rect behind each text block)
+      const textW = item.width > 0 ? item.width * pw : fs * transSlice.length * 0.55;
+      const textH = fs * 1.2;
+
+      doc.setFillColor(255, 255, 255);
+      doc.setGState(new doc.GState({ opacity: 0.75 }));
+      doc.rect(x, y - textH * 0.85, Math.min(textW, pw - x), textH, 'F');
+
+      // Draw translated text
+      doc.setGState(new doc.GState({ opacity: 1.0 }));
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(fs);
+      doc.setTextColor(10, 10, 10);
+      doc.text(transSlice, x, y, { maxWidth: Math.max(pw - x - 4, 20) });
+    }
+  }
+
+  doc.save(base + '-translated.pdf');
+}
+
+/* ── Text PDF: clean formatted PDF for TXT files ────────────────────────── */
+function buildTextPdf(base, fromLabel, toLabel, jsPDF) {
+  const doc = new jsPDF({ unit: 'pt', format: 'a4' });
+  const pageW = doc.internal.pageSize.getWidth();
+  const pageH = doc.internal.pageSize.getHeight();
+  const mL = 56, mR = 56, mT = 60, mB = 60;
+  const cW = pageW - mL - mR;
+  let y = mT;
+
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(15);
+  doc.setTextColor(30, 30, 30);
+  const titleLines = doc.splitTextToSize(base, cW);
+  doc.text(titleLines, mL, y);
+  y += titleLines.length * 20 + 4;
+
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(9);
+  doc.setTextColor(120, 120, 120);
+  doc.text(`${fromLabel} to ${toLabel}  |  NoServerTools.com`, mL, y);
+  y += 14;
+
+  doc.setDrawColor(210, 210, 220);
+  doc.setLineWidth(0.5);
+  doc.line(mL, y, pageW - mR, y);
+  y += 18;
+
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(11);
+  doc.setTextColor(40, 40, 40);
+
+  for (const para of translatedText.split(/\n\n+/)) {
+    if (!para.trim()) continue;
+    const lines = doc.splitTextToSize(para.trim(), cW);
+    const bH = lines.length * 15;
+    if (y + bH > pageH - mB) { doc.addPage(); y = mT; }
+    doc.text(lines, mL, y);
+    y += bH + 10;
+  }
+
+  const total = doc.internal.getNumberOfPages();
+  for (let i = 1; i <= total; i++) {
+    doc.setPage(i);
+    doc.setFontSize(8);
+    doc.setTextColor(170, 170, 170);
+    doc.text(`${base} — ${fromLabel} to ${toLabel}`, mL, pageH - 28);
+    doc.text(`${i} / ${total}`, pageW - mR, pageH - 28, { align: 'right' });
+    doc.setDrawColor(220, 220, 225);
+    doc.setLineWidth(0.4);
+    doc.line(mL, pageH - 38, pageW - mR, pageH - 38);
+  }
+
+  doc.save(base + '-translated.pdf');
 }
 
 /* ─── Error ─────────────────────────────────────────────────────────────── */
@@ -1050,6 +1206,8 @@ function resetAll() {
   currentFile = null;
   extractedText = '';
   translatedText = '';
+  pdfPageData = [];
+  isPdfFile = false;
   document.getElementById('file-input').value = '';
   document.getElementById('panel-original').textContent = '';
   document.getElementById('panel-translated').textContent = '';
