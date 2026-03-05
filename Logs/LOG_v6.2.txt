@@ -1,0 +1,367 @@
+════════════════════════════════════════════════════════════════
+LOG MAESTRO v6.2 — NOSERVERTOOLS
+PEGAR EN CUALQUIER AI PARA CONTINUAR SIN PREGUNTAS
+════════════════════════════════════════════════════════════════
+
+PROYECTO: NoServerTools
+Tipo: App web estatica — un HTML por herramienta, CERO servidores propios
+Hosting: GitHub Pages — GRATIS — $0 forever
+URL RAIZ: https://noservertools.com/ (dominio propio conectado en v6.2)
+URL anterior (sigue funcionando): https://fio42.github.io/noservertools/
+Repo: https://github.com/Fio42/noservertools
+Carpeta local: C:/Users/fiocc/OneDrive/Desktop/noservertools/
+Usuario GitHub: Fio42
+Ultimo deploy: v6.2 — dominio custom conectado, base href eliminado de todos los HTML
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+IDENTIDAD DE MARCA
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Nombre:    NoServerTools
+Dominio:   noservertools.com (ACTIVO desde v6.2)
+Tagline:   "Your files never leave your computer."
+Sub:       "Tools that run inside your browser. Not on our servers."
+SIN estadisticas inventadas. SIN reviews falsos. Sin excepcion.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+REGLAS PERMANENTES — NUNCA ROMPER
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+1.  CERO servidores propios. Todo corre en el browser del usuario.
+2.  NUNCA usar em dash en textos visibles del HTML.
+3.  SIEMPRE usar esc() antes de insertar texto del usuario en el DOM.
+4.  Cada herramienta = su propia carpeta + index.html. Nunca mezclar.
+5.  SIEMPRE actualizar sitemap.xml al agregar herramienta nueva.
+6.  SIEMPRE actualizar nav y footer de TODAS las paginas al agregar tool.
+7.  SIEMPRE entregar el LOG actualizado al final de cada sesion como .txt.
+8.  El usuario es principiante — pasos simples, uno a la vez, sin asumir nada.
+9.  NUNCA inventar estadisticas falsas ni reviews falsos.
+10. La marca es NoServerTools — no limitada a PDF, puede agregar cualquier tool.
+11. Todos los HTML deben incluir: CSP meta, X-Frame-Options, X-Content-Type-Options.
+12. SIEMPRE usar 'use strict' en todos los bloques <script>.
+13. SIEMPRE usar esc() — nunca innerHTML con datos del usuario.
+14. translate-pdf ELIMINADA en v6.0. No recrear, no referenciar.
+15. NUNCA agregar tools que envien datos a servidores externos sin aviso prominente.
+16. NUNCA agregar <base href> a ningun HTML nuevo. Eliminado en v6.2 para siempre.
+    Los links deben ser absolutos (/merge-pdf/) o relativos (../merge-pdf/).
+    Con dominio propio, las rutas absolutas desde raiz funcionan directamente.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+COMO SUBIR CAMBIOS AL REPO
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+cd "C:/Users/fiocc/OneDrive/Desktop/noservertools"
+git add .
+git commit -m "descripcion del cambio"
+git push
+Esperar 1-2 minutos y recargar en el browser.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ESTRUCTURA DE ARCHIVOS — ESTADO ACTUAL v6.2
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+noservertools/
+  index.html                [VIVO v6.2] HUB — 8 tools live, sin base href
+  sitemap.xml               [VIVO v6.1] 8 URLs indexadas
+  robots.txt                [VIVO] SEO
+  CNAME                     [VIVO v6.2] Creado por GitHub — contiene: noservertools.com
+  LOG.txt                   Este archivo
+
+  merge-pdf/
+    index.html              [VIVO v6.2] Merge PDF — sin base href
+
+  compress-pdf/
+    index.html              [VIVO v6.2] Compress PDF — sin base href
+
+  split-pdf/
+    index.html              [VIVO v6.2] Split PDF — sin base href
+
+  pdf-to-jpg/
+    index.html              [VIVO v6.2] PDF<->JPG — sin base href
+
+  rotate-pdf/
+    index.html              [VIVO v6.2] Rotate PDF — nunca tuvo base href
+
+  protect-pdf/
+    index.html              [VIVO v6.2] Protect PDF — sin base href
+
+  unlock-pdf/
+    index.html              [VIVO v6.2] Unlock PDF — sin base href
+
+  translate-pdf/            [ELIMINAR esta carpeta si aun existe en local]
+
+  -- PENDIENTES (orden prioridad SEO) --
+  watermark-pdf/            PRIORIDAD 1
+  delete-pages/             PRIORIDAD 2
+  reorder-pdf/              PRIORIDAD 3
+  pdf-to-text/              PRIORIDAD 4
+  repair-pdf/               PRIORIDAD 5
+  view-pdf-metadata/        PRIORIDAD 6 — diferenciador privacidad
+  remove-pdf-metadata/      PRIORIDAD 7 — diferenciador privacidad
+  redact-pdf/               PRIORIDAD 8 — diferenciador privacidad
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+DNS — CONFIGURACION NAMECHEAP (referencia permanente)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Configurado en Namecheap Advanced DNS:
+
+  Type        Host   Value                TTL
+  A Record    @      185.199.108.153      Automatic
+  A Record    @      185.199.109.153      Automatic
+  A Record    @      185.199.110.153      Automatic
+  A Record    @      185.199.111.153      Automatic
+  CNAME       www    fio42.github.io      Automatic
+
+GitHub Pages Settings -> Custom Domain: noservertools.com
+GitHub Pages Settings -> Enforce HTTPS: activado
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+DISENO VISUAL — SISTEMA GLOBAL
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Background:   #0e1117
+Fuentes:      Syne (titulos) clase .fd | Outfit (cuerpo) | DM Mono clase .fm
+Colores:
+  brand-400: #5a87ff  brand-500: #3363f5  brand-600: #1f45e0
+  green: #4ade80 | red: #f87171 | yellow: #fbbf24
+  text: #e8eaf0 | surface: rgba(255,255,255,.03) | border: rgba(255,255,255,.08)
+
+Background grid: body::before rgba(83,99,255,.055) 52x52px
+Blobs: .blob-a arriba-izquierda | .blob-b derecha-centro
+Nav: sticky, blur(14px), h=54px, bg rgba(14,17,23,.75)
+Logo: caja 28x28 azul + SVG 4 cuadros + "NoServer" blanco + "Tools" brand-400
+
+PATRON NAV (todas las tools v6.2):
+  Merge PDF | Compress | Split PDF | PDF JPG | Rotate PDF | Protect PDF | Unlock PDF | [All tools]
+
+PATRON FOOTER (todas las tools v6.2):
+  Merge PDF | Compress PDF | Split PDF | PDF JPG | Rotate PDF | Protect PDF | Unlock PDF
+  + strip: NO UPLOADS · NO ACCOUNTS · NO TRACKING · NO SERVERS
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+RECETAS TECNICAS — HERRAMIENTAS ACTIVAS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Stack base: Pyodide v0.25.0 + pypdf via micropip
+CDN Pyodide: https://cdn.jsdelivr.net/pyodide/v0.25.0/full/pyodide.js
+CDN PDF.js:  https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js
+
+MERGE PDF (Pyodide + pypdf):
+  PdfWriter().append(BytesIO(bytes)) por cada archivo
+  writer.write(out) -> merged.pdf
+
+COMPRESS PDF (Pyodide + pypdf):
+  compress_identical_objects(remove_identicals=True, remove_orphans=True)
+  img.replace(img.image, quality=N) segun nivel (35/60/85)
+  -> filename-compressed.pdf
+
+SPLIT PDF (Pyodide + pypdf):
+  writer.add_page(page) por paginas del rango
+  -> filename-split.pdf
+
+PDF->JPG (PDF.js, NO Pyodide):
+  page.render() -> canvas -> toDataURL('image/jpeg') -> page-N.jpg
+
+JPG->PDF (Pyodide + Pillow):
+  Image.open(BytesIO) -> img.save(buf, format='PDF') -> filename.pdf
+
+ROTATE PDF (Pyodide + pypdf):
+  page.rotate(90|180|270) con scope all o rango especifico
+  -> filename-rotated.pdf
+
+PROTECT PDF (Pyodide + pypdf):
+  writer.clone_reader_document_root(reader)
+  writer.encrypt(user_password=pw, owner_password=None, use_128bit=True)
+  UI: password + confirm + strength bar + show/hide toggle
+  -> filename-protected.pdf
+
+UNLOCK PDF (Pyodide + pypdf):
+  reader.decrypt(pw) -> 0=fallo, 1=user pw, 2=owner pw
+  writer.clone_reader_document_root(reader) -> writer.write(out)
+  Casos: wrong_password (error) | not_encrypted (descarga igual) | ok (descarga)
+  -> filename-unlocked.pdf
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ARQUITECTURA ESTANDAR — NUEVA HERRAMIENTA
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+1. Carpeta nueva: noservertools/[tool-name]/index.html
+2. SIN <base href>
+3. head: charset, viewport, CSP, X-Frame, X-Content-Type, title SEO,
+         description, keywords, canonical, og:tags, robots, fonts,
+         tailwind, JSON-LD WebApplication
+4. body: blobs, header nav (7 tools + CTA), main con hero+drop+ui+result+steps+why, footer
+5. script: 'use strict', esc(), fmt(), handleFile(), initPyodide(), startX(), resetAll()
+6. Despues de crear: actualizar nav/footer de TODAS las tools + hub + sitemap.xml
+
+SEO titulo pattern:   [Tool] Free Online — No Upload, 100% Private | NoServerTools
+SEO desc pattern:     [Accion] in your browser. No file upload. No server. 100% private.
+Canonical pattern:    https://noservertools.com/[tool-name]/
+JSON-LD:              WebApplication, price 0, applicationCategory UtilitiesApplication
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+SEGURIDAD
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Obligatorio en todo HTML:
+  <meta http-equiv="X-Content-Type-Options" content="nosniff">
+  <meta http-equiv="X-Frame-Options" content="DENY">
+  <meta http-equiv="Content-Security-Policy" content="...">
+  'use strict' en cada <script>
+  esc(s) para cualquier dato del usuario antes de insertarlo
+  URL.revokeObjectURL() despues de cada descarga
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+SEO Y COPYWRITING
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Tagline: "Your files never leave your computer."
+Badge verde en hero: "No upload · 100% local"
+Why NoServerTools (4 puntos en todas las tools):
+  Zero uploads | Zero storage | Zero tracking | Works offline
+Boton descarga: bg #4ade80, texto #0e1117
+
+Keywords long-tail de privacidad (diferenciador unico):
+  "pdf tools without uploading files"
+  "private pdf editor no server"
+  "pdf tools 100% browser"
+  "secure pdf no account"
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+HISTORIAL COMPLETO DE VERSIONES
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+v1-v5.2:  Merge, Compress, Split, HUB inicial
+v5.3:     REBRAND a NoServerTools + dark mode global
+v5.4:     Dark mode en todas las tools + PDF to JPG inicial
+v5.4.1:   Fix: base href para GitHub Pages subpath
+v5.5:     PDF<->JPG con PDF.js + JPG to PDF con Pillow
+v5.6:     HUB revamp (grid primero, hero compacto)
+          PDF<->JPG combinado con switch de modo
+          Hardening de seguridad general
+v5.7:     Translate PDF v1: Pyodide+pypdf extraccion, MyMemory API
+          UI en 5 idiomas, steps indicator, descarga TXT/HTML
+v5.8:     Fix descarga PDF en translate-pdf: jsPDF real con header,
+          parrafos, paginacion, fallback a .txt
+v5.9:     Translate PDF visual: PDF.js renderiza JPEG+coordenadas,
+          buildVisualPdf() imagen fondo+knockout+texto overlay,
+          fallback LibreTranslate, email key MyMemory
+v6.0:     REVAMP ESTRATEGICO:
+          translate-pdf ELIMINADA (enviaba texto a API externa)
+          rotate-pdf construida (Pyodide+pypdf, scope all/range)
+          Nuevo tagline: "Your files never leave your computer."
+          SEO strategy, copywriting, arquitectura documentados en LOG
+          I18N 9 idiomas documentado como objetivo
+          Roadmap 11 tools con prioridad SEO
+v6.1:     protect-pdf nueva: encrypt(user_password, use_128bit=True)
+            UI: password+confirm+strength indicator+show/hide
+          unlock-pdf nueva: decrypt(pw)+clone_reader_document_root
+            Maneja: wrong password, not encrypted, success
+          HUB: translate eliminada, rotate+protect+unlock activas
+            contador 8 live 5 coming
+          Nav+footer de TODAS las tools actualizados (7 links)
+          sitemap.xml: 8 URLs (sin translate)
+v6.2:     DOMINIO CUSTOM CONECTADO:
+          noservertools.com configurado en Namecheap + GitHub Pages
+          base href="/noservertools/" ELIMINADO de todos los HTML:
+            index.html, merge-pdf, compress-pdf, split-pdf,
+            pdf-to-jpg, protect-pdf, unlock-pdf
+            (rotate-pdf nunca tuvo base href)
+          Regla 16 agregada: nunca usar base href en HTML nuevo
+          URL canonica del sitio ahora es https://noservertools.com/
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+PROXIMOS PASOS — ORDEN RECOMENDADO
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+1.  Google Search Console:
+    Entrar a https://search.google.com/search-console
+    Agregar propiedad: noservertools.com
+    Verificar via DNS (Namecheap Advanced DNS -> agregar TXT record)
+    Subir sitemap: https://noservertools.com/sitemap.xml
+    Esto acelera que Google indexe el sitio
+
+2.  watermark-pdf (siguiente tool a construir):
+    Pyodide + pypdf
+    Agregar texto diagonal como marca de agua en todas las paginas
+    UI: input texto + selector opacidad + boton apply
+
+3.  delete-pages:
+    Pyodide + pypdf
+    Input de paginas a eliminar (ej: 1,3,5-8)
+    writer.add_page solo de las que NO estan en el rango a eliminar
+
+4.  pdf-to-text:
+    Pyodide + pypdf
+    page.extract_text() por cada pagina
+    Descarga como .txt
+
+5.  view-pdf-metadata + remove-pdf-metadata (par de privacidad):
+    view: reader.metadata -> mostrar tabla con Author, Creator, Producer, etc.
+    remove: writer.add_metadata({}) -> limpia todo -> descarga PDF limpio
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+PARA EL PROXIMO AI — LEER ESTO PRIMERO
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+1.  Proyecto: NoServerTools. App web estatica en GitHub Pages. CERO servidores.
+2.  URL: https://noservertools.com/ — dominio propio activo desde v6.2.
+3.  Fondo: #0e1117. Fuentes: Syne (.fd) + Outfit + DM Mono (.fm).
+    Brand: #5a87ff (400) / #3363f5 (500) / #1f45e0 (600).
+4.  Cada tool = su propia carpeta con index.html. No compartir HTML.
+5.  NUNCA agregar <base href> a ningun HTML. Eliminado definitivamente en v6.2.
+6.  Pyodide v0.25.0 + pypdf (via micropip) para todas las tools excepto pdf-to-jpg.
+7.  PDF.js v3.11.174 para pdf-to-jpg.
+8.  translate-pdf ELIMINADA en v6.0. No recrear. No referenciar.
+9.  Tools activas: merge, compress, split, pdf-to-jpg, rotate, protect, unlock (7 total).
+10. Nav pattern: Merge | Compress | Split | PDF JPG | Rotate | Protect | Unlock | All tools
+11. Footer: mismos 7 links + strip "NO UPLOADS · NO ACCOUNTS · NO TRACKING · NO SERVERS"
+12. Al agregar tool nueva: nav+footer de TODAS las 7 tools + hub + sitemap.xml
+13. CSP + X-Frame + X-Content-Type + 'use strict' + esc() en todo HTML nuevo.
+14. NUNCA estadisticas inventadas. NUNCA reviews falsos.
+15. Usuario es principiante. Pasos exactos: archivo -> carpeta -> comando git.
+16. LOG completo al final de cada sesion como .txt.
+17. Leer HTML completo antes de modificar. str_replace quirurgico, no reescribir.
+18. Pyodide carga LAZY. Spinner + "Loading engine (first time: 10-20 seconds)".
+19. Boton descarga: bg #4ade80, texto #0e1117.
+20. Canonical URLs usan https://noservertools.com/ (sin /noservertools/ en el path).
+
+════════════════════════════════════════════════════════════════
+CHANGE LOG — v6.2
+════════════════════════════════════════════════════════════════
+
+CAMBIO 1
+  Accion:      Eliminar <base href="/noservertools/"> de todos los HTML
+  Archivos:    index.html (hub), merge-pdf/index.html,
+               compress-pdf/index.html, split-pdf/index.html,
+               pdf-to-jpg/index.html, protect-pdf/index.html,
+               unlock-pdf/index.html
+               (rotate-pdf/index.html no tenia base href)
+  Descripcion: La linea <base href="/noservertools/"> era necesaria
+               cuando el sitio vivia en el subpath /noservertools/ de
+               GitHub Pages (fio42.github.io/noservertools/).
+               Con el dominio propio noservertools.com, el sitio vive
+               en la raiz del dominio. La linea base href ya no solo
+               es innecesaria sino que rompe todos los links y assets
+               porque prefija incorrectamente todas las rutas.
+               Eliminada de los 7 archivos que la tenian.
+               Agregada regla 16 al LOG: nunca usar base href en nuevo HTML.
+  Motivo:      Conexion de dominio propio noservertools.com.
+               Sin esta eliminacion, el sitio cargaria en blanco o con
+               CSS/JS roto al acceder desde el dominio propio.
+  Impacto SEO: Alto positivo. Las URLs canonicas ahora coinciden
+               exactamente con el dominio real. Google indexa
+               noservertools.com directamente, sin subpaths.
+  Impacto UX:  Critico. Sin este cambio el sitio no funciona en dominio propio.
+  Impacto perf: Neutro en tamano, positivo en correctitud.
+
+CAMBIO 2
+  Accion:      Conexion dominio noservertools.com a GitHub Pages
+  Archivos:    CNAME (creado automaticamente por GitHub al configurar)
+  Descripcion: DNS configurado en Namecheap Advanced DNS:
+               4 A Records apuntando a IPs de GitHub Pages:
+                 185.199.108.153, 185.199.109.153,
+                 185.199.110.153, 185.199.111.153
+               CNAME: www -> fio42.github.io
+               Custom domain en GitHub Settings -> Pages: noservertools.com
+               HTTPS forzado (Enforce HTTPS activado).
+               GitHub crea automaticamente archivo CNAME en el repo.
+  Motivo:      URL profesional y limpia. Requerido para SEO serio.
+               Google prefiere dominios propios sobre subpaths de github.io.
+               Canonica noservertools.com es mas memorable y brandeable.
+  Impacto SEO: Alto positivo. Dominio propio mejora autoridad de dominio,
+               facilita link building, y las URLs son mas cortas y limpias.
+  Impacto UX:  Positivo. URL limpia con HTTPS desde cualquier browser.
+
+════════════════════════════════════════════════════════════════
+FIN DEL LOG MAESTRO v6.2 — NoServerTools
+════════════════════════════════════════════════════════════════
