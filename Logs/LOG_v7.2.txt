@@ -1,0 +1,88 @@
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+NOSERVERTOOLS — LOG v7.2  (Fix definitivo Loading Engine)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+════════════════════════════════════════════════════════════
+ERROR RAÍZ REAL — Identificado en consola del navegador
+════════════════════════════════════════════════════════════
+
+ERROR EXACTO EN CONSOLA:
+  CompileError: WebAssembly.instantiateStreaming(): Compiling or
+  instantiating WebAssembly module violates the following Content
+  Security Policy directive because 'unsafe-eval' is not an allowed
+  source of script in the following Content Security Policy directive.
+
+CAUSA:
+  Pyodide necesita OBLIGATORIAMENTE estas dos directivas en script-src:
+    'unsafe-eval'        — para ejecutar código JS generado por WASM
+    'wasm-unsafe-eval'   — para compilar módulos WebAssembly (Chrome 97+)
+
+  El <meta CSP> que teníamos NO las incluía.
+  El navegador bloqueaba WebAssembly.instantiateStreaming() silenciosamente.
+  loadPyodide() quedaba colgado infinitamente → "Loading engine" forever.
+
+  TAMBIÉN: Los meta tags <X-Frame-Options> y <X-Content-Type-Options>
+  generaban errores en consola porque esas directivas SOLO funcionan
+  como HTTP headers del servidor, NO como meta tags HTML.
+
+SOLUCIÓN DEFINITIVA:
+  1. Eliminar TODOS los <meta http-equiv="Content-Security-Policy"> de
+     todos los archivos HTML. En GitHub Pages (sitio estático) el CSP
+     via meta tag:
+       a) No puede incluir 'wasm-unsafe-eval' sin romper todo
+       b) No da protección real contra ataques externos
+       c) Rompe Pyodide, PDF.js workers y WebAssembly
+
+  2. Eliminar todos los meta tags de X-Frame-Options y X-Content-Type-Options
+     (solo funcionan como headers HTTP del servidor)
+
+  3. Las cabeceras de seguridad correctas van en el archivo _headers
+     (Netlify) o vía GitHub Actions para GitHub Pages.
+
+════════════════════════════════════════════════════════════
+ARCHIVOS MODIFICADOS EN v7.2
+════════════════════════════════════════════════════════════
+protect-pdf/index.html   — eliminado CSP meta + X-Frame/X-Content meta
+unlock-pdf/index.html    — eliminado CSP meta + X-Frame/X-Content meta
+pdf-to-jpg/index.html    — eliminado CSP meta + X-Frame/X-Content meta
+split-pdf/index.html     — eliminado CSP meta (no tenía X-Frame)
+compress-pdf/index.html  — eliminado CSP meta (no tenía X-Frame)
+merge-pdf/index.html     — eliminado CSP meta (no tenía X-Frame)
+rotate-pdf/index.html    — eliminado CSP meta + X-Frame/X-Content meta
+delete-pages/index.html  — eliminado CSP meta + X-Frame/X-Content meta
+edit-pdf/index.html      — eliminado CSP meta + X-Frame/X-Content meta
+index.html (hub)         — eliminado CSP meta + X-Frame/X-Content meta
+_headers                 — NUEVO: headers de seguridad correctos
+
+════════════════════════════════════════════════════════════
+REGLA #29 — NUNCA usar <meta> CSP en tools con Pyodide/WASM
+════════════════════════════════════════════════════════════
+
+Pyodide + WebAssembly requiere en script-src:
+  'unsafe-eval' 'wasm-unsafe-eval'
+
+Estos NO se pueden poner en un <meta> CSP de forma segura.
+Las cabeceras de seguridad van SIEMPRE en el servidor (_headers / HTTP headers).
+
+════════════════════════════════════════════════════════════
+GIT PUSH
+════════════════════════════════════════════════════════════
+
+cd C:/Users/fiocc/OneDrive/Desktop/noservertools
+
+# Copiar todos los archivos a sus carpetas
+copy index_-_protect.html    protect-pdf/index.html
+copy index_-_unlock.html     unlock-pdf/index.html
+copy index_-_pdftojpg.html   pdf-to-jpg/index.html
+copy index_-_split.html      split-pdf/index.html
+copy index_-_compress.html   compress-pdf/index.html
+copy index_-_merge.html      merge-pdf/index.html
+copy index_-_rotate.html     rotate-pdf/index.html
+copy index_-_deletepages.html delete-pages/index.html
+copy index_-_editpdf.html    edit-pdf/index.html
+copy index_-_hub.html        index.html
+copy _headers                _headers
+
+git add -A
+git commit -m "v7.2: fix Loading Engine - eliminar CSP meta que bloqueaba wasm-unsafe-eval"
+git push origin main

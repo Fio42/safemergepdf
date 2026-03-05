@@ -1,0 +1,154 @@
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+NOSERVERTOOLS — LOG v7.0
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+BUGS FIXED IN THIS VERSION
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+[1] ROTATE-PDF — "Loading engine" spinner never disappears
+  Root cause: if(pyodide||pyReady)return — race condition
+  Fix: pyLoading flag pattern (Regla #25)
+  Also: handleFile() now checks pyReady first — no re-init on 2nd file
+  File: rotate-pdf/index.html
+
+[2] PROTECT-PDF — Same infinite loading spinner
+  Root cause: same if(pyReady)return without pyLoading guard
+  Fix: pyLoading flag pattern
+  Also: handleFile() enables button immediately if pyReady
+  File: protect-pdf/index.html
+
+[3] UNLOCK-PDF — Same infinite loading spinner
+  Root cause: same race condition
+  Fix: pyLoading flag pattern
+  UX improvement: password is now OPTIONAL — click button without password
+    → auto-detects if file is encrypted
+    → if not encrypted: shows "PDF is not password-protected" message
+    → if encrypted but no password entered: asks for password
+    → if wrong password: clear error message
+  File: unlock-pdf/index.html
+
+[4] PDF-TO-JPG (JPG→PDF mode) — "Failed to load engine" on every file
+  Root cause: if(pyodide||pyReady)return — same race condition
+  Fix: pyLoading flag + polling-wait pattern; initPyodide() now throws
+    on failure so callers can show the error properly
+  File: pdf-to-jpg/index.html
+
+[5] SPLIT-PDF — Custom range "1-2" does nothing / never works
+  Root cause: parseRange(str, totalPages) was called with totalPages=0
+    because totalPages was only set AFTER Python loaded the file inside
+    startSplit(). User could enter range before clicking Split, but
+    validation would always fail with totalPages=0.
+  Fix: Added readTotalPages() using PDF.js — runs immediately when file
+    is selected, NO Pyodide needed. totalPages is set before user can
+    interact with range input.
+  Also added PDF.js <script> to <head> of split-pdf.
+  Better error messages: "Enter numbers between 1 and N. Example: 1-3, 5"
+  File: split-pdf/index.html
+
+[6] EDIT-PDF — Move text button missing (showed in screenshot: "≡ Text ×")
+  Root cause: addTextInput() created plain <textarea> overlays with no
+    drag handle. The draggable header bar was never implemented.
+  Fix: Completely rewrote addTextInput() to create a wrapper .text-box div
+    with a blue header bar (.text-box-header) containing:
+      - ≡ drag icon (cursor: grab)
+      - "Text" label
+      - × delete button
+    makeTextBoxDraggable() handles mouse + touch drag on the header
+    Updated downloadPDF() to extract text from new .text-box structure
+    Updated clearPage(), undoLast(), renderPage() for new structure
+    textInputs[] now stores .text-box wrapper divs (not textareas)
+  File: edit-pdf/index.html
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+REGLA #25 — PYODIDE INIT PATTERN OBLIGATORIO (establecido en v6.9)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+SIEMPRE usar este patrón. NUNCA usar if(pyodide||pyReady)return.
+
+let pyodide = null, pyReady = false, pyLoading = false;
+
+async function initPyodide() {
+  if (pyReady) { /* enable button */ return; }
+  if (pyLoading) return;          // ← ya está cargando, no duplicar
+  pyLoading = true;
+  /* show spinner */
+  try {
+    pyodide = await loadPyodide({indexURL:'https://cdn.jsdelivr.net/pyodide/v0.25.0/full/'});
+    await pyodide.loadPackage('micropip');
+    await pyodide.runPythonAsync(`import micropip; await micropip.install([...])`);
+    pyReady = true;
+    pyLoading = false;
+    /* hide spinner, enable button */
+  } catch(e) {
+    pyLoading = false;
+    pyodide = null;               // ← CRÍTICO: reset para permitir retry
+    /* show error: "Please refresh the page and try again" */
+  }
+}
+
+// En handleFile(): si pyReady → habilitar botón directamente
+function handleFile(f) {
+  ...
+  if (pyReady) {
+    /* enable button immediately */
+  } else {
+    initPyodide();
+  }
+}
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+REGLA #26 — SPLIT: LEER PÁGINAS CON PDF.JS, NO CON PYODIDE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Cuando necesites saber el total de páginas de un PDF al cargar el archivo,
+SIEMPRE usar PDF.js (ya disponible, no requiere carga async lenta).
+NUNCA esperar a que Pyodide cargue para obtener el número de páginas.
+
+async function readTotalPages(f) {
+  const ab = await f.arrayBuffer();
+  const pdf = await pdfjsLib.getDocument({data: ab}).promise;
+  totalPages = pdf.numPages;
+  document.getElementById('total-pages').textContent = totalPages;
+}
+
+Llamar readTotalPages(f) en handleFile() — inmediatamente tras seleccionar.
+Así el usuario puede escribir un rango ANTES de que Pyodide termine de cargar.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+REGLA #27 — EDIT-PDF: STRUCTURE DE TEXT-BOX
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Los text overlays en edit-pdf son .text-box divs (NO textareas sueltas).
+Estructura:
+  <div class="text-box" style="left:Xpx; top:Ypx" data-page="N">
+    <div class="text-box-header"> ← drag handle (cursor:grab)
+      <span class="text-box-drag-icon">≡</span>
+      <span class="text-box-label">Text</span>
+      <button class="text-box-del">×</button>
+    </div>
+    <textarea class="text-input-overlay"></textarea>
+  </div>
+
+textInputs[pageNum] = array of .text-box wrapper divs
+En downloadPDF(): box.querySelector('textarea') para obtener el valor
+En clearPage()/undoLast(): box.remove() (el wrapper incluye todo)
+En renderPage(): display='flex' (no 'block') para mostrar text-boxes
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ARCHIVOS MODIFICADOS EN v7.0
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+- rotate-pdf/index.html      (pyLoading fix)
+- protect-pdf/index.html     (pyLoading fix)
+- unlock-pdf/index.html      (pyLoading fix + UX password opcional)
+- pdf-to-jpg/index.html      (pyLoading fix + throw on error)
+- split-pdf/index.html       (pyLoading fix + PDF.js page count)
+- edit-pdf/index.html        (text-box drag handle + download fix)
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+STACK TÉCNICO (sin cambios)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+- Pyodide v0.25.0 (cdn.jsdelivr.net)
+- PDF.js 3.11.174 (cdnjs.cloudflare.com)
+- pypdf (via micropip)
+- Pillow (via micropip, solo pdf-to-jpg)
+- 10 tools, GitHub Pages, zero servers

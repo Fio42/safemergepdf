@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%231f45e0'/><rect x='4' y='4' width='10' height='10' rx='2' fill='white'/><rect x='18' y='4' width='10' height='10' rx='2' fill='white' opacity='.6'/><rect x='4' y='18' width='10' height='10' rx='2' fill='white' opacity='.6'/><rect x='18' y='18' width='10' height='10' rx='2' fill='white' opacity='.3'/></svg>">
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Split PDF Free Online — No Upload, 100% Private | NoServerTools</title>
   <meta name="description" content="Split PDF files online for free. Extract pages or split all pages. No upload, no server, no account. Runs locally in your browser." />
@@ -13,6 +14,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@700;800&family=Outfit:wght@400;500;600&display=swap" rel="stylesheet" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
     tailwind.config = {
@@ -49,6 +51,16 @@
     input[type=text]{background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.12);border-radius:10px;color:white;padding:10px 14px;width:100%;outline:none;font-family:'DM Mono',monospace;font-size:13px}
     input[type=text]:focus{border-color:#5a87ff}
     input[type=text]::placeholder{color:rgba(255,255,255,0.25)}
+  
+    /* lang switcher */
+    #ls{position:fixed;top:12px;right:12px;z-index:9999;font-family:'DM Mono',monospace}
+    #ls-btn{display:flex;align-items:center;gap:5px;padding:5px 10px;background:rgba(14,17,23,.88);border:1px solid rgba(90,135,255,.32);border-radius:8px;color:rgba(255,255,255,.7);font-size:11px;cursor:pointer;backdrop-filter:blur(12px);letter-spacing:.04em;transition:border-color .15s}
+    #ls-btn:hover{border-color:rgba(90,135,255,.7);color:#fff}
+    #ls-menu{display:none;position:absolute;top:calc(100% + 5px);right:0;background:rgba(14,17,23,.97);border:1px solid rgba(90,135,255,.18);border-radius:10px;overflow:hidden;box-shadow:0 8px 32px rgba(0,0,0,.55);min-width:138px}
+    #ls-menu.open{display:block}
+    .ls-opt{display:flex;align-items:center;gap:9px;width:100%;padding:9px 14px;background:none;border:none;color:rgba(255,255,255,.65);font-size:12px;font-family:'DM Mono',monospace;cursor:pointer;text-align:left;letter-spacing:.03em;transition:background .12s,color .12s}
+    .ls-opt:hover{background:rgba(90,135,255,.1);color:#fff}
+    .ls-opt.active{color:#5a87ff;background:rgba(90,135,255,.08)}
   </style>
 </head>
 <body class="bg-grid min-h-screen">
@@ -200,8 +212,9 @@
 </footer>
 
 <script>
+  pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
   const esc = s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
-  let selectedFile=null, pyodide=null, pyodideReady=false, splitMode='all', totalPages=0, objectURLs=[];
+  let selectedFile=null, pyodide=null, pyodideReady=false, pyLoading=false, splitMode='all', totalPages=0, objectURLs=[];
 
   function triggerFileInput(){document.getElementById('file-input').click()}
   function formatSize(b){return b>1048576?(b/1048576).toFixed(1)+' MB':(b/1024).toFixed(0)+' KB'}
@@ -217,7 +230,9 @@
   }
 
   function parseRange(str, total){
+    if(!total) return null;
     const parts=str.split(',').map(s=>s.trim()).filter(Boolean);
+    if(!parts.length) return null;
     const indices=[];
     for(const p of parts){
       if(p.includes('-')){
@@ -233,10 +248,22 @@
     return indices.length ? [...new Set(indices)].sort((a,b)=>a-b) : null;
   }
 
+  // Read total pages immediately with PDF.js (no Pyodide needed)
+  async function readTotalPages(f){
+    try{
+      const ab=await f.arrayBuffer();
+      const pdf=await pdfjsLib.getDocument({data:ab}).promise;
+      totalPages=pdf.numPages;
+      document.getElementById('total-pages').textContent=totalPages;
+    }catch(e){ totalPages=0; }
+  }
+
   function handleFiles(files){
     const f=Array.from(files).find(f=>f.type==='application/pdf'||f.name.endsWith('.pdf'));
     if(!f){showError('Please select a PDF file.');return}
     selectedFile=f;
+    totalPages=0;
+    document.getElementById('total-pages').textContent='?';
     document.getElementById('drop-zone').classList.add('hidden');
     document.getElementById('file-preview').classList.remove('hidden');
     document.getElementById('mode-section').classList.remove('hidden');
@@ -244,22 +271,38 @@
     document.getElementById('file-size').textContent=formatSize(f.size);
     document.getElementById('error-area').classList.add('hidden');
     document.getElementById('result-area').classList.add('hidden');
-    initPyodide();
+    readTotalPages(f); // sets totalPages immediately via PDF.js
+    if(pyodideReady){
+      document.getElementById('split-btn').disabled=false;
+    } else {
+      initPyodide();
+    }
   }
 
   async function initPyodide(){
-    if(pyodide||pyodideReady) return;
-    setProgress(10,'Loading engine...');
+    if(pyodideReady){
+      document.getElementById('progress-area').classList.add('hidden');
+      if(selectedFile) document.getElementById('split-btn').disabled=false;
+      return;
+    }
+    if(pyLoading) return;
+    pyLoading=true;
+    setProgress(10,'Loading engine (first time: ~15s)...');
     try{
       pyodide=await loadPyodide({indexURL:'https://cdn.jsdelivr.net/pyodide/v0.25.0/full/'});
       setProgress(60,'Installing pypdf...');
       await pyodide.loadPackage('micropip');
       await pyodide.runPythonAsync(`import micropip; await micropip.install('pypdf')`);
       pyodideReady=true;
+      pyLoading=false;
       setProgress(100,'Ready');
-      setTimeout(()=>{document.getElementById('progress-area').classList.add('hidden')},600);
-      document.getElementById('split-btn').disabled=false;
-    }catch(e){showError('Failed to load engine: '+e.message)}
+      setTimeout(()=>document.getElementById('progress-area').classList.add('hidden'),600);
+      if(selectedFile) document.getElementById('split-btn').disabled=false;
+    }catch(e){
+      pyLoading=false;
+      pyodide=null;
+      showError('Failed to load engine: '+e.message+'. Please refresh and try again.');
+    }
   }
 
   function setProgress(pct,label){
@@ -280,22 +323,23 @@
       const buf=await selectedFile.arrayBuffer();
       const arr=new Uint8Array(buf);
       pyodide.globals.set('file_bytes_js',arr);
-      // Get total pages
+      // Load PDF in Python (totalPages already known from PDF.js)
       await pyodide.runPythonAsync(`
 from pypdf import PdfReader, PdfWriter
 from io import BytesIO
 _reader=PdfReader(BytesIO(bytes(file_bytes_js)))
 _total_pages=len(_reader.pages)
       `);
-      totalPages=pyodide.globals.get('_total_pages');
-      document.getElementById('total-pages').textContent=totalPages;
+      // Update totalPages from Python in case PDF.js count differed
+      const pyTotal=pyodide.globals.get('_total_pages');
+      if(pyTotal) { totalPages=pyTotal; document.getElementById('total-pages').textContent=totalPages; }
 
       let pageIndices;
       if(splitMode==='range'){
         const rangeStr=document.getElementById('range-input').value.trim();
-        if(!rangeStr){showError('Please enter a page range.');document.getElementById('split-btn').disabled=false;return}
+        if(!rangeStr){showError('Please enter a page range. Example: 1-3 or 1,3,5');document.getElementById('split-btn').disabled=false;return}
         pageIndices=parseRange(rangeStr,totalPages);
-        if(!pageIndices){showError('Invalid page range. Check your input.');document.getElementById('split-btn').disabled=false;return}
+        if(!pageIndices){showError(`Invalid range. Enter numbers between 1 and ${totalPages}. Example: 1-3, 5`);document.getElementById('split-btn').disabled=false;return}
       } else {
         pageIndices=[...Array(totalPages).keys()];
       }
@@ -367,5 +411,38 @@ o=BytesIO(); w.write(o); range_result=o.getvalue()
   }
 </script>
 <script src="https://cdn.jsdelivr.net/pyodide/v0.25.0/full/pyodide.js"></script>
+<script>
+'use strict';
+(function(){
+  var FLAGS={'en':'🇺🇸','es':'🇪🇸','pt':'🇧🇷','fr':'🇫🇷','de':'🇩🇪'};
+  var LABELS={'en':'EN','es':'ES','pt':'PT','fr':'FR','de':'DE'};
+  var T={
+    en:{badge:'No upload · 100% local',why_title:'Why NoServerTools?',why_uploads:'Zero uploads',why_uploads_d:'We never receive your files.',why_storage:'Zero storage',why_storage_d:'Nothing is saved anywhere.',why_tracking:'Zero tracking',why_tracking_d:"We don't know what you process.",why_offline:'Works offline',why_offline_d:'Once loaded, no internet needed.',footer_strip:'NO UPLOADS · NO ACCOUNTS · NO TRACKING · NO SERVERS'},
+    es:{badge:'Sin subir · 100% local',why_title:'¿Por qué NoServerTools?',why_uploads:'Cero subidas',why_uploads_d:'Nunca recibimos tus archivos.',why_storage:'Cero almacenamiento',why_storage_d:'Nada se guarda en ningún lugar.',why_tracking:'Cero rastreo',why_tracking_d:'No sabemos qué procesas.',why_offline:'Funciona sin internet',why_offline_d:'Sin conexión necesaria.',footer_strip:'SIN SUBIDAS · SIN CUENTAS · SIN RASTREO · SIN SERVIDORES'},
+    pt:{badge:'Sem upload · 100% local',why_title:'Por que NoServerTools?',why_uploads:'Zero uploads',why_uploads_d:'Nunca recebemos seus arquivos.',why_storage:'Zero armazenamento',why_storage_d:'Nada é salvo em lugar algum.',why_tracking:'Zero rastreamento',why_tracking_d:'Não sabemos o que você processa.',why_offline:'Funciona offline',why_offline_d:'Sem internet necessária.',footer_strip:'SEM UPLOADS · SEM CONTAS · SEM RASTREIO · SEM SERVIDORES'},
+    fr:{badge:'Sans envoi · 100% local',why_title:'Pourquoi NoServerTools?',why_uploads:'Zéro envoi',why_uploads_d:'Nous ne recevons jamais vos fichiers.',why_storage:'Zéro stockage',why_storage_d:"Rien n'est sauvegardé nulle part.",why_tracking:'Zéro pistage',why_tracking_d:'Nous ne savons pas ce que vous traitez.',why_offline:'Fonctionne hors ligne',why_offline_d:"Pas d'internet requis.",footer_strip:'SANS ENVOI · SANS COMPTE · SANS SUIVI · SANS SERVEURS'},
+    de:{badge:'Kein Upload · 100% lokal',why_title:'Warum NoServerTools?',why_uploads:'Null Uploads',why_uploads_d:'Wir erhalten Ihre Dateien nie.',why_storage:'Null Speicherung',why_storage_d:'Nichts wird irgendwo gespeichert.',why_tracking:'Null Tracking',why_tracking_d:'Wir wissen nicht, was Sie verarbeiten.',why_offline:'Funktioniert offline',why_offline_d:'Kein Internet nötig.',footer_strip:'KEIN UPLOAD · KEIN KONTO · KEIN TRACKING · KEIN SERVER'}
+  };
+  var SAVED='nst_lang';
+  var cur='en';
+  function detect(){var s=localStorage.getItem(SAVED);if(s&&T[s])return s;var n=(navigator.language||'en').toLowerCase().slice(0,2);return T[n]?n:'en';}
+  function apply(lang){
+    cur=lang;var t=T[lang];
+    var f=document.getElementById('ls-flag');var l=document.getElementById('ls-lbl');
+    if(f)f.textContent=FLAGS[lang];if(l)l.textContent=LABELS[lang];
+    document.querySelectorAll('.ls-opt').forEach(function(b,i){b.classList.toggle('active',['en','es','pt','fr','de'][i]===lang);});
+    document.querySelectorAll('[data-i18n]').forEach(function(el){var k=el.getAttribute('data-i18n');if(t[k]!==undefined)el.textContent=t[k];});
+  }
+  window.lsToggle=function(){
+    var m=document.getElementById('ls-menu');var b=document.getElementById('ls-btn');
+    var o=m.classList.toggle('open');b.setAttribute('aria-expanded',o);
+    if(o){setTimeout(function(){document.addEventListener('click',function c(e){if(!document.getElementById('ls').contains(e.target)){m.classList.remove('open');b.setAttribute('aria-expanded','false');document.removeEventListener('click',c);}});},10);}
+  };
+  window.lsSet=function(lang){localStorage.setItem(SAVED,lang);apply(lang);document.getElementById('ls-menu').classList.remove('open');document.getElementById('ls-btn').setAttribute('aria-expanded','false');};
+  window.i18n=function(k){return(T[cur]||T.en)[k]||k;};
+  document.addEventListener('DOMContentLoaded',function(){apply(detect());});
+})();
+</script>
+
 </body>
 </html>

@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%231f45e0'/><rect x='4' y='4' width='10' height='10' rx='2' fill='white'/><rect x='18' y='4' width='10' height='10' rx='2' fill='white' opacity='.6'/><rect x='4' y='18' width='10' height='10' rx='2' fill='white' opacity='.6'/><rect x='18' y='18' width='10' height='10' rx='2' fill='white' opacity='.3'/></svg>">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta http-equiv="X-Content-Type-Options" content="nosniff">
   <meta http-equiv="X-Frame-Options" content="DENY">
@@ -73,9 +74,16 @@
     #pageContainer{position:relative;box-shadow:0 8px 40px rgba(0,0,0,.5);border-radius:4px;overflow:hidden;flex-shrink:0}
     #pdfCanvas{display:block}
     #annotationCanvas{position:absolute;top:0;left:0;cursor:crosshair;touch-action:none}
-    /* text inputs on canvas */
-    .text-input-overlay{position:absolute;background:transparent;border:1.5px dashed rgba(90,135,255,.6);outline:none;font-family:'Outfit',sans-serif;color:#000;resize:none;min-width:60px;min-height:24px;padding:2px 4px;z-index:50;border-radius:3px;overflow:hidden}
-    .text-input-overlay:focus{border-color:var(--brand);background:rgba(255,255,255,.08)}
+    /* text box overlay — draggable with header */
+    .text-box{position:absolute;z-index:50;min-width:120px;min-height:48px;border:1.5px dashed rgba(90,135,255,.55);border-radius:4px;background:transparent;display:flex;flex-direction:column}
+    .text-box-header{display:flex;align-items:center;gap:6px;padding:3px 7px;background:#1f45e0;border-radius:3px 3px 0 0;cursor:grab;user-select:none;flex-shrink:0;height:22px}
+    .text-box-header:active{cursor:grabbing}
+    .text-box-drag-icon{color:rgba(255,255,255,.7);font-size:12px;line-height:1;flex-shrink:0}
+    .text-box-label{color:rgba(255,255,255,.9);font-size:10px;font-family:'DM Mono',monospace;letter-spacing:.04em;flex:1;pointer-events:none}
+    .text-box-del{background:none;border:none;color:rgba(255,255,255,.7);cursor:pointer;font-size:14px;line-height:1;padding:0 2px;flex-shrink:0;transition:color .12s}
+    .text-box-del:hover{color:#f87171}
+    .text-input-overlay{background:rgba(255,255,255,.05);border:none;outline:none;font-family:'Outfit',sans-serif;color:#000;resize:none;padding:4px 6px;flex:1;min-height:28px;border-radius:0 0 3px 3px;width:100%}
+    .text-input-overlay:focus{background:rgba(255,255,255,.12)}
     /* image overlay */
     .img-overlay{position:absolute;cursor:move;border:1.5px dashed rgba(90,135,255,.6);z-index:50}
     .img-overlay img{display:block;width:100%;height:100%}
@@ -107,9 +115,34 @@
     .fu{animation:fadeUp .4s ease both} .fu2{animation:fadeUp .4s .07s ease both} .fu3{animation:fadeUp .4s .14s ease both}
     @keyframes spin{to{transform:rotate(360deg)}}
     .spin{display:inline-block;width:14px;height:14px;border:2px solid var(--border);border-top-color:var(--brand);border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle;margin-right:6px}
+  
+    /* lang switcher */
+    #ls{position:fixed;top:12px;right:12px;z-index:9999;font-family:'DM Mono',monospace}
+    #ls-btn{display:flex;align-items:center;gap:5px;padding:5px 10px;background:rgba(14,17,23,.88);border:1px solid rgba(90,135,255,.32);border-radius:8px;color:rgba(255,255,255,.7);font-size:11px;cursor:pointer;backdrop-filter:blur(12px);letter-spacing:.04em;transition:border-color .15s}
+    #ls-btn:hover{border-color:rgba(90,135,255,.7);color:#fff}
+    #ls-menu{display:none;position:absolute;top:calc(100% + 5px);right:0;background:rgba(14,17,23,.97);border:1px solid rgba(90,135,255,.18);border-radius:10px;overflow:hidden;box-shadow:0 8px 32px rgba(0,0,0,.55);min-width:138px}
+    #ls-menu.open{display:block}
+    .ls-opt{display:flex;align-items:center;gap:9px;width:100%;padding:9px 14px;background:none;border:none;color:rgba(255,255,255,.65);font-size:12px;font-family:'DM Mono',monospace;cursor:pointer;text-align:left;letter-spacing:.03em;transition:background .12s,color .12s}
+    .ls-opt:hover{background:rgba(90,135,255,.1);color:#fff}
+    .ls-opt.active{color:#5a87ff;background:rgba(90,135,255,.08)}
   </style>
 </head>
 <body>
+
+<!-- LANG SWITCHER -->
+<div id="ls" role="navigation" aria-label="Language selector">
+  <button id="ls-btn" onclick="lsToggle()" aria-haspopup="true" aria-expanded="false">
+    <span id="ls-flag">🌐</span><span id="ls-lbl">EN</span>
+    <svg width="9" height="6" viewBox="0 0 9 6" fill="none"><path d="M1 1l3.5 4L8 1" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+  </button>
+  <div id="ls-menu" role="menu">
+    <button class="ls-opt" onclick="lsSet('en')" role="menuitem">🇺🇸&nbsp; English</button>
+    <button class="ls-opt" onclick="lsSet('es')" role="menuitem">🇪🇸&nbsp; Español</button>
+    <button class="ls-opt" onclick="lsSet('pt')" role="menuitem">🇧🇷&nbsp; Português</button>
+    <button class="ls-opt" onclick="lsSet('fr')" role="menuitem">🇫🇷&nbsp; Français</button>
+    <button class="ls-opt" onclick="lsSet('de')" role="menuitem">🇩🇪&nbsp; Deutsch</button>
+  </div>
+</div>
 <div class="blob blob-a"></div>
 <div class="blob blob-b"></div>
 
@@ -369,7 +402,7 @@ async function renderPage(num){
   setStatus('Rendering page '+num+'...');
   // Hide text/image overlays for other pages, show for current
   Object.keys(textInputs).forEach(p=>{
-    textInputs[p].forEach(el=>el.style.display=parseInt(p)===num?'block':'none');
+    textInputs[p].forEach(el=>el.style.display=parseInt(p)===num?'flex':'none');
   });
   Object.keys(imageOverlays).forEach(p=>{
     imageOverlays[p].forEach(el=>el.style.display=parseInt(p)===num?'block':'none');
@@ -494,20 +527,83 @@ function addTextInput(pos){
   const container=document.getElementById('pageContainer');
   const scaleX=annCanvas.offsetWidth/annCanvas.width;
   const scaleY=annCanvas.offsetHeight/annCanvas.height;
+
+  // Outer draggable wrapper
+  const box=document.createElement('div');
+  box.className='text-box';
+  box.style.left=(pos.x*scaleX)+'px';
+  box.style.top=(pos.y*scaleY-22)+'px'; // offset so text starts at click point
+  box.setAttribute('data-page',currentPage);
+
+  // Header drag bar
+  const hdr=document.createElement('div');
+  hdr.className='text-box-header';
+  const dragIcon=document.createElement('span');
+  dragIcon.className='text-box-drag-icon';
+  dragIcon.textContent='≡';
+  const lbl=document.createElement('span');
+  lbl.className='text-box-label';
+  lbl.textContent='Text';
+  const delBtn=document.createElement('button');
+  delBtn.className='text-box-del';
+  delBtn.textContent='×';
+  delBtn.title='Delete text box';
+  delBtn.onclick=()=>{
+    box.remove();
+    if(textInputs[currentPage]) textInputs[currentPage]=textInputs[currentPage].filter(x=>x!==box);
+  };
+  hdr.appendChild(dragIcon);
+  hdr.appendChild(lbl);
+  hdr.appendChild(delBtn);
+
+  // Textarea
   const inp=document.createElement('textarea');
   inp.className='text-input-overlay';
-  inp.style.left=(pos.x*scaleX)+'px';
-  inp.style.top=(pos.y*scaleY)+'px';
   inp.style.fontSize=document.getElementById('fontSize').value+'px';
   inp.style.color=document.getElementById('colorPicker').value;
-  inp.rows=1;
-  inp.setAttribute('data-page', currentPage);
+  inp.rows=2;
+  inp.placeholder='Type here...';
   inp.addEventListener('input',()=>{inp.style.height='auto';inp.style.height=inp.scrollHeight+'px'});
   inp.addEventListener('keydown',e=>{if(e.key==='Escape'){inp.blur()}});
-  container.appendChild(inp);
+
+  box.appendChild(hdr);
+  box.appendChild(inp);
+  makeTextBoxDraggable(box, hdr);
+  container.appendChild(box);
   inp.focus();
+
   if(!textInputs[currentPage]) textInputs[currentPage]=[];
-  textInputs[currentPage].push(inp);
+  textInputs[currentPage].push(box);
+}
+
+function makeTextBoxDraggable(el, handle){
+  let ox,oy,sx,sy;
+  handle.addEventListener('mousedown',e=>{
+    e.preventDefault();
+    ox=parseInt(el.style.left)||0; oy=parseInt(el.style.top)||0;
+    sx=e.clientX; sy=e.clientY;
+    const mm=ev=>{
+      el.style.left=(ox+ev.clientX-sx)+'px';
+      el.style.top=(oy+ev.clientY-sy)+'px';
+    };
+    const mu=()=>{
+      document.removeEventListener('mousemove',mm);
+      document.removeEventListener('mouseup',mu);
+    };
+    document.addEventListener('mousemove',mm);
+    document.addEventListener('mouseup',mu);
+  });
+  // Touch support
+  handle.addEventListener('touchstart',e=>{
+    e.preventDefault();
+    const t=e.touches[0];
+    ox=parseInt(el.style.left)||0; oy=parseInt(el.style.top)||0;
+    sx=t.clientX; sy=t.clientY;
+    const mm=ev=>{const tt=ev.touches[0];el.style.left=(ox+tt.clientX-sx)+'px';el.style.top=(oy+tt.clientY-sy)+'px'};
+    const mu=()=>{handle.removeEventListener('touchmove',mm);handle.removeEventListener('touchend',mu)};
+    handle.addEventListener('touchmove',mm,{passive:false});
+    handle.addEventListener('touchend',mu);
+  },{passive:false});
 }
 
 // ─── IMAGE ────────────────────────────────────────────────────
@@ -603,15 +699,13 @@ function placeSig(){
 // ─── UNDO / CLEAR ─────────────────────────────────────────────
 function undoLast(){
   const anns=annotations[currentPage];
-  if(anns&&anns.length){anns.pop();redrawAnnotations(currentPage)}
-  else{
-    // undo last text input
-    const txts=textInputs[currentPage];
-    if(txts&&txts.length){txts[txts.length-1].remove();txts.pop()}
-    // undo last image
-    const imgs=imageOverlays[currentPage];
-    if(imgs&&imgs.length){imgs[imgs.length-1].remove();imgs.pop()}
-  }
+  if(anns&&anns.length){anns.pop();redrawAnnotations(currentPage);return}
+  // undo last text box
+  const txts=textInputs[currentPage];
+  if(txts&&txts.length){txts[txts.length-1].remove();txts.pop();return}
+  // undo last image
+  const imgs=imageOverlays[currentPage];
+  if(imgs&&imgs.length){imgs[imgs.length-1].remove();imgs.pop()}
 }
 function clearPage(){
   annotations[currentPage]=[];
@@ -659,12 +753,15 @@ async function downloadPDF(){
       });
       // Draw text inputs for this page
       const txts=textInputs[n]||[];
-      for(const inp of txts){
-        if(!inp.value.trim())continue;
+      for(const box of txts){
+        const inp=box.querySelector('textarea');
+        if(!inp||!inp.value.trim())continue;
         const dispW=annCanvas.offsetWidth; const dispH=annCanvas.offsetHeight;
         const sx=vp.width/dispW; const sy=vp.height/dispH;
-        const x=parseFloat(inp.style.left)*sx;
-        const y=parseFloat(inp.style.top)*sy;
+        // box position includes header (22px offset), add back for text start
+        const boxTop=parseFloat(box.style.top)+22; // skip header height
+        const x=parseFloat(box.style.left)*sx;
+        const y=boxTop*sy;
         const fs=parseFloat(inp.style.fontSize||'16')*scale;
         offCtx.save();
         offCtx.font=`${fs}px Outfit,sans-serif`;
@@ -804,5 +901,38 @@ function resetAll(){
   setMode('select');
 }
 </script>
+<script>
+'use strict';
+(function(){
+  var FLAGS={'en':'🇺🇸','es':'🇪🇸','pt':'🇧🇷','fr':'🇫🇷','de':'🇩🇪'};
+  var LABELS={'en':'EN','es':'ES','pt':'PT','fr':'FR','de':'DE'};
+  var T={
+    en:{badge:'No upload · 100% local',why_title:'Why NoServerTools?',why_uploads:'Zero uploads',why_uploads_d:'We never receive your files.',why_storage:'Zero storage',why_storage_d:'Nothing is saved anywhere.',why_tracking:'Zero tracking',why_tracking_d:"We don't know what you process.",why_offline:'Works offline',why_offline_d:'Once loaded, no internet needed.',footer_strip:'NO UPLOADS · NO ACCOUNTS · NO TRACKING · NO SERVERS'},
+    es:{badge:'Sin subir · 100% local',why_title:'¿Por qué NoServerTools?',why_uploads:'Cero subidas',why_uploads_d:'Nunca recibimos tus archivos.',why_storage:'Cero almacenamiento',why_storage_d:'Nada se guarda en ningún lugar.',why_tracking:'Cero rastreo',why_tracking_d:'No sabemos qué procesas.',why_offline:'Funciona sin internet',why_offline_d:'Sin conexión necesaria.',footer_strip:'SIN SUBIDAS · SIN CUENTAS · SIN RASTREO · SIN SERVIDORES'},
+    pt:{badge:'Sem upload · 100% local',why_title:'Por que NoServerTools?',why_uploads:'Zero uploads',why_uploads_d:'Nunca recebemos seus arquivos.',why_storage:'Zero armazenamento',why_storage_d:'Nada é salvo em lugar algum.',why_tracking:'Zero rastreamento',why_tracking_d:'Não sabemos o que você processa.',why_offline:'Funciona offline',why_offline_d:'Sem internet necessária.',footer_strip:'SEM UPLOADS · SEM CONTAS · SEM RASTREIO · SEM SERVIDORES'},
+    fr:{badge:'Sans envoi · 100% local',why_title:'Pourquoi NoServerTools?',why_uploads:'Zéro envoi',why_uploads_d:'Nous ne recevons jamais vos fichiers.',why_storage:'Zéro stockage',why_storage_d:"Rien n'est sauvegardé nulle part.",why_tracking:'Zéro pistage',why_tracking_d:'Nous ne savons pas ce que vous traitez.',why_offline:'Fonctionne hors ligne',why_offline_d:"Pas d'internet requis.",footer_strip:'SANS ENVOI · SANS COMPTE · SANS SUIVI · SANS SERVEURS'},
+    de:{badge:'Kein Upload · 100% lokal',why_title:'Warum NoServerTools?',why_uploads:'Null Uploads',why_uploads_d:'Wir erhalten Ihre Dateien nie.',why_storage:'Null Speicherung',why_storage_d:'Nichts wird irgendwo gespeichert.',why_tracking:'Null Tracking',why_tracking_d:'Wir wissen nicht, was Sie verarbeiten.',why_offline:'Funktioniert offline',why_offline_d:'Kein Internet nötig.',footer_strip:'KEIN UPLOAD · KEIN KONTO · KEIN TRACKING · KEIN SERVER'}
+  };
+  var SAVED='nst_lang';
+  var cur='en';
+  function detect(){var s=localStorage.getItem(SAVED);if(s&&T[s])return s;var n=(navigator.language||'en').toLowerCase().slice(0,2);return T[n]?n:'en';}
+  function apply(lang){
+    cur=lang;var t=T[lang];
+    var f=document.getElementById('ls-flag');var l=document.getElementById('ls-lbl');
+    if(f)f.textContent=FLAGS[lang];if(l)l.textContent=LABELS[lang];
+    document.querySelectorAll('.ls-opt').forEach(function(b,i){b.classList.toggle('active',['en','es','pt','fr','de'][i]===lang);});
+    document.querySelectorAll('[data-i18n]').forEach(function(el){var k=el.getAttribute('data-i18n');if(t[k]!==undefined)el.textContent=t[k];});
+  }
+  window.lsToggle=function(){
+    var m=document.getElementById('ls-menu');var b=document.getElementById('ls-btn');
+    var o=m.classList.toggle('open');b.setAttribute('aria-expanded',o);
+    if(o){setTimeout(function(){document.addEventListener('click',function c(e){if(!document.getElementById('ls').contains(e.target)){m.classList.remove('open');b.setAttribute('aria-expanded','false');document.removeEventListener('click',c);}});},10);}
+  };
+  window.lsSet=function(lang){localStorage.setItem(SAVED,lang);apply(lang);document.getElementById('ls-menu').classList.remove('open');document.getElementById('ls-btn').setAttribute('aria-expanded','false');};
+  window.i18n=function(k){return(T[cur]||T.en)[k]||k;};
+  document.addEventListener('DOMContentLoaded',function(){apply(detect());});
+})();
+</script>
+
 </body>
 </html>

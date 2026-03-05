@@ -1,0 +1,161 @@
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+NOSERVERTOOLS — LOG v7.1  (Auditoría completa de producción)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+═══════════════════════════════════════════════════════════════
+BUG RAÍZ #1 — "Loading Engine" INFINITO (CRÍTICO)
+Archivos: protect, unlock, pdftojpg, split, compress, merge
+═══════════════════════════════════════════════════════════════
+
+CAUSA EXACTA:
+  Content Security Policy faltaba la directiva connect-src para
+  https://cdn.jsdelivr.net
+
+Pyodide no solo carga el script inicial desde cdn.jsdelivr.net —
+también hace FETCH (XHR) en tiempo de ejecución para descargar:
+  • pyodide.asm.wasm  (~20 MB, WebAssembly)
+  • pyodide.asm.js
+  • packages/micropip.zip
+  • packages/pypdf.zip / pillow.zip
+
+Sin connect-src, el navegador bloquea todos esos fetch() con un
+error de CSP. La promesa loadPyodide() nunca se resuelve.
+No hay error visible en consola porque el bloqueo es silencioso
+en muchos browsers. El spinner queda infinito.
+
+DIFERENCIA entre los que funcionaban y los que no:
+  rotate.html y deletepages.html SÍ tenían:
+    connect-src cdn.jsdelivr.net;
+  → Funcionaban correctamente.
+
+  protect, unlock, pdftojpg, split, compress, merge NO tenían
+  connect-src → "Loading engine" infinito.
+
+SOLUCIÓN aplicada (todos los archivos):
+  Añadir al CSP:
+    connect-src https://cdn.jsdelivr.net https://cdnjs.cloudflare.com;
+
+CSP CANÓNICO para tools con Pyodide + PDF.js + Tailwind:
+  default-src 'self' https://fonts.googleapis.com https://fonts.gstatic.com
+    https://cdn.tailwindcss.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net;
+  style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.tailwindcss.com;
+  script-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com
+    https://cdnjs.cloudflare.com https://cdn.jsdelivr.net;
+  img-src 'self' data: blob:;
+  font-src https://fonts.gstatic.com;
+  worker-src blob:;
+  connect-src https://cdn.jsdelivr.net https://cdnjs.cloudflare.com;
+  frame-ancestors 'none'
+
+CSP CANÓNICO para tools con Pyodide + PDF.js sin Tailwind:
+  default-src 'self' https://fonts.googleapis.com https://fonts.gstatic.com
+    https://cdnjs.cloudflare.com https://cdn.jsdelivr.net;
+  style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
+  script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net;
+  img-src 'self' data: blob:;
+  font-src https://fonts.gstatic.com;
+  worker-src blob:;
+  connect-src https://cdn.jsdelivr.net https://cdnjs.cloudflare.com;
+  frame-ancestors 'none'
+
+═══════════════════════════════════════════════════════════════
+BUG #2 — Race condition en merge.html y deletepages.html
+Archivos: merge, deletepages
+═══════════════════════════════════════════════════════════════
+
+CAUSA:
+  if (pyodide || pyodideReady) return;
+  Si loadPyodide() se asigna a pyodide antes de que micropip termine,
+  una segunda llamada a initPyodide() sale inmediatamente sin esperar.
+  Si además el primer intento falla a mitad, pyodide != null pero
+  pyodideReady = false → deadlock permanente, nunca se reintenta.
+
+SOLUCIÓN:
+  Mismo patrón pyLoading (Regla #25) ya aplicado en otros archivos:
+    if (pyodideReady) { ... return; }
+    if (pyodideLoading) return;
+    pyodideLoading = true;
+    try { ... pyodideReady=true; pyodideLoading=false; }
+    catch(e) { pyodideLoading=false; pyodide=null; showError(...); }
+
+═══════════════════════════════════════════════════════════════
+BUG #3 — editpdf resetAll() dejaba .text-box huérfanos
+Archivo: edit-pdf/index.html  línea 894
+═══════════════════════════════════════════════════════════════
+
+CAUSA:
+  La función resetAll() limpiaba con:
+    container.querySelectorAll('.text-input-overlay,.img-overlay')
+  
+  Pero en v7.0 los text inputs pasaron a estar dentro de un wrapper
+  .text-box div. El querySelector('.text-input-overlay') eliminaba
+  la <textarea> interior pero dejaba el wrapper <div class="text-box">
+  flotando en el DOM. Al cargar un nuevo PDF, esos wrappers viejos
+  permanecían visibles.
+
+SOLUCIÓN:
+  container.querySelectorAll('.text-box,.img-overlay').forEach(el=>el.remove());
+
+═══════════════════════════════════════════════════════════════
+REGLA #28 — CSP CON PYODIDE: SIEMPRE INCLUIR connect-src
+═══════════════════════════════════════════════════════════════
+
+Pyodide requiere connect-src porque descarga WASM y paquetes en
+runtime via fetch(). Sin connect-src la promesa se queda colgada
+indefinidamente sin error visible.
+
+CHECKLIST para cada nueva tool con Pyodide:
+  □ script-src incluye https://cdn.jsdelivr.net
+  □ connect-src incluye https://cdn.jsdelivr.net
+  □ connect-src incluye https://cdnjs.cloudflare.com (si usa PDF.js)
+  □ worker-src blob: (para Web Workers de PDF.js y Pyodide)
+  □ img-src incluye blob: (para URLs de objeto de canvas)
+
+═══════════════════════════════════════════════════════════════
+REGLA #25 — PYODIDE INIT PATTERN (recordatorio)
+═══════════════════════════════════════════════════════════════
+
+NUNCA: if (pyodide || pyodideReady) return;
+SIEMPRE:
+  if (pyodideReady) { enableButton(); return; }
+  if (pyodideLoading) return;
+  pyodideLoading = true;
+  try {
+    pyodide = await loadPyodide({...});
+    await pyodide.loadPackage('micropip');
+    await pyodide.runPythonAsync(`...`);
+    pyodideReady = true;
+    pyodideLoading = false;
+    enableButton();
+  } catch(e) {
+    pyodideLoading = false;
+    pyodide = null;  // ← reset para permitir retry
+    showError('...' + e.message + '. Please refresh.');
+  }
+
+═══════════════════════════════════════════════════════════════
+ARCHIVOS MODIFICADOS EN v7.1
+═══════════════════════════════════════════════════════════════
+protect-pdf/index.html   — CSP fix (connect-src añadido)
+unlock-pdf/index.html    — CSP fix
+pdf-to-jpg/index.html    — CSP fix
+split-pdf/index.html     — CSP fix + CSP inyectada (no tenía)
+compress-pdf/index.html  — CSP fix + CSP inyectada (no tenía)
+merge-pdf/index.html     — CSP fix + CSP inyectada + pyLoading race fix
+rotate-pdf/index.html    — CSP corregida (ya tenía connect-src, unificada)
+delete-pages/index.html  — CSP corregida + pyLoading race fix
+edit-pdf/index.html      — CSP fix + resetAll .text-box cleanup fix
+index.html (hub)         — Sin cambios (no usa Pyodide)
+sitemap.xml              — Sin cambios
+
+FILES NO MODIFICADOS (sin bugs):
+compress-pdf — pyLoading ya correcto desde v6.9
+
+═══════════════════════════════════════════════════════════════
+GIT PUSH
+═══════════════════════════════════════════════════════════════
+
+cd C:/Users/fiocc/OneDrive/Desktop/noservertools
+git add protect-pdf/index.html unlock-pdf/index.html pdf-to-jpg/index.html split-pdf/index.html compress-pdf/index.html merge-pdf/index.html rotate-pdf/index.html delete-pages/index.html edit-pdf/index.html
+git commit -m "v7.1: fix Loading Engine infinito en todas las tools (CSP connect-src faltante)"
+git push origin main

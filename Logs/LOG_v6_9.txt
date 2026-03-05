@@ -1,0 +1,274 @@
+════════════════════════════════════════════════════════════════
+LOG MAESTRO v6.9 — NOSERVERTOOLS
+PEGAR EN CUALQUIER AI PARA CONTINUAR SIN PREGUNTAS
+════════════════════════════════════════════════════════════════
+
+PROYECTO: NoServerTools
+Tipo: App web estática — un HTML por herramienta, CERO servidores
+Hosting: GitHub Pages — GRATIS — $0 forever
+URL RAIZ: https://noservertools.com/
+Repo: https://github.com/Fio42/noservertools
+Carpeta local: C:/Users/fiocc/OneDrive/Desktop/noservertools/
+Usuario GitHub: Fio42
+Último deploy: v6.9 — BUG FIX engine loading en todas las tools,
+                       compress multi-file fix, quality recompress
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+REGLAS PERMANENTES — NUNCA ROMPER
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+1.  CERO servidores propios. Todo corre en el browser del usuario.
+2.  NUNCA usar em dash en textos visibles del HTML.
+3.  SIEMPRE usar esc() antes de insertar texto del usuario en el DOM.
+4.  Cada herramienta = su propia carpeta + index.html. Nunca mezclar.
+5.  SIEMPRE actualizar sitemap.xml al agregar herramienta nueva.
+6.  SIEMPRE actualizar nav y footer de TODAS las pages al agregar tool.
+7.  SIEMPRE entregar el LOG actualizado al final de cada sesión como .txt.
+8.  El usuario es principiante — pasos simples, uno a la vez.
+9.  NUNCA inventar estadísticas ni reviews falsos.
+10. La marca es NoServerTools — no limitada a PDF.
+11. Todos los HTML deben incluir: CSP meta, X-Frame-Options, X-Content-Type-Options.
+12. SIEMPRE usar 'use strict' en todos los bloques <script>.
+13. SIEMPRE usar esc() — nunca innerHTML con datos del usuario.
+14. translate-pdf ELIMINADA en v6.0. No recrear, no referenciar.
+15. NUNCA agregar tools que envíen datos a servidores externos sin aviso.
+16. NUNCA agregar <base href> a ningún HTML.
+17. Links nav/footer: rutas absolutas /tool-name/ — EXCEPTO rotate que usa ../tool-name/
+18. SIEMPRE dar LOG + git commands completos al final de cada sesión.
+19. rotate-pdf: rutas ../ Y nav con .nav-inner (max-width centrado).
+20. FAVICON: inline SVG data URI en todas las tools — NO archivo .ico.
+21. LANGUAGE SWITCHER: incluir en CADA nueva tool (ver sección LANG SWITCHER).
+22. COMPRESS: instalar ['pypdf','pillow'] juntos. Wrap img.replace en try/except.
+23. edit-pdf texto: estructura .text-box. NUNCA modificar buildPDFFromJpegs sin leer LOG.
+24. NUEVAS TOOLS: siempre incluir favicon + lang switcher + nav/footer 10 tools.
+25. PYODIDE INIT PATTERN: SIEMPRE usar pyLoading flag para evitar race conditions.
+    Ver sección "PATRÓN PYODIDE INIT CORRECTO" abajo.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+PATRÓN PYODIDE INIT CORRECTO — OBLIGATORIO EN TODA TOOL (v6.9)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+PROBLEMA QUE CAUSABA "Loading engine" infinito:
+  - pyodide se asignaba ANTES de que pyReady=true
+  - Si fallaba después del await loadPyodide() pero antes de pyReady=true,
+    la variable pyodide quedaba asignada y la guard if(pyodide||pyReady)
+    impedía reintentar → loop infinito de carga
+
+SOLUCIÓN: usar tres flags separados + never check pyodide variable as guard:
+
+  let pyodide = null, pyReady = false, pyLoading = false;
+
+  async function initPyodide() {
+    if (pyReady) { /* habilitar botón */ return; }
+    if (pyLoading) return;   // ya está cargando, esperar
+    pyLoading = true;
+    /* mostrar spinner */
+    try {
+      pyodide = await loadPyodide({...});
+      await pyodide.loadPackage('micropip');
+      await pyodide.runPythonAsync(`import micropip; await micropip.install([...])`);
+      pyReady = true;
+      pyLoading = false;
+      /* ocultar spinner, habilitar botón */
+    } catch(e) {
+      pyLoading = false;
+      pyodide = null;   // reset para permitir reintento
+      /* mostrar error con instrucción de refresh */
+    }
+  }
+
+  // En handleFile(): si pyReady → habilitar botón directamente (sin llamar initPyodide)
+  // si !pyReady → llamar initPyodide()
+
+REGLA: NUNCA usar `if (pyodide || pyReady)` como guard. Solo `if (pyReady)` + `if (pyLoading)`.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ESTRUCTURA DE ARCHIVOS — ESTADO v6.9
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+noservertools/
+  index.html               [v6.8] hub — 10 tools live
+  sitemap.xml              [v6.8] 10 URLs — OK, delete-pages incluido
+  robots.txt
+  CNAME
+  LOG.txt
+
+  merge-pdf/index.html     [v6.8] favicon + lang switcher
+  compress-pdf/index.html  [v6.9] BUG FIXED: multi-file, quality recompress, pyLoading lock
+  split-pdf/index.html     [v6.8] favicon + lang switcher
+  pdf-to-jpg/index.html    [v6.9] BUG FIXED: pyLoading lock, error handling j2p
+  rotate-pdf/index.html    [v6.8] preview visual, botones Left/Flip/Right
+  protect-pdf/index.html   [v6.9] BUG FIXED: pyLoading lock, no más loading infinito
+  unlock-pdf/index.html    [v6.9] BUG FIXED: pyLoading lock, no más loading infinito
+  edit-pdf/index.html      [v6.8] favicon + lang switcher + texto movible
+  delete-pages/index.html  [v6.8] thumbnails visuales, selección por click
+
+  -- PENDIENTES (prioridad SEO) --
+  watermark-pdf/           PRIORIDAD 1 — alto volumen búsquedas
+  pdf-to-text/             PRIORIDAD 2 — alto volumen búsquedas
+  reorder-pages/           PRIORIDAD 3
+  view-pdf-metadata/       PRIORIDAD 4
+  remove-metadata/         PRIORIDAD 5
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+BUG FIX SESIÓN v6.9
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+1. COMPRESS-PDF — BUG: Al comprimir un archivo y luego cargar otro,
+   el botón Compress quedaba disabled para siempre.
+   CAUSA: resetFull() ponía disabled=true, handleFiles() llamaba
+   initPyodide() que hacía early return (engine ya cargado) sin
+   re-habilitar el botón.
+   FIX: En handleFiles(), si pyodideReady → habilitar botón inmediatamente.
+   BONUS: setQuality() ahora re-ejecuta compresión si ya hay resultado
+   mostrado → cambiar calidad actualiza el resultado automáticamente.
+   BONUS: botón "Compress another file" en result area.
+   BONUS: guard corregido a pyLoading para evitar race conditions.
+
+2. PROTECT-PDF — BUG: "Loading engine" se mostraba y nunca desaparecía.
+   CAUSA: race condition — pyodide se asignaba antes de pyReady=true,
+   si el proceso fallaba pyodide != null pero pyReady = false → loop.
+   FIX: patrón pyLoading, reset pyodide=null en catch, mejor mensaje de error.
+   FIX EXTRA: si engine ya está listo al cargar nuevo archivo, no
+   muestra spinner ni llama initPyodide de nuevo.
+
+3. UNLOCK-PDF — mismo bug y fix que protect-pdf.
+
+4. PDF-TO-JPG (modo JPG→PDF) — BUG: "Loading engine" infinito.
+   CAUSA: mismo race condition en initPyodide.
+   FIX: patrón pyLoading, re-throw de error para que j2pConvert lo maneje,
+   mensaje de error claro al usuario si falla.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+FAVICON — SOLUCIÓN DEFINITIVA (v6.7+)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Técnica: inline SVG data URI. Sin archivo .ico. Sin rutas. Sin CSP problems.
+Va justo después de <meta charset="UTF-8"> en todas las tools.
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%231f45e0'/><rect x='4' y='4' width='10' height='10' rx='2' fill='white'/><rect x='18' y='4' width='10' height='10' rx='2' fill='white' opacity='.6'/><rect x='4' y='18' width='10' height='10' rx='2' fill='white' opacity='.6'/><rect x='18' y='18' width='10' height='10' rx='2' fill='white' opacity='.3'/></svg>">
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+LANGUAGE SWITCHER — IMPLEMENTACIÓN (v6.8+)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Idiomas: EN (default), ES, PT, FR, DE
+Posición: fixed top-right, z-index:9999
+Persistencia: localStorage key 'nst_lang'
+CSS id: #ls, #ls-btn, #ls-menu, .ls-opt
+JS: window.lsToggle(), window.lsSet(lang), window.i18n(key)
+NOTA: El icono del switcher (🌐 / bandera) se muestra en las tools
+que tienen el HTML del switcher. Si no lo ves, verificar que el
+#ls div esté ANTES del <header> en el body.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+STACK TÉCNICO
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Pyodide v0.25.0: https://cdn.jsdelivr.net/pyodide/v0.25.0/full/pyodide.js
+PDF.js 3.11.174: https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js
+Tailwind CSS CDN: https://cdn.tailwindcss.com
+
+MERGE:       PdfWriter.append(BytesIO) x N
+COMPRESS:    compress_identical_objects + pillow img.replace(quality=N) + try/except
+SPLIT:       writer.add_page por rango
+PDF→JPG:     PDF.js render → canvas → jpeg
+JPG→PDF:     Pillow Image.save(format='PDF')
+ROTATE:      page.rotate(angle) + preview PDF.js
+PROTECT:     writer.encrypt(user_password, use_128bit=True)
+UNLOCK:      reader.decrypt(pw)
+EDIT PDF:    PDF.js + canvas + .text-box divs + buildPDFFromJpegs
+DELETE:      PDF.js thumbnails → Set páginas → PdfWriter sin esas páginas
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+SITEMAP — ESTADO v6.9
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+10 URLs — OK. No cambios requeridos en v6.9.
+/  /merge-pdf/  /compress-pdf/  /split-pdf/  /pdf-to-jpg/
+/rotate-pdf/  /protect-pdf/  /unlock-pdf/  /edit-pdf/  /delete-pages/
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+DISEÑO VISUAL
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Background: #0e1117 | Fuentes: Syne (.fd) / Outfit / DM Mono (.fm)
+brand-400: #5a87ff | brand-500: #3363f5 | brand-600: #1f45e0
+green: #4ade80 | red: #f87171 | yellow: #fbbf24
+Botón descarga: bg #4ade80 texto #0e1117
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+PATRÓN NAV — 10 TOOLS (v6.8+)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Orden: Merge | Compress | Split | JPG | Rotate | Protect | Unlock | Edit | Delete | [All tools]
+ESTILO A (merge/compress/split) — Tailwind classes
+ESTILO B (hub/pdftojpg/protect/unlock/edit/delete) — .nav-link class rutas absolutas
+ESTILO C (rotate) — rutas ../ relativas + .nav-inner centrado
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ANALÍTICAS PRIVACY-FIRST — RECOMENDACIÓN
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+OPCIÓN RECOMENDADA: Plausible Analytics (https://plausible.io)
+  - Sin cookies. Cumple GDPR/CCPA.
+  - Script: <script defer data-domain="noservertools.com" src="https://plausible.io/js/script.js"></script>
+  - Plan: $9/mes
+ALTERNATIVA GRATIS: Umami (https://umami.is) — cloud gratis hasta 100k pageviews/mes.
+NO USAR: Google Analytics, hotjar, mixpanel.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+HISTORIAL COMPLETO
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+v1-v5.9:  Construcción inicial, merge/compress/split, rebrand, hardening
+v6.0:     translate-pdf ELIMINADA. rotate-pdf nueva.
+v6.1:     protect-pdf + unlock-pdf. HUB 8 tools.
+v6.2:     Dominio noservertools.com. base href eliminado.
+v6.3:     edit-pdf NUEVA. 9 tools.
+v6.4:     protect-pdf reconstruido (confirm password).
+v6.5:     unlock canonical fix. rotate nav centrado.
+v6.6:     Primer intento favicon + i18n.
+v6.7:     Favicon inline SVG definitivo. edit-pdf texto movible.
+v6.8:     compress fix (pillow), rotate reescrito con preview,
+          delete-pages nueva, language switcher todas las tools.
+v6.9:     [ESTA SESIÓN]
+          BUG FIX CRÍTICO — "Loading engine" infinito en todas las tools:
+            - compress-pdf: multi-file funciona, quality cambia re-comprime,
+              pyLoading guard, botón "Compress another file"
+            - protect-pdf: pyLoading lock, no más spinner infinito
+            - unlock-pdf: pyLoading lock, no más spinner infinito
+            - pdf-to-jpg (j2p): pyLoading lock, error propagado al usuario
+          Regla #25 agregada: patrón pyLoading obligatorio.
+          Sitemap: ya correcto (10 URLs, sin cambios).
+          Language switcher: nota sobre visibilidad del icono en el LOG.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+PARA EL PRÓXIMO AI — LEER ESTO PRIMERO
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+1.  NoServerTools. GitHub Pages. noservertools.com. CERO servidores.
+2.  Fondo #0e1117. Syne/Outfit/DM-Mono. Brand #5a87ff/#3363f5/#1f45e0.
+3.  10 tools: merge, compress, split, pdf-to-jpg, rotate, protect, unlock, edit-pdf, delete-pages.
+4.  Nav orden: Merge|Compress|Split|JPG|Rotate|Protect|Unlock|Edit|Delete|[All tools CTA]
+5.  3 estilos de nav — respetar el existente de cada archivo.
+6.  rotate-pdf usa rutas ../ Y .nav-inner.
+7.  Pyodide v0.25.0 + PDF.js 3.11.174.
+8.  COMPRESS: instalar ['pypdf','pillow'] — ver Regla #22.
+9.  PYODIDE INIT: SIEMPRE usar patrón pyLoading — ver Regla #25 y sección arriba.
+10. ROTATE: ver LOG v6.8 para lógica pageRotations.
+11. DELETE: ver LOG v6.8 para lógica selectedPages.
+12. translate-pdf ELIMINADA v6.0.
+13. Nueva tool: favicon + lang switcher + nav/footer 10 tools + hub + sitemap.
+14. CSP + X-Frame + X-Content-Type + 'use strict' + esc() en todo HTML nuevo.
+15. NUNCA estadísticas inventadas. NUNCA reviews falsos.
+16. Usuario principiante. Pasos exactos. Git commands listos.
+17. LOG completo al final de cada sesión.
+
+════════════════════════════════════════════════════════════════
+GIT COMMANDS — DEPLOY v6.9
+════════════════════════════════════════════════════════════════
+
+cd C:/Users/fiocc/OneDrive/Desktop/noservertools
+
+# Reemplaza SOLO los archivos modificados:
+# compress-pdf/index.html  ← compress-pdf_index.html
+# pdf-to-jpg/index.html   ← pdf-to-jpg_index.html
+# protect-pdf/index.html  ← protect-pdf_index.html
+# unlock-pdf/index.html   ← unlock-pdf_index.html
+
+git add compress-pdf/index.html pdf-to-jpg/index.html protect-pdf/index.html unlock-pdf/index.html
+git commit -m "v6.9: fix loading engine infinite spinner in compress/protect/unlock/pdftojpg"
+git push origin main
+
+════════════════════════════════════════════════════════════════
+FIN DEL LOG MAESTRO v6.9 — NoServerTools
+════════════════════════════════════════════════════════════════
