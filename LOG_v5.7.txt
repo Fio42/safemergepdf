@@ -173,6 +173,11 @@ v5.6:     HUB revamp (tools primero) + PDF<->JPG combinado + hardening
 v5.7:     Translate PDF (Pyodide + MyMemory) + UI en 5 idiomas
           Deteccion automatica idioma via navigator.language
           Steps indicator guiado, side-by-side panels, descarga TXT/HTML
+se arreglo bug en translate git add .
+Eliminé "Auto-detect" del selector — MyMemory no lo soporta y era el origen del error INVALID LANGUAGE PAIR
+Ahora el par siempre tiene formato válido: es|en, en|fr, etc.
+Defaults inteligentes: si la UI está en español → viene Español → Inglés preseleccionado automáticamente
+Validación: si seleccionas el mismo idioma en ambos lados, te avisa antes de intentar
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 PROXIMOS PASOS

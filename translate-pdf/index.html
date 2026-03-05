@@ -458,6 +458,8 @@
   </div>
 </footer>
 
+<!-- jsPDF for real PDF generation -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <!-- Pyodide -->
 <script src="https://cdn.jsdelivr.net/pyodide/v0.25.0/full/pyodide.js"></script>
 <script>
@@ -934,32 +936,105 @@ function downloadTxt(which) {
 
 function downloadPdf() {
   if (!translatedText) return;
-  const toCode = document.getElementById('lang-to').value;
-  const toLabel = LANGS.find(l => l.code === toCode)?.label || toCode;
+
+  const toCode  = document.getElementById('lang-to').value;
+  const fromCode = document.getElementById('lang-from').value;
+  const toLabel  = LANGS.find(l => l.code === toCode)?.label  || toCode;
+  const fromLabel = LANGS.find(l => l.code === fromCode)?.label || fromCode;
   const base = currentFile ? currentFile.name.replace(/\.[^.]+$/, '') : 'document';
 
-  // Build minimal PDF with jsPDF-style raw PDF generation (no library needed for simple text)
-  // Using a simple approach: wrap text in a printable HTML and use the browser print dialog
-  const html = `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>${esc(base)} — ${esc(toLabel)}</title>
-  <style>body{font-family:Arial,sans-serif;max-width:700px;margin:40px auto;font-size:14px;line-height:1.7;color:#111}
-  h1{font-size:16px;color:#333;border-bottom:1px solid #ddd;padding-bottom:8px}
-  pre{white-space:pre-wrap;word-break:break-word}</style></head>
-  <body><h1>${esc(base)} — ${esc(toLabel)}</h1><pre>${esc(translatedText)}</pre></body></html>`;
+  try {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF({ unit: 'pt', format: 'a4' });
 
-  const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = base + '-translated.html';
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-  setTimeout(() => URL.revokeObjectURL(url), 2000);
+    const pageW   = doc.internal.pageSize.getWidth();
+    const pageH   = doc.internal.pageSize.getHeight();
+    const marginL = 56;
+    const marginR = 56;
+    const marginT = 60;
+    const marginB = 60;
+    const contentW = pageW - marginL - marginR;
+    let y = marginT;
 
-  // Change button label to clarify
-  const btn = document.getElementById('dl-pdf-btn');
-  const span = btn.querySelector('span');
-  if (span) { span.textContent = 'Downloaded as HTML (open & print to PDF)'; }
+    // ── Header: document title ──────────────────────────────────────────
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(15);
+    doc.setTextColor(30, 30, 30);
+    const titleLines = doc.splitTextToSize(base, contentW);
+    doc.text(titleLines, marginL, y);
+    y += titleLines.length * 20 + 4;
+
+    // ── Subtitle: lang pair + tool name ────────────────────────────────
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(9);
+    doc.setTextColor(120, 120, 120);
+    doc.text(`${fromLabel} → ${toLabel}  ·  Translated by NoServerTools.com`, marginL, y);
+    y += 14;
+
+    // ── Divider line ────────────────────────────────────────────────────
+    doc.setDrawColor(210, 210, 220);
+    doc.setLineWidth(0.5);
+    doc.line(marginL, y, pageW - marginR, y);
+    y += 18;
+
+    // ── Body text ───────────────────────────────────────────────────────
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(11);
+    doc.setTextColor(40, 40, 40);
+
+    // Split into paragraphs to preserve document structure
+    const paragraphs = translatedText.split(/\n\n+/);
+
+    for (const para of paragraphs) {
+      if (!para.trim()) continue;
+
+      const lines = doc.splitTextToSize(para.trim(), contentW);
+      const blockH = lines.length * 15;
+
+      // Page break if needed
+      if (y + blockH > pageH - marginB) {
+        doc.addPage();
+        y = marginT;
+      }
+
+      doc.text(lines, marginL, y);
+      y += blockH + 10; // 10pt gap between paragraphs
+    }
+
+    // ── Footer on every page ────────────────────────────────────────────
+    const totalPages = doc.internal.getNumberOfPages();
+    for (let i = 1; i <= totalPages; i++) {
+      doc.setPage(i);
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(8);
+      doc.setTextColor(170, 170, 170);
+      doc.text(
+        `${base} — ${fromLabel} to ${toLabel}`,
+        marginL,
+        pageH - 28
+      );
+      doc.text(
+        `${i} / ${totalPages}`,
+        pageW - marginR,
+        pageH - 28,
+        { align: 'right' }
+      );
+      // Footer line
+      doc.setDrawColor(220, 220, 225);
+      doc.setLineWidth(0.4);
+      doc.line(marginL, pageH - 38, pageW - marginR, pageH - 38);
+    }
+
+    doc.save(base + '-translated.pdf');
+
+  } catch (err) {
+    // Fallback: if jsPDF fails for any reason, download as TXT
+    console.error('jsPDF error:', err);
+    downloadTxt('translated');
+    const btn = document.getElementById('dl-pdf-btn');
+    const span = btn.querySelector('span');
+    if (span) { span.textContent = 'Saved as .txt (PDF engine error)'; }
+  }
 }
 
 /* ─── Error ─────────────────────────────────────────────────────────────── */
