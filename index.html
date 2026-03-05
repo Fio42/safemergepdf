@@ -185,6 +185,7 @@
         <a href="/noservertools/compress-pdf/" class="px-3 py-1.5 rounded-lg text-sm text-white/60 hover:bg-white/5">Compress PDF</a>
         <a href="/noservertools/split-pdf/" class="px-3 py-1.5 rounded-lg text-sm text-white/60 hover:bg-white/5">Split PDF</a>
         <a href="/noservertools/pdf-to-jpg/" class="px-3 py-1.5 rounded-lg text-sm text-white/60 hover:bg-white/5">PDF to JPG</a>
+      <a href="/noservertools/jpg-to-pdf/" class="px-3 py-1.5 rounded-lg text-sm text-white/60 hover:bg-white/5">JPG to PDF</a>
         <a href="/noservertools/" class="ml-2 px-4 py-1.5 rounded-lg text-sm bg-brand-600 text-white font-medium hover:bg-brand-500">All tools</a>
       </nav>
       <!-- Mobile menu button (static) -->
@@ -293,7 +294,7 @@
           <h2 class="font-display font-bold text-3xl text-white mb-1">All tools</h2>
           <p class="text-white/40 text-sm">Every tool is 100% local. Pick one and go.</p>
         </div>
-        <span class="font-mono-custom text-xs text-white/25 hidden md:block">3 live · 10 coming</span>
+        <span class="font-mono-custom text-xs text-white/25 hidden md:block">5 live · 8 coming</span>
       </div>
 
       <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -340,18 +341,33 @@
           </div>
         </a>
 
-        <!-- PDF TO JPG — COMING -->
-        <div class="tool-card soon block">
-          <div style="height:3px;background:rgba(255,255,255,0.05);"></div>
+        <!-- PDF TO JPG — LIVE -->
+        <a href="/noservertools/pdf-to-jpg/" class="tool-card block">
+          <div class="card-accent"></div>
           <div class="p-6">
             <div class="flex items-start justify-between mb-4">
-              <div class="tool-icon opacity-40">🖼️</div>
-              <span class="font-mono-custom text-xs text-white/20 bg-white/5 border border-white/10 px-2 py-0.5 rounded-full">Soon</span>
+              <div class="tool-icon">🖼️</div>
+              <span class="font-mono-custom text-xs text-green-400/80 bg-green-400/10 border border-green-400/20 px-2 py-0.5 rounded-full">Live</span>
             </div>
-            <h3 class="font-semibold text-white/30 text-[15px] mb-1">PDF to JPG</h3>
-            <p class="text-sm text-white/20 leading-relaxed">Convert PDF pages to JPG images locally.</p>
+            <h3 class="font-semibold text-white text-[15px] mb-1">PDF to JPG</h3>
+            <p class="text-sm text-white/40 leading-relaxed">Convert PDF pages to JPG images. Choose DPI. Download all at once.</p>
+            <div class="mt-4 text-xs font-mono-custom text-brand-400/70">pdf-to-jpg →</div>
           </div>
-        </div>
+        </a>
+
+        <!-- JPG TO PDF — LIVE -->
+        <a href="/noservertools/jpg-to-pdf/" class="tool-card block">
+          <div class="card-accent"></div>
+          <div class="p-6">
+            <div class="flex items-start justify-between mb-4">
+              <div class="tool-icon">🗂️</div>
+              <span class="font-mono-custom text-xs text-green-400/80 bg-green-400/10 border border-green-400/20 px-2 py-0.5 rounded-full">Live</span>
+            </div>
+            <h3 class="font-semibold text-white text-[15px] mb-1">JPG to PDF</h3>
+            <p class="text-sm text-white/40 leading-relaxed">Convert JPG, PNG or WEBP images into a PDF. Drag to reorder pages.</p>
+            <div class="mt-4 text-xs font-mono-custom text-brand-400/70">jpg-to-pdf →</div>
+          </div>
+        </a>
 
         <!-- ROTATE PDF — COMING -->
         <div class="tool-card soon block">
@@ -516,7 +532,8 @@
           <a href="/noservertools/merge-pdf/" class="text-xs text-white/35 hover:text-brand-400 transition-colors">Merge PDF</a>
           <a href="/noservertools/compress-pdf/" class="text-xs text-white/35 hover:text-brand-400 transition-colors">Compress PDF</a>
           <a href="/noservertools/split-pdf/" class="text-xs text-white/35 hover:text-brand-400 transition-colors">Split PDF</a>
-          <a href="/noservertools/pdf-to-jpg/" class="text-xs text-white/20 cursor-default">PDF to JPG</a>
+          <a href="/noservertools/pdf-to-jpg/" class="text-xs text-white/35 hover:text-brand-400 transition-colors">PDF to JPG</a>
+          <a href="/noservertools/jpg-to-pdf/" class="text-xs text-white/35 hover:text-brand-400 transition-colors">JPG to PDF</a>
           <a href="/noservertools/rotate-pdf/" class="text-xs text-white/20 cursor-default">Rotate PDF</a>
           <a href="/noservertools/protect-pdf/" class="text-xs text-white/20 cursor-default">Protect PDF</a>
           <a href="/noservertools/unlock-pdf/" class="text-xs text-white/20 cursor-default">Unlock PDF</a>
