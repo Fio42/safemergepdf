@@ -624,7 +624,6 @@ const I18N = {
 
 /* ─── Language pairs ────────────────────────────────────────────────────── */
 const LANGS = [
-  {code:'autodetect', label:'Auto-detect'},
   {code:'en', label:'English'},
   {code:'es', label:'Español'},
   {code:'fr', label:'Français'},
@@ -697,7 +696,6 @@ function populateLangSelects() {
     const prev = sel.value;
     sel.innerHTML = '';
     LANGS.forEach(({code, label}) => {
-      if (id === 'lang-to' && code === 'autodetect') return;
       const opt = document.createElement('option');
       opt.value = code;
       opt.textContent = label;
@@ -707,22 +705,20 @@ function populateLangSelects() {
       sel.value = prev;
     } else {
       // Smart defaults based on UI language
-      if (id === 'lang-from') sel.value = 'autodetect';
-      else {
-        const defaults = {en:'es', es:'en', fr:'en', de:'en', pt:'en'};
-        sel.value = defaults[uiLang] || 'en';
-      }
+      const fromDefaults = {en:'es', es:'es', fr:'fr', de:'de', pt:'pt'};
+      const toDefaults   = {en:'en', es:'en', fr:'en', de:'en', pt:'en'};
+      if (id === 'lang-from') sel.value = fromDefaults[uiLang] || 'es';
+      else                    sel.value = toDefaults[uiLang]   || 'en';
     }
   });
 }
 
 function swapLangs() {
   const from = document.getElementById('lang-from');
-  const to = document.getElementById('lang-to');
-  if (from.value === 'autodetect') return;
-  const tmp = from.value;
+  const to   = document.getElementById('lang-to');
+  const tmp  = from.value;
   from.value = to.value;
-  to.value = tmp;
+  to.value   = tmp;
 }
 
 /* ─── Steps ─────────────────────────────────────────────────────────────── */
@@ -840,9 +836,12 @@ extracted = "\\n\\n".join(pages_text)
     const origPanel = document.getElementById('panel-original');
     origPanel.textContent = extractedText;
     const fromCode = document.getElementById('lang-from').value;
-    const toCode = document.getElementById('lang-to').value;
+    const toCode   = document.getElementById('lang-to').value;
+    if (!fromCode || !toCode) throw new Error('Please select both languages.');
+    if (fromCode === toCode) throw new Error('Source and target languages must be different.');
+    const langPair  = fromCode + '|' + toCode;
     const fromLabel = LANGS.find(l => l.code === fromCode)?.label || fromCode;
-    const toLabel = LANGS.find(l => l.code === toCode)?.label || toCode;
+    const toLabel   = LANGS.find(l => l.code === toCode)?.label   || toCode;
     document.getElementById('panel-from-lang').textContent = fromLabel;
     document.getElementById('panel-to-lang').textContent = toLabel;
     document.getElementById('r-title').textContent = '✅ ' + (strings.btn_translate || 'Translation complete');
@@ -852,7 +851,6 @@ extracted = "\\n\\n".join(pages_text)
     const transPanel = document.getElementById('panel-translated');
     transPanel.innerHTML = `<span class="panel-placeholder pulse">${strings.translating || 'Translating...'}</span>`;
 
-    const langPair = (fromCode === 'autodetect' ? '' : fromCode + '|') + toCode;
     const chunks = splitIntoChunks(extractedText, 450);
     const translated = [];
     for (let i = 0; i < chunks.length; i++) {
