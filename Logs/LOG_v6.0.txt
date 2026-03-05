@@ -1,0 +1,534 @@
+════════════════════════════════════════════════════════════════
+LOG MAESTRO v6.0 — NOSERVERTOOLS
+PEGAR EN CUALQUIER AI PARA CONTINUAR SIN PREGUNTAS
+════════════════════════════════════════════════════════════════
+
+PROYECTO: NoServerTools
+Tipo: App web estatica — un HTML por herramienta, CERO servidores propios
+Hosting: GitHub Pages — GRATIS — $0 forever
+URL RAIZ: https://fio42.github.io/noservertools/
+Repo: https://github.com/Fio42/noservertools
+Carpeta local: C:/Users/fiocc/OneDrive/Desktop/noservertools/
+Usuario GitHub: Fio42
+Ultimo deploy: v5.9 — translate-pdf eliminada en v6.0 (ver abajo)
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+IDENTIDAD DE MARCA
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Nombre:    NoServerTools
+Dominio:   noservertools.com (objetivo futuro, aun no comprado)
+Tagline:   "Your files never leave your computer."
+Sub-tagline: "Tools that run inside your browser. Not on our servers."
+Propuesta de valor central: PRIVACIDAD + SEGURIDAD. 100% client-side.
+SIN estadisticas inventadas. SIN reviews falsos. Sin excepcion.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+REGLAS PERMANENTES — NUNCA ROMPER
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+1.  CERO servidores propios. Todo corre en el browser del usuario.
+2.  NUNCA usar em dash (—) en textos visibles del HTML.
+3.  SIEMPRE usar esc() antes de insertar texto del usuario en el DOM.
+4.  Cada herramienta = su propia carpeta + index.html. Nunca mezclar.
+5.  SIEMPRE actualizar sitemap.xml al agregar herramienta nueva.
+6.  SIEMPRE actualizar header/footer de TODAS las paginas al agregar tool.
+7.  SIEMPRE entregar el LOG actualizado al final de cada sesion como .txt.
+8.  El usuario es principiante — pasos simples, uno a la vez, sin asumir nada.
+9.  NUNCA inventar estadisticas falsas ni reviews falsos.
+10. La marca es NoServerTools — no limitada a PDF, puede agregar cualquier tool.
+11. Todos los HTML deben incluir: CSP meta, X-Frame-Options, X-Content-Type-Options.
+12. SIEMPRE usar 'use strict' en todos los bloques <script>.
+13. SIEMPRE usar createElement (no innerHTML) para datos que vienen del usuario.
+14. translate-pdf ELIMINADA en v6.0. Ver seccion CAMBIOS v6.0.
+15. NUNCA agregar herramientas que requieran enviar datos a servidores externos
+    sin advertencia visible y prominente al usuario.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+COMO SUBIR CAMBIOS AL REPO
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+cd "C:/Users/fiocc/OneDrive/Desktop/noservertools"
+git add .
+git commit -m "descripcion del cambio"
+git push
+Esperar 1-2 minutos y recargar la pagina en el browser.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ESTRUCTURA DE ARCHIVOS — ESTADO ACTUAL v6.0
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+noservertools/
+  index.html                [VIVO] HUB principal — muestra todas las tools
+  sitemap.xml               [VIVO] SEO — actualizar cada vez que se agrega tool
+  robots.txt                [VIVO] SEO
+  LOG.txt                   Este archivo — reemplazar con cada version nueva
+
+  merge-pdf/
+    index.html              [VIVO] Merge PDF — une multiples PDFs en uno
+
+  compress-pdf/
+    index.html              [VIVO] Compress PDF — reduce peso del PDF
+
+  split-pdf/
+    index.html              [VIVO] Split PDF — divide PDF por paginas
+
+  pdf-to-jpg/
+    index.html              [VIVO] PDF<->JPG — convierte en ambas direcciones
+                            Una sola pagina con switch de modo (PDF->JPG / JPG->PDF)
+
+  translate-pdf/            [ELIMINADA en v6.0 — ver instrucciones abajo]
+
+  -- PENDIENTES (orden prioridad SEO) --
+  rotate-pdf/               PRIORIDAD 1 — simple, alto trafico de busqueda
+  protect-pdf/              PRIORIDAD 2
+  unlock-pdf/               PRIORIDAD 3
+  watermark-pdf/            PRIORIDAD 4
+  reorder-pdf/              PRIORIDAD 5
+  delete-pages/             PRIORIDAD 6
+  pdf-to-text/              PRIORIDAD 7
+  repair-pdf/               PRIORIDAD 8
+  view-pdf-metadata/        PRIORIDAD 9 — diferenciador de privacidad
+  remove-pdf-metadata/      PRIORIDAD 10 — diferenciador de privacidad
+  redact-pdf/               PRIORIDAD 11 — diferenciador de privacidad
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+DISENO VISUAL — SISTEMA GLOBAL (aplicar a toda tool nueva)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Background:   #0e1117
+Fuentes:      Syne (titulos, font-weight 700/800)
+              Outfit (cuerpo, font-weight 400/500/600)
+              DM Mono (labels tecnicos, badges, monospace)
+Colores:
+  --brand:       #5a87ff  (azul principal)
+  --brand-dark:  #1f45e0  (azul oscuro, botones primarios)
+  --brand-mid:   #3363f5  (hover de botones)
+  --green:       #4ade80  (exito, done)
+  --red:         #f87171  (error)
+  --text:        rgba(255,255,255,.88)
+  --muted:       rgba(255,255,255,.42)
+  --dim:         rgba(255,255,255,.25)
+  --surface:     rgba(255,255,255,.028)
+  --border:      rgba(255,255,255,.08)
+
+CSS: Variables en :root. Mobile-first. Media queries para >= 600px y >= 700px.
+Background efecto: body::before con grid de lineas rgba(83,99,255,.05) 52x52px
+Blobs: dos divs .blob fijos con radial-gradient, uno arriba-izquierda, uno abajo-derecha
+Nav: sticky, backdrop-filter blur(16px), altura 54px
+Logo: caja azul 28x28px con SVG de 4 cuadros + texto "NoServer" + "Tools" en brand color
+Footer: border-top, fondo rgba(0,0,0,.3), links a todas las tools
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+RECETAS TECNICAS — HERRAMIENTAS ACTIVAS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Todas usan Pyodide v0.25.0 + pypdf, excepto pdf-to-jpg.
+
+MERGE PDF:
+  Pyodide + pypdf
+  PdfWriter().append(BytesIO(bytes)) por cada archivo
+  writer.write(output_buffer)
+  Descarga como .pdf
+
+COMPRESS PDF:
+  Pyodide + pypdf
+  compress_identical_objects=True
+  Por cada imagen: img.replace(quality=N) con N segun nivel elegido
+  Descarga como .pdf comprimido
+
+SPLIT PDF:
+  Pyodide + pypdf
+  PdfWriter().add_page(page) por cada pagina del rango elegido
+  writer.write(output) -> descarga como .pdf
+
+PDF -> JPG:
+  PDF.js (NO Pyodide)
+  page.render() -> canvas -> canvas.toDataURL('image/jpeg')
+  Descarga cada pagina como .jpg
+
+JPG -> PDF:
+  Pyodide + Pillow
+  Image.open(BytesIO(bytes)) -> img.save(buf, format='PDF')
+  PdfWriter().append(BytesIO(pdf_bytes))
+  Descarga como .pdf
+
+ROTATE PDF (PROXIMA):
+  Pyodide + pypdf
+  page.rotate(N) donde N es 90, 180, 270
+  PdfWriter con todas las paginas rotadas
+  Descarga como .pdf
+
+PROTECT PDF (FUTURA):
+  Pyodide + pypdf
+  writer.encrypt(user_password, owner_password, use_128bit=True)
+  Descarga como .pdf protegido
+
+UNLOCK PDF (FUTURA):
+  Pyodide + pypdf
+  reader.decrypt(password)
+  writer.clone_reader_document_root(reader)
+  Descarga como .pdf sin contrasena
+
+VIEW PDF METADATA (FUTURA — diferenciador privacidad):
+  Pyodide + pypdf
+  reader.metadata -> dict con Author, Creator, Producer, Subject, etc.
+  Mostrar en tabla visible, sin descargar nada
+
+REMOVE PDF METADATA (FUTURA — diferenciador privacidad):
+  Pyodide + pypdf
+  writer.add_metadata({}) -> limpia todos los campos
+  Descarga como .pdf sin metadatos
+
+REDACT PDF (FUTURA — diferenciador privacidad):
+  PDF.js: renderizar paginas
+  Canvas API: usuario dibuja rectangulos sobre texto sensible
+  pypdf o jsPDF: aplicar rectangulos negros permanentes
+  NOTA: requiere diseno de UI cuidadoso (drag-to-select)
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+SEGURIDAD — APLICAR A TODOS LOS HTML
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Meta tags obligatorios en <head>:
+  <meta http-equiv="X-Content-Type-Options" content="nosniff">
+  <meta http-equiv="X-Frame-Options" content="DENY">
+  <meta http-equiv="Content-Security-Policy" content="...">
+
+CSP para herramientas que solo usan Pyodide:
+  script-src: cdn.jsdelivr.net
+  worker-src: blob:
+  img-src: self, data:, blob:
+  connect-src: cdn.jsdelivr.net
+
+JS obligatorio:
+  'use strict' en cada bloque <script>
+  esc(s) para sanitizar cualquier dato del usuario antes de insertarlo
+  createElement (nunca innerHTML) para datos del usuario
+  Validacion de tipo y tamano de archivo antes de procesar
+  URL.revokeObjectURL() despues de cada descarga
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+SISTEMA DE I18N (MULTIIDIOMA DE INTERFAZ)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Aplica SOLO a textos de la interfaz. NO a contenido de documentos del usuario.
+
+Idiomas soportados (objetivo):
+  en (English) — fallback por defecto
+  es (Espanol)
+  fr (Francais)
+  de (Deutsch)
+  pt (Portugues)
+  it (Italiano)
+  ja (Japanese)
+  ko (Korean)
+  zh (Chinese Simplified)
+
+Implementacion recomendada:
+  - Objeto I18N con clave: { en: '...', es: '...', fr: '...', ... }
+  - Deteccion: navigator.language.slice(0,2).toLowerCase()
+  - Todos los textos del HTML: atributo data-i18n="clave"
+  - Funcion applyI18n() recorre todos los elementos y aplica traducciones
+  - Fallback automatico a 'en' si el idioma del navegador no esta en I18N
+
+Patrón de implementacion:
+  const I18N = {
+    title: { en: 'Merge PDF', es: 'Unir PDF', fr: 'Fusionner PDF', ... },
+    ...
+  };
+  function applyI18n(lang) {
+    const L = I18N;
+    document.querySelectorAll('[data-i18n]').forEach(el => {
+      const key = el.dataset.i18n;
+      el.textContent = (L[key] && L[key][lang]) || (L[key] && L[key]['en']) || key;
+    });
+  }
+  const uiLang = navigator.language.slice(0,2).toLowerCase();
+  applyI18n(['en','es','fr','de','pt','it','ja','ko','zh'].includes(uiLang) ? uiLang : 'en');
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+SEO — ESTRATEGIA GLOBAL
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Cada herramienta debe tener en su index.html:
+  <title>[Tool Name] - Free, Private, No Upload | NoServerTools</title>
+  <meta name="description" content="[Tool action] directly in your browser.
+    No file upload. No server. 100% private and secure.">
+  <meta property="og:title" content="...">
+  <meta property="og:description" content="...">
+  <link rel="canonical" href="https://noservertools.com/[tool-name]/">
+  <meta name="robots" content="index, follow">
+
+H1: nombre de la herramienta + keyword principal
+H2: "How it works" + "Why it's private"
+H3: pasos numerados
+
+Keywords principales por herramienta:
+  merge-pdf:          "merge pdf online free", "combine pdf no upload"
+  compress-pdf:       "compress pdf online free", "reduce pdf size no upload"
+  split-pdf:          "split pdf online free", "separate pdf pages no upload"
+  pdf-to-jpg:         "pdf to jpg online free", "convert pdf to image no upload"
+  rotate-pdf:         "rotate pdf online free", "rotate pdf pages no upload"
+  protect-pdf:        "password protect pdf free", "encrypt pdf online"
+  remove-metadata:    "remove pdf metadata", "clean pdf privacy"
+  redact-pdf:         "redact pdf online free", "hide text in pdf"
+
+Diferenciador SEO unico:
+  Posicionar en keywords long-tail como:
+  - "pdf tools without uploading files"
+  - "private pdf editor no server"
+  - "pdf merge local browser"
+  - "secure pdf compressor no upload"
+  Estos tienen menos competencia y alta intencion de privacidad.
+
+sitemap.xml: mantener actualizado con cada nueva tool. Formato:
+  <url>
+    <loc>https://noservertools.com/[tool]/</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ARQUITECTURA DE CADA HERRAMIENTA
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Cada index.html sigue esta estructura:
+
+  1. <head>
+       - Meta charset, viewport
+       - Meta SEO: title, description, canonical, og:tags, robots
+       - Meta seguridad: CSP, X-Frame-Options, X-Content-Type-Options
+       - Google Fonts: Syne + Outfit + DM Mono
+       - CDN scripts (Pyodide, PDF.js segun aplique)
+       - <style> con CSS completo (variables, layout, componentes)
+
+  2. <body>
+       - <nav> sticky con logo + links a otras tools
+       - <main>
+           - .hero: H1 + descripcion + badge de privacidad
+           - .privacy-badge: "No upload. No server. 100% private."
+           - .drop-zone: drag & drop area
+           - .tool-ui: controles especificos de la herramienta
+           - .steps: como funciona (3 pasos visuales)
+           - .why-private: seccion de privacidad con iconos
+       - <footer> con links a todas las tools + copyright
+
+  3. <script>
+       - 'use strict'
+       - Estado global (variables let)
+       - Funciones utiles: esc(), formatBytes(), showError(), showSuccess()
+       - Logica principal de la herramienta
+       - Event listeners (drag & drop, buttons, inputs)
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+COPYWRITING — MENSAJES CLAVE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Hero principal (index.html):
+  H1: "PDF Tools That Respect Your Privacy"
+  Sub: "Every tool runs entirely in your browser.
+        Your files never leave your computer."
+  Badge: "No upload. No server. No tracking."
+
+Badge de privacidad (repetir en cada tool):
+  "Your file never leaves your device"
+  Icono de candado o escudo. Color verde (#4ade80).
+
+CTA principal: "Select File" o "Drop your PDF here"
+CTA secundario: "Download" (solo aparece cuando hay resultado listo)
+
+Secciones "How it works" (3 pasos):
+  1. "Drop your file" — Your file stays on your computer
+  2. "[Action specific]" — Processed entirely in your browser
+  3. "Download result" — Ready in seconds, nothing stored
+
+Seccion "Why NoServerTools?":
+  - "Zero uploads" — We never receive your files
+  - "Zero storage" — Nothing is saved anywhere
+  - "Zero tracking" — We don't know what's in your documents
+  - "Works offline" — Once loaded, no internet needed
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+HISTORIAL DE VERSIONES
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+v1-v5.2:  Merge, Compress, Split, HUB inicial
+v5.3:     REBRAND a NoServerTools + dark mode global
+v5.4:     Todas las tools en dark mode + PDF to JPG inicial
+v5.4.1:   Fix: base href para GitHub Pages
+v5.5:     PDF<->JPG con PDF.js (funciona real) + JPG to PDF con Pillow
+v5.6:     HUB revamp (grid de tools primero, hero compacto)
+          PDF<->JPG combinado en una sola pagina con switch de modo
+          Hardening de seguridad general
+v5.7:     Translate PDF — primera version
+v5.8:     Fix descarga PDF en translate-pdf (jsPDF real)
+v5.9:     Translate PDF — descarga visual (PDF.js + jsPDF overlay)
+          Rate limit fallback a LibreTranslate
+v6.0:     REVAMP ESTRATEGICO (ver CHANGE LOG abajo)
+          - translate-pdf ELIMINADA completamente
+          - Nuevo tagline centrado en privacidad
+          - I18N expandido a 9 idiomas (objetivo)
+          - Arquitectura de cada tool estandarizada
+          - SEO strategy documentada
+          - 11 tools planificadas con prioridad SEO
+          - Tools de privacidad (metadata, redact) agregadas al roadmap
+          - Copywriting de privacidad definido para todo el sitio
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+PROXIMOS PASOS — ORDEN EXACTO
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+PASO 1 — ELIMINAR translate-pdf (INMEDIATO):
+  a. Borrar la carpeta translate-pdf/ del repo local
+  b. Eliminar link a translate-pdf del nav y footer de TODAS las paginas
+  c. Eliminar entrada de translate-pdf del sitemap.xml
+  d. Eliminar reglas 14 y 15 del LOG (ya hechas en esta version)
+  e. git add . && git commit -m "v6.0: remove translate-pdf tool" && git push
+
+PASO 2 — ACTUALIZAR index.html HUB:
+  a. Cambiar tagline a: "Your files never leave your computer."
+  b. Agregar seccion "Why NoServerTools?" con los 4 puntos de privacidad
+  c. Quitar card de translate-pdf del grid
+  d. Preparar cards "coming soon" para rotate-pdf, protect-pdf, etc.
+
+PASO 3 — CONSTRUIR rotate-pdf:
+  Carpeta: rotate-pdf/index.html
+  Stack: Pyodide v0.25.0 + pypdf
+  UI: subir PDF -> preview miniatura de primera pagina -> selector
+      de angulo (90 / 180 / 270 / custom por pagina) -> descargar
+  Pyodide code:
+    from pypdf import PdfReader, PdfWriter
+    from io import BytesIO
+    reader = PdfReader(BytesIO(pdf_bytes))
+    writer = PdfWriter()
+    for page in reader.pages:
+        page.rotate(angle)  # 90, 180, 270
+        writer.add_page(page)
+    output = BytesIO()
+    writer.write(output)
+    return output.getvalue()
+  Agregar a nav, footer, sitemap de TODAS las paginas.
+
+PASO 4 — GOOGLE SEARCH CONSOLE:
+  a. Comprar noservertools.com (quitar <base href> de todos los HTML)
+  b. Registrar en Google Search Console
+  c. Subir sitemap.xml
+
+PASO 5 — Tools de Fase 2 (privacidad):
+  - view-pdf-metadata/
+  - remove-pdf-metadata/
+  - redact-pdf/ (mas compleja — requiere canvas UI)
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+PARA EL PROXIMO AI — LEER ESTO PRIMERO
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+1.  Proyecto: NoServerTools. App web estatica en GitHub Pages. CERO servidores.
+2.  Fondo: #0e1117. Fuentes: Syne + Outfit + DM Mono. Brand: #5a87ff / #1f45e0.
+3.  Cada tool es una carpeta con su propio index.html. No compartir HTML entre tools.
+4.  Pyodide v0.25.0 + pypdf para merge/compress/split/rotate/protect/unlock.
+5.  Pyodide v0.25.0 + Pillow para jpg-to-pdf.
+6.  PDF.js v3.11.174 para pdf-to-jpg (render + extraccion de texto).
+7.  translate-pdf ELIMINADA en v6.0. No referenciarla. No recrearla.
+8.  La marca se diferencia 100% en PRIVACIDAD. Tagline: "Your files never leave
+    your computer." Reforzar esto en cada tool, cada titulo, cada descripcion.
+9.  I18N: 9 idiomas de interfaz (en/es/fr/de/pt/it/ja/ko/zh).
+    Deteccion via navigator.language. Objeto I18N. Atributos data-i18n.
+    Fallback a 'en'. NUNCA traducir los documentos del usuario con APIs externas.
+10. SEO: cada tool tiene titulo, meta description, canonical, og:tags.
+    Keywords long-tail de privacidad: "no upload", "no server", "local browser".
+11. CSP + X-Frame-Options + 'use strict' + esc() + createElement en todo HTML nuevo.
+12. Al agregar tool nueva: actualizar nav y footer de TODAS las paginas + sitemap.xml.
+13. NUNCA estadisticas inventadas. NUNCA reviews falsos.
+14. Usuario es principiante. Dar pasos exactos: que archivo va donde, que comando correr.
+15. LOG actualizado y completo al final de cada sesion, entregado como archivo .txt.
+16. Cuando el usuario mande un index.html, leerlo completo antes de modificar.
+    Usar str_replace quirurgico, no reescribir el archivo entero.
+17. NUNCA usar innerHTML para datos del usuario. Siempre createElement + esc().
+18. Privacy badge verde (#4ade80) en cada herramienta: "Your file never leaves
+    your device." Visible sin scroll.
+
+════════════════════════════════════════════════════════════════
+CHANGE LOG — v6.0
+════════════════════════════════════════════════════════════════
+
+CAMBIO 1
+  Accion:      Eliminacion de translate-pdf
+  Archivo:     translate-pdf/index.html (eliminar carpeta completa)
+               index.html (quitar card + link)
+               sitemap.xml (quitar entrada)
+               nav/footer de todas las paginas (quitar link)
+  Descripcion: La herramienta translate-pdf enviaba texto del usuario a la
+               API de MyMemory (servicio externo). Esto contradice el
+               posicionamiento de privacidad total del sitio. Aunque el
+               archivo no salia del dispositivo, los datos de texto si lo
+               hacian, lo que debilita el mensaje "Your files never leave
+               your computer." Ademas, la herramienta usaba Pyodide
+               innecesariamente (carga ~10MB) y tenia dependencias de
+               MyMemory, LibreTranslate y jsPDF que aumentaban el peso
+               y la complejidad.
+  Motivo:      Alineacion con el posicionamiento de privacidad total.
+               Reduccion de complejidad y bundle size. Eliminacion de
+               dependencia en servicios externos.
+  Impacto SEO: Neutro. translate-pdf generaba poco trafico organico
+               comparado con herramientas de mayor volumen de busqueda.
+  Impacto UX:  Positivo. El sitio queda mas coherente con su propuesta
+               de valor. El usuario no ve contradicciones.
+  Impacto perf: Positivo. Se eliminan 3 CDN scripts y ~10MB de Pyodide
+               en la herramienta mas pesada del sitio.
+
+CAMBIO 2
+  Accion:      Nuevo tagline principal
+  Archivo:     index.html, todos los index.html de herramientas
+  Descripcion: Cambio de tagline de "Tools that run inside your browser.
+               Not on our servers." a "Your files never leave your
+               computer." como mensaje H1 o sub-headline del hero.
+               El tagline anterior es bueno como secundario/complementario.
+  Motivo:      Mensaje mas directo, emocional y diferenciador.
+               "Your files never leave your computer" es mas memorable,
+               mas buscable y mas convincente para el usuario promedio.
+  Impacto SEO: Positivo. Mejor para keywords de intencion de privacidad.
+  Impacto UX:  Positivo. Mas claro para usuario no tecnico.
+
+CAMBIO 3
+  Accion:      Expansion del sistema I18N a 9 idiomas
+  Archivo:     Todos los index.html de herramientas (implementar gradualmente)
+  Descripcion: Agregar ja (japones), ko (coreano), zh (chino), it (italiano)
+               al sistema de I18N que ya tenia en/es/fr/de/pt.
+  Motivo:      Aumentar alcance organico en mercados de alto volumen.
+               Japon, Korea y China representan cientos de millones de
+               usuarios que buscan tools PDF online. El nicho de privacidad
+               es especialmente relevante en estos mercados.
+  Impacto SEO: Alto positivo a largo plazo.
+  Impacto UX:  Positivo para usuarios no angloparlantes.
+
+CAMBIO 4
+  Accion:      Documentacion de arquitectura estandar de herramientas
+  Archivo:     LOG.txt (este archivo)
+  Descripcion: Seccion "ARQUITECTURA DE CADA HERRAMIENTA" con estructura
+               exacta de HTML que debe seguir cada tool nueva.
+               Incluye: head completo, body con hero + privacy badge +
+               drop zone + steps + why-private, footer.
+  Motivo:      Consistencia entre tools. Facilita construccion por AI.
+               Evita olvidar elementos de SEO o seguridad.
+  Impacto UX:  Positivo. Experiencia consistente entre herramientas.
+  Impacto SEO: Positivo. Estructura semantica correcta en todas las tools.
+
+CAMBIO 5
+  Accion:      Roadmap expandido con 11 herramientas priorizadas
+  Archivo:     LOG.txt (este archivo)
+  Descripcion: Agregadas al roadmap: view-pdf-metadata, remove-pdf-metadata,
+               redact-pdf como herramientas de privacidad diferenciadoras
+               (Fase 2). Mantenidas en Fase 1: rotate, protect, unlock,
+               watermark, reorder, delete-pages, pdf-to-text, repair.
+  Motivo:      Las herramientas de metadata y redaccion son unicas en el
+               mercado con enfoque de privacidad y generan trafico de
+               usuarios con alta intencion de privacidad (valor de usuario
+               mas alto, menor competencia SEO).
+  Impacto SEO: Alto positivo — keywords como "remove pdf metadata" y
+               "redact pdf online" tienen competencia moderada y alta
+               intencion comercial.
+
+CAMBIO 6
+  Accion:      Estrategia SEO y copywriting documentados
+  Archivo:     LOG.txt (este archivo)
+  Descripcion: Secciones "SEO ESTRATEGIA GLOBAL" y "COPYWRITING MENSAJES
+               CLAVE" con keywords especificas, estructura de titulos y
+               textos de interfaz. Privacy badge verde definido.
+  Motivo:      Sin estrategia SEO documentada, cada herramienta nueva se
+               construia sin criterio de posicionamiento. Ahora cada AI
+               puede construir tools con SEO correcto desde el inicio.
+  Impacto SEO: Alto positivo.
+
+════════════════════════════════════════════════════════════════
+FIN DEL LOG MAESTRO v6.0 — NoServerTools
+════════════════════════════════════════════════════════════════
