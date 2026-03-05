@@ -315,8 +315,12 @@ function handleFile(f){
 }
 
 async function initPyodide(){
-  if(pyReady){document.getElementById('loadingEngine').style.display='none';document.getElementById('btnProtect').disabled=false;return;}
-  if(pyLoading)return;
+  if(pyReady){
+    document.getElementById('loadingEngine').style.display='none';
+    if(currentFile) document.getElementById('btnProtect').disabled=false;
+    return;
+  }
+  if(pyLoading) return; // already loading, don't start again
   pyLoading=true;
   document.getElementById('loadingEngine').style.display='block';
   document.getElementById('btnProtect').disabled=true;
@@ -330,7 +334,7 @@ async function initPyodide(){
     if(currentFile) document.getElementById('btnProtect').disabled=false;
   }catch(e){
     pyLoading=false;
-    pyodide=null;
+    pyodide=null; // reset so retry is possible
     document.getElementById('loadingEngine').style.display='none';
     showError('Failed to load engine: '+e.message+'. Please refresh the page and try again.');
   }

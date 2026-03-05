@@ -656,7 +656,15 @@ function j2pRemove(i) {
 
 async function initPyodide() {
   if (pyReady) return;
-  if (pyLoading) return; // already loading, wait
+  if (pyLoading) {
+    // Already loading — wait for it to finish by polling
+    return new Promise((resolve, reject) => {
+      const check = setInterval(() => {
+        if (pyReady) { clearInterval(check); resolve(); }
+        else if (!pyLoading) { clearInterval(check); reject(new Error('Engine load failed')); }
+      }, 200);
+    });
+  }
   pyLoading = true;
   try {
     pyodide = await loadPyodide({ indexURL: 'https://cdn.jsdelivr.net/pyodide/v0.25.0/full/' });
@@ -666,9 +674,8 @@ async function initPyodide() {
     pyLoading = false;
   } catch(e) {
     pyLoading = false;
-    pyodide = null;
-    console.error('Pyodide init failed:', e.message);
-    throw e; // re-throw so callers can handle
+    pyodide = null; // reset so retry is possible
+    throw e; // re-throw so callers can show the error
   }
 }
 
@@ -694,12 +701,6 @@ async function j2pConvert() {
       document.getElementById('j2p-list').style.display = '';
       return;
     }
-  }
-  if (!pyReady) {
-    showErr('Failed to load engine. Please refresh and try again.');
-    document.getElementById('j2p-progress').style.display = 'none';
-    document.getElementById('j2p-list').style.display = '';
-    return;
   }
   j2pProg(25, 'Reading images...', '');
   try {

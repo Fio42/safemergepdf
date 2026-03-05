@@ -152,21 +152,21 @@
   <!-- TOOL UI -->
   <div id="toolUi" style="display:none">
     <div class="tool-card" style="padding:24px;margin-bottom:20px">
-      <h3 class="fd" style="font-size:16px;font-weight:700;margin:0 0 6px;color:#fff">Enter current password</h3>
-      <p style="font-size:13px;color:rgba(255,255,255,.35);margin:0 0 20px">You must know the current password to remove it. We decrypt everything locally.</p>
+      <h3 class="fd" style="font-size:16px;font-weight:700;margin:0 0 6px;color:#fff">Remove PDF password</h3>
+      <p style="font-size:13px;color:rgba(255,255,255,.35);margin:0 0 20px">Enter the password if the file is protected. If you are unsure, click "Remove Password" and we will check automatically.</p>
 
       <div style="margin-bottom:24px">
-        <label style="display:block;font-size:13px;color:rgba(255,255,255,.45);margin-bottom:7px">Current password <span style="color:#f87171">*</span></label>
+        <label style="display:block;font-size:13px;color:rgba(255,255,255,.45);margin-bottom:7px">Password <span style="color:rgba(255,255,255,.25);font-size:11px">(leave blank to auto-check)</span></label>
         <div style="position:relative">
-          <input class="input-field" type="password" id="password" placeholder="Enter the PDF password">
-          <button onclick="toggleVisibility()" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;color:rgba(255,255,255,.3);cursor:pointer;font-size:16px;line-height:1">👁</button>
+          <input class="input-field" type="password" id="password" placeholder="Enter the PDF password (optional)">
+          <button onclick="toggleVisibility()" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;color:rgba(255,255,255,.3);cursor:pointer;font-size:16px;line-height:1" title="Show/hide password">👁</button>
         </div>
       </div>
 
       <!-- Loading engine -->
       <div id="loadingEngine" style="display:none;text-align:center;padding:16px;color:rgba(255,255,255,.4);font-size:14px">
         <div style="display:inline-block;width:16px;height:16px;border:2px solid rgba(255,255,255,.1);border-top-color:#5a87ff;border-radius:50%;animation:spin .8s linear infinite;vertical-align:middle;margin-right:8px"></div>
-        Loading engine (first time: 10-20 seconds)...
+        Loading engine (first time: ~15 seconds)...
       </div>
 
       <button class="btn-primary" id="btnUnlock" onclick="startUnlock()">
@@ -307,8 +307,12 @@ function handleFile(f){
 }
 
 async function initPyodide(){
-  if(pyReady){document.getElementById('loadingEngine').style.display='none';document.getElementById('btnUnlock').disabled=false;return;}
-  if(pyLoading)return;
+  if(pyReady){
+    document.getElementById('loadingEngine').style.display='none';
+    if(currentFile) document.getElementById('btnUnlock').disabled=false;
+    return;
+  }
+  if(pyLoading) return;
   pyLoading=true;
   document.getElementById('loadingEngine').style.display='block';
   document.getElementById('btnUnlock').disabled=true;
@@ -336,7 +340,7 @@ function toggleVisibility(){
 async function startUnlock(){
   if(!pyReady||!currentFile)return;
   const pw=document.getElementById('password').value;
-  if(!pw){showError('Please enter the current PDF password.');return}
+  // Don't block if password empty — we'll check if file is encrypted first
 
   document.getElementById('btnUnlock').disabled=true;
   setProgress(15,'Reading file...');
@@ -345,12 +349,21 @@ async function startUnlock(){
     const arr=new Uint8Array(buf);
     pyodide.globals.set('file_bytes',arr);
     pyodide.globals.set('user_password',pw);
-    setProgress(50,'Decrypting...');
+    setProgress(50,'Checking file...');
     const success=await pyodide.runPythonAsync(`
 from pypdf import PdfReader, PdfWriter
 from io import BytesIO
 reader = PdfReader(BytesIO(bytes(file_bytes)))
-if reader.is_encrypted:
+if not reader.is_encrypted:
+    writer = PdfWriter()
+    writer.clone_reader_document_root(reader)
+    out = BytesIO()
+    writer.write(out)
+    result_bytes = out.getvalue()
+    result_status = 'not_encrypted'
+elif not user_password:
+    result_status = 'need_password'
+else:
     ok = reader.decrypt(user_password)
     if not ok:
         result_status = 'wrong_password'
@@ -361,15 +374,34 @@ if reader.is_encrypted:
         writer.write(out)
         result_bytes = out.getvalue()
         result_status = 'ok'
-else:
-    writer = PdfWriter()
-    writer.clone_reader_document_root(reader)
-    out = BytesIO()
-    writer.write(out)
-    result_bytes = out.getvalue()
-    result_status = 'not_encrypted'
 result_status
 `);
+    if(success==='not_encrypted'){
+      // Show informational result — file has no password
+      const result=pyodide.globals.get('result_bytes').toJs();
+      const blob=new Blob([result],{type:'application/pdf'});
+      if(resultURL)URL.revokeObjectURL(resultURL);
+      resultURL=URL.createObjectURL(blob);
+      const baseName=currentFile.name.replace(/\.pdf$/i,'');
+      const link=document.getElementById('btnDownload');
+      link.href=resultURL; link.download=baseName+'.pdf';
+      document.getElementById('resultDesc').textContent=fmt(blob.size)+' · This PDF is not password-protected. No changes needed.';
+      setProgress(100,'Done');
+      setTimeout(()=>{
+        document.getElementById('progressWrap').style.display='none';
+        document.getElementById('resultWrap').style.display='block';
+        document.getElementById('toolUi').style.display='none';
+        document.getElementById('fileChip').style.display='none';
+        document.getElementById('btnUnlock').disabled=false;
+      },400);
+      return;
+    }
+    if(success==='need_password'){
+      showError('This PDF is password-protected. Please enter the password to unlock it.');
+      document.getElementById('btnUnlock').disabled=false;
+      document.getElementById('progressWrap').style.display='none';
+      return;
+    }
     if(success==='wrong_password'){
       showError('Wrong password. Please check and try again.');
       document.getElementById('btnUnlock').disabled=false;
@@ -385,8 +417,7 @@ result_status
     const link=document.getElementById('btnDownload');
     link.href=resultURL;
     link.download=baseName+'-unlocked.pdf';
-    const msg=success==='not_encrypted'?'This PDF was not password-protected. Downloaded as-is.':'Password removed. PDF is now unlocked.';
-    document.getElementById('resultDesc').textContent=fmt(blob.size)+' · '+msg;
+    document.getElementById('resultDesc').textContent=fmt(blob.size)+' · Password removed. PDF is now unlocked.';
     setProgress(100,'Done');
     setTimeout(()=>{
       document.getElementById('progressWrap').style.display='none';
