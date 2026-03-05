@@ -1,0 +1,242 @@
+════════════════════════════════════════════════════════════════
+LOG MAESTRO v5.6 — NOSERVERTOOLS
+PEGAR EN CUALQUIER AI PARA CONTINUAR SIN PREGUNTAS
+════════════════════════════════════════════════════════════════
+
+PROYECTO: NoServerTools
+Tipo: App web estatica — un HTML por herramienta, CERO servidores
+Hosting: GitHub Pages — GRATIS — $0 forever
+URL RAIZ: https://fio42.github.io/noservertools/
+Repo: https://github.com/Fio42/noservertools
+Carpeta local: C:/Users/fiocc/OneDrive/Desktop/noservertools/
+Usuario GitHub: Fio42
+Ultimo deploy: v5.6 — HUB revamp + PDF<->JPG tool combinado
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+IDENTIDAD DE MARCA
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Nombre:    NoServerTools
+Dominio:   noservertools.com (objetivo futuro)
+Tagline:   "Tools that run inside your browser. Not on our servers."
+Diferenciador: iLovePDF y SmallPDF suben tus archivos a sus servidores.
+  NoServerTools no tiene servidores. Imposible que veamos tus archivos.
+SIN estadisticas inventadas. SIN reviews falsos.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+REGLAS PERMANENTES — NUNCA ROMPER
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+1. CERO servidores. Todo corre en Pyodide/WASM o PDF.js.
+2. NUNCA usar em dash en textos visibles del HTML.
+3. SIEMPRE usar esc() antes de insertar texto del usuario en el DOM.
+4. Cada herramienta = su propia carpeta + index.html.
+5. SIEMPRE actualizar sitemap.xml al agregar herramienta nueva.
+6. SIEMPRE actualizar header/footer de TODAS las paginas al agregar tool.
+7. SIEMPRE mandar el LOG actualizado al final de cada sesion.
+8. El usuario es principiante — pasos simples, uno a la vez.
+9. NUNCA inventar estadisticas falsas.
+10. La marca es NoServerTools — no limitada a PDF.
+11. Todos los HTML deben incluir CSP, X-Frame-Options, X-Content-Type-Options.
+12. SIEMPRE usar 'use strict' en bloques <script>.
+13. SIEMPRE crear elementos DOM con createElement, no innerHTML para datos de usuario.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+COMO SUBIR CAMBIOS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+cd "C:/Users/fiocc/OneDrive/Desktop/noservertools"
+git add .
+git commit -m "descripcion"
+git push
+Esperar 1-2 minutos y recargar.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ESTRUCTURA — ESTADO ACTUAL v5.6
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+noservertools/
+  index.html              [VIVO] HUB revamped v5.6 — tools first, compact hero
+  sitemap.xml             [VIVO] SEO — actualizar al agregar tool
+  robots.txt              [VIVO] SEO
+  LOG.txt                 Este archivo
+
+  merge-pdf/
+    index.html            [VIVO] Merge PDF — dark mode v5.4
+
+  compress-pdf/
+    index.html            [VIVO] Compress PDF — dark mode v5.4
+
+  split-pdf/
+    index.html            [VIVO] Split PDF — dark mode v5.4
+
+  pdf-to-jpg/
+    index.html            [VIVO] PDF<->JPG combinado v5.6 (PDF.js + Pyodide)
+                          Redirige a: jpg-to-pdf no existe mas, todo en pdf-to-jpg
+
+  -- NOTA: jpg-to-pdf/ ya no existe como carpeta separada --
+  -- Todo PDF<->JPG esta en pdf-to-jpg/index.html con switch de modo --
+
+  -- PENDIENTES (orden de prioridad SEO) --
+  rotate-pdf/index.html      prioridad 1 (~400K/mes)
+  protect-pdf/index.html     prioridad 2 (~800K/mes)
+  unlock-pdf/index.html      prioridad 3 (~600K/mes)
+  watermark-pdf/index.html   prioridad 4
+  reorder-pdf/index.html     prioridad 5
+  delete-pages/index.html    prioridad 6
+  pdf-to-text/index.html     prioridad 7
+  repair-pdf/index.html      prioridad 8
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+PARA DEPLOY v5.6 — QUE COPIAR DONDE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+1. index.html          -> noservertools/index.html (reemplazar)
+2. pdf-to-jpg/index.html -> noservertools/pdf-to-jpg/index.html (reemplazar)
+3. BORRAR carpeta: noservertools/jpg-to-pdf/ (ya no se usa)
+4. LOG_v5.6.txt        -> noservertools/LOG.txt (reemplazar)
+5. git add . && git commit -m "v5.6 hub revamp + pdf-jpg combined" && git push
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+DISENO — SISTEMA VISUAL v5.6
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Tema: Dark mode — bg #0e1117
+Fuentes: Syne (display .fd) + Outfit (body) + DM Mono (labels .fm)
+CDN Tailwind: cdn.tailwindcss.com (solo en tools — HUB usa CSS puro)
+CDN Pyodide: cdn.jsdelivr.net/pyodide/v0.25.0/full/pyodide.js
+CDN PDF.js: cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js
+Paleta brand: 400:#5a87ff  500:#3363f5  600:#1f45e0
+Background grid: pseudo-element ::before con linear-gradient
+Blobs: position:fixed divs con radial-gradient
+gradient-text .gt: linear-gradient(105deg,#7aa3ff,#a78bfa,#60a5fa) clip
+Tool cards .tc: bg rgba(255,255,255,.028) border rgba(255,255,255,.07) radius:16px
+  hover: translateY(-3px) + border brand + shadow + top accent bar opacity:1
+  soon: opacity:.38 pointer-events:none
+Nav activo: clase .on — color #5a87ff bg rgba(90,135,255,.12) font-weight:600
+Footer activo: clase .fl.on — color #5a87ff font-weight:600
+
+HUB v5.6 diferencias:
+  - CSS puro (sin Tailwind en HUB) para mejor performance
+  - Tools primero, hero compacto (no gigante), how it works al final
+  - Tools grid: auto-fill minmax(200px,1fr), 4 cols en desktop
+  - Header sticky con backdrop-blur
+  - Privacy strip compacta debajo del grid
+  - CSP en meta tags
+
+PDF<->JPG tool v5.6 diferencias:
+  - UNA sola pagina con switch de modo (PDF to JPG / JPG to PDF)
+  - Boton circular "swap" (⇄) para cambiar direccion
+  - mode-bar con 2 botones, el activo en azul
+  - FAQ y How-It-Works dinamicos segun modo activo (JS)
+  - PDF.js para PDF->JPG (renderizado real, no imagenes blancas)
+  - Pyodide + Pillow para JPG->PDF
+  - Drag-and-drop para reordenar imagenes en modo JPG->PDF
+  - 'use strict' en todos los scripts
+  - createElement para insercion de datos de usuario (no innerHTML)
+  - esc() para todos los strings de usuario mostrados en DOM
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+SEGURIDAD — IMPLEMENTADO EN TODOS LOS HTML v5.6
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Headers en meta:
+  X-Content-Type-Options: nosniff
+  X-Frame-Options: DENY
+  Content-Security-Policy: default-src 'self' + CDNs permitidos
+    script-src: self unsafe-inline + Tailwind + Pyodide + PDF.js
+    img-src: self data: blob:
+    worker-src: blob: (requerido por PDF.js worker)
+    frame-ancestors: none
+Codigo JS:
+  'use strict' en todos los scripts
+  esc() antes de cualquier string de usuario en DOM
+  createElement() para elementos que muestran datos de usuario
+  URL.revokeObjectURL() para limpiar blob URLs
+  Validacion de tipo de archivo antes de procesar
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+PYTHON RECETAS — todas sin servidor
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+MERGE:    PdfWriter().append(BytesIO(bytes)) x N -> write(output)
+COMPRESS: compress_identical_objects(True,True) + img.replace(quality=N)
+SPLIT ALL: por pagina: PdfWriter().add_page(page).write(out) -> array
+SPLIT RANGE: PdfWriter() con paginas seleccionadas -> write(out)
+JPG->PDF: Pillow Image.open -> img.save(buf, format='PDF') -> PdfWriter.append
+ROTATE:   page.rotate(90|180|270)
+PROTECT:  writer.encrypt(password, algorithm="AES-256")
+UNLOCK:   reader.decrypt(password); writer.append(reader)
+PDF->JPG: PDF.js + canvas.toDataURL('image/jpeg', 0.92) — NO Pyodide
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+PLANTILLA NUEVA HERRAMIENTA
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Base: compress-pdf/index.html o split-pdf/index.html
+Siempre incluir:
+  - <meta http-equiv="X-Content-Type-Options" content="nosniff">
+  - <meta http-equiv="X-Frame-Options" content="DENY">
+  - <meta http-equiv="Content-Security-Policy" ...>
+  - 'use strict' en script
+  - esc() para datos de usuario
+  - createElement para elementos DOM con datos de usuario
+Nav activo: bg:rgba(90,135,255,.12) color:#5a87ff font-weight:600
+Footer activo: color:#5a87ff font-weight:600
+Al activar tool:
+  - Card en HUB: cambiar .tc.soon a .tc, badge "Soon" a "Live", agregar href
+  - Agregar URL en sitemap.xml
+  - Agregar link en nav/footer de TODAS las paginas
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+SEO KEYWORDS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+VENTAJA UNICA: "no upload / without uploading / private / no server"
+Merge:    merge pdf free, combine pdf online, pdf merger no upload
+Compress: compress pdf free, reduce pdf size, compress without uploading
+Split:    split pdf free, separate pdf pages, extract pages from pdf
+PDF-JPG:  pdf to jpg free, jpg to pdf, convert pdf image online, no upload
+Rotate:   rotate pdf pages online free, no upload
+Protect:  add password to pdf free, lock pdf online, no server
+Unlock:   remove pdf password free, unlock pdf online, no upload
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+FASES COMPLETADAS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+v1-v3:  Merge PDF funcional + diseno + GitHub Pages
+v4.0:   Compress PDF + sitemap + robots.txt
+v5.0:   HUB central
+v5.1:   Header/footer unificado
+v5.2:   Split PDF (2 modos)
+v5.3:   REBRAND NoServerTools + dark mode
+v5.4:   Todos los HTML dark mode + PDF to JPG (buggy)
+v5.4.1: Fix base href GitHub Pages
+v5.5:   PDF to JPG reescrito con PDF.js (funciona) + JPG to PDF nuevo
+v5.6:   HUB revamp (tools primero, hero compacto, CSS puro, SEO/seguridad)
+        PDF<->JPG combinado en una pagina con switch de modo
+        Hardening de seguridad en todos los HTML (CSP, strict, esc, createElement)
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+PROXIMOS PASOS EN ORDEN
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+INMEDIATO:  rotate-pdf/index.html (simple, alto trafico)
+DESPUES:    protect-pdf/index.html
+DESPUES:    unlock-pdf/index.html
+FUTURO:     Comprar dominio noservertools.com
+FUTURO:     Google Search Console + sitemap actualizado con nuevas URLs
+FUTURO:     Google Analytics 4
+FUTURO:     Google AdSense
+FUTURO:     Herramientas no-PDF (imagen resize, etc.)
+NOTA:       Cuando se compre dominio, quitar <base href="/noservertools/">
+            de todos los HTML y cambiar URLs absolutas a /merge-pdf/ etc.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+PARA EL PROXIMO AI
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+1. Proyecto: NoServerTools. Bg #0e1117. Syne+Outfit+DM Mono.
+2. Brand: #5a87ff (400) / #3363f5 (500) / #1f45e0 (600).
+3. TODO en Pyodide/WASM o PDF.js. CERO servidores.
+4. PDF->JPG usa PDF.js + canvas. JPG->PDF usa Pyodide + Pillow.
+5. PDF<->JPG es una sola pagina en pdf-to-jpg/. No hay jpg-to-pdf/.
+6. Siempre incluir CSP + X-Frame-Options + X-Content-Type-Options.
+7. 'use strict' en todo JS. esc() para datos de usuario. createElement.
+8. HUB: tools primero, hero compacto. No hero gigante.
+9. NUNCA inventar estadisticas. NUNCA reviews falsos.
+10. Usuario principiante: pasos exactos, que va donde.
+11. LOG actualizado AL FINAL de cada sesion.
+
+════════════════════════════════════════════════════════════════
+FIN DEL LOG MAESTRO v5.6 — NoServerTools
+════════════════════════════════════════════════════════════════

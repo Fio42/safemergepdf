@@ -2,545 +2,390 @@
 <html lang="en">
 <head>
   <base href="/noservertools/">
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>NoServerTools — Free Private Browser Tools. No Uploads. No Servers.</title>
-  <meta name="description" content="Free online tools that run entirely in your browser. No file uploads, no servers, no accounts, no tracking. Your files never leave your device." />
-  <meta name="keywords" content="no upload tools, private pdf tools, browser tools, no server, local tools, safe pdf online, privacy tools" />
-  <link rel="canonical" href="https://noservertools.com/" />
-  <meta property="og:title" content="NoServerTools — Private Browser Tools. No Uploads." />
-  <meta property="og:description" content="All processing happens locally in your browser using WebAssembly. Your files never leave your device." />
-  <meta property="og:url" content="https://noservertools.com/" />
-  <meta property="og:type" content="website" />
-
-  <!-- Fonts -->
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@700;800&family=Outfit:wght@400;500;600&display=swap" rel="stylesheet" />
-
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-Content-Type-Options" content="nosniff">
+  <meta http-equiv="X-Frame-Options" content="DENY">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self' https://fonts.googleapis.com https://fonts.gstatic.com https://cdn.tailwindcss.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.tailwindcss.com; script-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com; img-src 'self' data:; font-src https://fonts.gstatic.com; frame-ancestors 'none'">
+  <title>NoServerTools — Free PDF &amp; Image Tools. No Upload. No Server. 100% Private.</title>
+  <meta name="description" content="Free online PDF and image tools that run entirely in your browser. No file uploads, no servers, no accounts, no tracking. Merge, compress, split, convert PDF — your files never leave your device.">
+  <meta name="keywords" content="pdf tools free, merge pdf, compress pdf, split pdf, pdf to jpg, jpg to pdf, no upload tools, private pdf, browser tools, no server pdf">
+  <link rel="canonical" href="https://noservertools.com/">
+  <meta property="og:title" content="NoServerTools — Free Private Browser Tools. No Uploads. No Servers.">
+  <meta property="og:description" content="PDF and image tools that run locally in your browser. No uploads, no accounts, no tracking. 100% free.">
+  <meta property="og:url" content="https://noservertools.com/">
+  <meta property="og:type" content="website">
+  <meta name="robots" content="index, follow">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@700;800&family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
     tailwind.config = {
-      theme: {
-        extend: {
-          colors: {
-            brand: {
-              50:  '#eef3ff',
-              100: '#dce7ff',
-              200: '#b9ceff',
-              300: '#8aaeff',
-              400: '#5a87ff',
-              500: '#3363f5',
-              600: '#1f45e0',
-              700: '#1a34c0',
-              800: '#1a2d9a',
-              900: '#1b2b7a',
-            },
-            ink: '#0e1117',
-          }
-        }
-      }
+      theme: { extend: { colors: { brand: { 400:'#5a87ff', 500:'#3363f5', 600:'#1f45e0', 700:'#1a34c0' }, ink:'#0e1117' } } }
     }
   </script>
-
   <style>
-    body { font-family: 'Outfit', sans-serif; background: #0e1117; color: #e8eaf0; }
-    .font-display { font-family: 'Syne', sans-serif; }
-    .font-mono-custom { font-family: 'DM Mono', monospace; }
+    *,*::before,*::after{box-sizing:border-box}
+    body{font-family:'Outfit',sans-serif;background:#0e1117;color:#e8eaf0;margin:0;-webkit-font-smoothing:antialiased}
+    .fd{font-family:'Syne',sans-serif}
+    .fm{font-family:'DM Mono',monospace}
 
-    /* Background grid */
-    .bg-grid {
-      background-image:
-        linear-gradient(rgba(83,99,255,0.06) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(83,99,255,0.06) 1px, transparent 1px);
-      background-size: 48px 48px;
-    }
+    /* Grid bg */
+    body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(83,99,255,0.055) 1px,transparent 1px),linear-gradient(90deg,rgba(83,99,255,0.055) 1px,transparent 1px);background-size:52px 52px;pointer-events:none;z-index:0}
 
-    /* Glow blobs */
-    .blob-1 {
-      position: absolute; width: 600px; height: 600px; border-radius: 50%;
-      background: radial-gradient(circle, rgba(63,94,251,0.12) 0%, transparent 70%);
-      top: -150px; left: -100px; pointer-events: none;
-    }
-    .blob-2 {
-      position: absolute; width: 500px; height: 500px; border-radius: 50%;
-      background: radial-gradient(circle, rgba(99,63,251,0.10) 0%, transparent 70%);
-      top: 200px; right: -100px; pointer-events: none;
-    }
+    /* Blobs */
+    .blob{position:fixed;border-radius:50%;pointer-events:none;z-index:0}
+    .blob-a{width:700px;height:700px;background:radial-gradient(circle,rgba(55,80,255,0.10) 0%,transparent 65%);top:-200px;left:-150px}
+    .blob-b{width:550px;height:550px;background:radial-gradient(circle,rgba(120,60,255,0.08) 0%,transparent 65%);top:300px;right:-150px}
 
     /* Gradient text */
-    .gradient-text {
-      background: linear-gradient(100deg, #5a87ff, #a78bfa, #60a5fa);
-      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-      background-clip: text;
-    }
-
-    /* Badge pill */
-    .badge {
-      display: inline-flex; align-items: center; gap: 6px;
-      background: rgba(83,99,255,0.12); border: 1px solid rgba(83,99,255,0.25);
-      border-radius: 999px; padding: 5px 14px;
-      font-family: 'DM Mono', monospace; font-size: 11px; letter-spacing: 0.06em;
-      color: #8aaeff; text-transform: uppercase;
-    }
-
-    /* Tool card */
-    .tool-card {
-      background: rgba(255,255,255,0.03);
-      border: 1px solid rgba(255,255,255,0.07);
-      border-radius: 16px;
-      transition: all 0.25s ease;
-      overflow: hidden;
-      position: relative;
-    }
-    .tool-card:hover {
-      background: rgba(255,255,255,0.06);
-      border-color: rgba(90,135,255,0.35);
-      transform: translateY(-3px);
-      box-shadow: 0 12px 40px rgba(83,99,255,0.15);
-    }
-    .tool-card .card-accent {
-      height: 3px;
-      background: linear-gradient(90deg, #3363f5, #a78bfa);
-    }
-    .tool-card.soon { opacity: 0.45; cursor: default; pointer-events: none; }
-    .tool-card.soon:hover { transform: none; box-shadow: none; }
-
-    /* Privacy bar */
-    .privacy-bar {
-      background: rgba(83,99,255,0.08);
-      border: 1px solid rgba(83,99,255,0.18);
-      border-radius: 12px;
-    }
-
-    /* Pill icon */
-    .tool-icon {
-      width: 44px; height: 44px; border-radius: 10px;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 20px;
-      background: rgba(83,99,255,0.12);
-      border: 1px solid rgba(83,99,255,0.2);
-    }
-
-    @keyframes fadeUp {
-      from { opacity:0; transform: translateY(20px); }
-      to   { opacity:1; transform: translateY(0); }
-    }
-    .fade-up   { animation: fadeUp 0.55s ease both; }
-    .fade-up-2 { animation: fadeUp 0.55s 0.1s ease both; }
-    .fade-up-3 { animation: fadeUp 0.55s 0.2s ease both; }
-    .fade-up-4 { animation: fadeUp 0.55s 0.3s ease both; }
+    .gt{background:linear-gradient(105deg,#7aa3ff,#a78bfa,#60a5fa);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
 
     /* Nav */
-    nav a { transition: color 0.2s; }
-    nav a:hover { color: #8aaeff; }
+    .nav-link{padding:6px 12px;border-radius:8px;font-size:13.5px;color:rgba(255,255,255,0.55);transition:color .15s,background .15s;white-space:nowrap}
+    .nav-link:hover{color:rgba(255,255,255,0.9);background:rgba(255,255,255,0.06)}
+    .nav-cta{padding:6px 16px;border-radius:9px;font-size:13.5px;background:#1f45e0;color:#fff;font-weight:600;transition:background .15s}
+    .nav-cta:hover{background:#3363f5}
 
-    /* How it works step */
-    .step-num {
-      width: 36px; height: 36px; border-radius: 50%;
-      background: rgba(83,99,255,0.15); border: 1px solid rgba(83,99,255,0.3);
-      display: flex; align-items: center; justify-content: center;
-      font-family: 'DM Mono', monospace; font-size: 13px; color: #8aaeff;
-      flex-shrink: 0;
-    }
+    /* Hero pill */
+    .pill{display:inline-flex;align-items:center;gap:7px;background:rgba(83,99,255,0.10);border:1px solid rgba(83,99,255,0.22);border-radius:999px;padding:5px 14px;font-family:'DM Mono',monospace;font-size:11px;letter-spacing:.07em;color:#8aaeff;text-transform:uppercase}
+
+    /* Tool grid */
+    .tools-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px}
+    @media(min-width:768px){.tools-grid{grid-template-columns:repeat(3,1fr)}}
+    @media(min-width:1024px){.tools-grid{grid-template-columns:repeat(4,1fr)}}
+
+    /* Tool card */
+    .tc{background:rgba(255,255,255,0.028);border:1px solid rgba(255,255,255,0.07);border-radius:16px;padding:20px;transition:transform .2s,border-color .2s,background .2s,box-shadow .2s;text-decoration:none;display:block;position:relative;overflow:hidden}
+    .tc::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,#3363f5,#a78bfa);opacity:0;transition:opacity .2s}
+    .tc:hover{transform:translateY(-3px);border-color:rgba(90,135,255,0.30);background:rgba(255,255,255,0.05);box-shadow:0 10px 36px rgba(31,69,224,0.14)}
+    .tc:hover::before{opacity:1}
+    .tc.soon{opacity:.38;pointer-events:none;cursor:default}
+    .tc-icon{width:40px;height:40px;border-radius:10px;background:rgba(83,99,255,0.13);border:1px solid rgba(83,99,255,0.18);display:flex;align-items:center;justify-content:center;font-size:18px;margin-bottom:14px}
+    .tc-badge-live{font-family:'DM Mono',monospace;font-size:10px;color:rgba(74,222,128,.85);background:rgba(74,222,128,.1);border:1px solid rgba(74,222,128,.2);border-radius:999px;padding:2px 8px;position:absolute;top:14px;right:14px}
+    .tc-badge-soon{font-family:'DM Mono',monospace;font-size:10px;color:rgba(255,255,255,.2);background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:999px;padding:2px 8px;position:absolute;top:14px;right:14px}
+    .tc-title{font-weight:600;font-size:14.5px;color:rgba(255,255,255,.88);margin-bottom:5px}
+    .tc-desc{font-size:12.5px;color:rgba(255,255,255,.38);line-height:1.5}
+    .tc-arrow{font-family:'DM Mono',monospace;font-size:11px;color:rgba(90,135,255,.6);margin-top:12px;display:block}
+
+    /* Privacy strip */
+    .priv-strip{background:rgba(83,99,255,0.07);border:1px solid rgba(83,99,255,0.15);border-radius:14px;padding:18px 24px;display:flex;flex-wrap:wrap;gap:20px;align-items:center;justify-content:center}
+    .priv-item{display:flex;align-items:center;gap:8px}
+    .priv-dot{width:7px;height:7px;border-radius:50%;background:#4ade80;flex-shrink:0}
+
+    /* Comparison table */
+    .ctable{width:100%;border-collapse:collapse;font-size:13.5px}
+    .ctable th{padding:10px 16px;text-align:center;font-weight:600;border-bottom:1px solid rgba(255,255,255,.07)}
+    .ctable td{padding:10px 16px;border-bottom:1px solid rgba(255,255,255,.04)}
+    .ctable tr:last-child td{border-bottom:none}
+    .yes{color:#4ade80;font-weight:700}
+    .no{color:rgba(255,100,100,.65)}
+    .partial{color:rgba(255,200,80,.7)}
+
+    /* How it works */
+    .step{background:rgba(255,255,255,.025);border:1px solid rgba(255,255,255,.07);border-radius:16px;padding:24px}
+    .step-n{width:34px;height:34px;border-radius:50%;background:rgba(83,99,255,.15);border:1px solid rgba(83,99,255,.28);display:flex;align-items:center;justify-content:center;font-family:'DM Mono',monospace;font-size:12px;color:#8aaeff;margin-bottom:14px}
+
+    /* Footer */
+    .footer-link{font-size:12px;color:rgba(255,255,255,.3);transition:color .15s}
+    .footer-link:hover{color:#5a87ff}
+    .footer-link.active{color:#5a87ff;font-weight:600}
+
+    /* Animations */
+    @keyframes fadeUp{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
+    .fu{animation:fadeUp .5s ease both}
+    .fu2{animation:fadeUp .5s .07s ease both}
+    .fu3{animation:fadeUp .5s .14s ease both}
+    .fu4{animation:fadeUp .5s .21s ease both}
   </style>
 
-  <!-- Schema.org -->
   <script type="application/ld+json">
   {
-    "@context": "https://schema.org",
-    "@type": "WebSite",
-    "name": "NoServerTools",
-    "url": "https://noservertools.com/",
-    "description": "Free private browser-based tools. No uploads, no servers, no accounts.",
-    "potentialAction": { "@type": "SearchAction", "target": "https://noservertools.com/?q={search_term_string}", "query-input": "required name=search_term_string" }
+    "@context":"https://schema.org",
+    "@type":"WebSite",
+    "name":"NoServerTools",
+    "url":"https://noservertools.com/",
+    "description":"Free private browser-based PDF and image tools. No uploads, no servers, no accounts.",
+    "potentialAction":{"@type":"SearchAction","target":"https://noservertools.com/?q={search_term_string}","query-input":"required name=search_term_string"}
   }
   </script>
 </head>
+<body>
+<div class="blob blob-a"></div>
+<div class="blob blob-b"></div>
 
-<body class="bg-grid min-h-screen">
-
-  <!-- Background blobs -->
-  <div class="fixed inset-0 overflow-hidden pointer-events-none">
-    <div class="blob-1"></div>
-    <div class="blob-2"></div>
+<!-- NAV -->
+<header style="position:sticky;top:0;z-index:50;border-bottom:1px solid rgba(255,255,255,.05);backdrop-filter:blur(14px);background:rgba(14,17,23,.75)">
+  <div style="max-width:1200px;margin:0 auto;padding:0 20px;height:54px;display:flex;align-items:center;justify-content:space-between;gap:16px">
+    <a href="/noservertools/" style="display:flex;align-items:center;gap:9px;text-decoration:none;flex-shrink:0">
+      <div style="width:28px;height:28px;border-radius:8px;background:#1f45e0;display:flex;align-items:center;justify-content:center">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true"><rect x="1" y="1" width="5" height="5" rx="1.5" fill="white"/><rect x="8" y="1" width="5" height="5" rx="1.5" fill="white" opacity=".6"/><rect x="1" y="8" width="5" height="5" rx="1.5" fill="white" opacity=".6"/><rect x="8" y="8" width="5" height="5" rx="1.5" fill="white" opacity=".3"/></svg>
+      </div>
+      <span class="fd" style="font-weight:800;font-size:15px;color:#fff">NoServer<span style="color:#5a87ff">Tools</span></span>
+    </a>
+    <nav style="display:flex;align-items:center;gap:2px;overflow-x:auto" aria-label="Main navigation">
+      <a href="/noservertools/merge-pdf/" class="nav-link">Merge PDF</a>
+      <a href="/noservertools/compress-pdf/" class="nav-link">Compress</a>
+      <a href="/noservertools/split-pdf/" class="nav-link">Split PDF</a>
+      <a href="/noservertools/pdf-to-jpg/" class="nav-link">PDF ↔ JPG</a>
+      <a href="/noservertools/" class="nav-cta" style="margin-left:6px">All tools</a>
+    </nav>
   </div>
+</header>
 
-  <!-- ─── NAV ─── -->
-  <header class="relative z-20 border-b border-white/5 backdrop-blur-sm bg-ink/60 sticky top-0">
-    <div class="max-w-6xl mx-auto px-5 h-14 flex items-center justify-between">
-      <a href="/noservertools/" class="flex items-center gap-2.5">
-        <div class="w-7 h-7 rounded-lg bg-brand-600 flex items-center justify-center">
-          <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-            <rect x="1" y="1" width="5" height="5" rx="1.5" fill="white"/>
-            <rect x="8" y="1" width="5" height="5" rx="1.5" fill="white" opacity="0.6"/>
-            <rect x="1" y="8" width="5" height="5" rx="1.5" fill="white" opacity="0.6"/>
-            <rect x="8" y="8" width="5" height="5" rx="1.5" fill="white" opacity="0.35"/>
-          </svg>
-        </div>
-        <span class="font-display font-bold text-white text-[15px] tracking-tight">NoServer<span class="text-brand-400">Tools</span></span>
+<main style="position:relative;z-index:1">
+
+  <!-- COMPACT HERO -->
+  <section style="max-width:1200px;margin:0 auto;padding:48px 20px 36px;text-align:center">
+    <div class="fu" style="margin-bottom:16px">
+      <span class="pill">
+        <span style="width:6px;height:6px;border-radius:50%;background:#4ade80"></span>
+        Zero uploads · Zero servers · Zero tracking
+      </span>
+    </div>
+    <h1 class="fd fu2" style="font-size:clamp(32px,5vw,56px);font-weight:800;color:#fff;line-height:1.12;margin:0 0 14px">
+      Private tools that run<br><span class="gt">in your browser.</span>
+    </h1>
+    <p class="fu3" style="font-size:16px;color:rgba(255,255,255,.45);max-width:520px;margin:0 auto 10px;line-height:1.6">
+      No file uploads. No servers. Your files never leave your device.
+    </p>
+    <p class="fm fu4" style="font-size:11.5px;color:rgba(255,255,255,.22);letter-spacing:.04em">
+      Processing runs locally via WebAssembly · Free forever
+    </p>
+  </section>
+
+  <!-- TOOLS GRID — first, easy access -->
+  <section id="tools" style="max-width:1200px;margin:0 auto;padding:0 20px 64px" aria-label="Available tools">
+    <div style="display:flex;align-items:baseline;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:8px">
+      <h2 class="fd" style="font-size:20px;font-weight:700;color:#fff;margin:0">All tools</h2>
+      <span class="fm" style="font-size:11px;color:rgba(255,255,255,.2)">5 live &nbsp;·&nbsp; 8 coming</span>
+    </div>
+
+    <div class="tools-grid">
+
+      <!-- MERGE — live -->
+      <a href="/noservertools/merge-pdf/" class="tc" aria-label="Merge PDF tool">
+        <span class="tc-badge-live">Live</span>
+        <div class="tc-icon">📎</div>
+        <div class="tc-title">Merge PDF</div>
+        <div class="tc-desc">Combine multiple PDFs into one. Drag to reorder.</div>
+        <span class="tc-arrow">merge-pdf →</span>
       </a>
-      <nav class="hidden md:flex items-center gap-1">
-        <a href="/noservertools/merge-pdf/" class="px-3 py-1.5 rounded-lg text-sm text-white/60 hover:bg-white/5">Merge PDF</a>
-        <a href="/noservertools/compress-pdf/" class="px-3 py-1.5 rounded-lg text-sm text-white/60 hover:bg-white/5">Compress PDF</a>
-        <a href="/noservertools/split-pdf/" class="px-3 py-1.5 rounded-lg text-sm text-white/60 hover:bg-white/5">Split PDF</a>
-        <a href="/noservertools/pdf-to-jpg/" class="px-3 py-1.5 rounded-lg text-sm text-white/60 hover:bg-white/5">PDF to JPG</a>
-      <a href="/noservertools/jpg-to-pdf/" class="px-3 py-1.5 rounded-lg text-sm text-white/60 hover:bg-white/5">JPG to PDF</a>
-        <a href="/noservertools/" class="ml-2 px-4 py-1.5 rounded-lg text-sm bg-brand-600 text-white font-medium hover:bg-brand-500">All tools</a>
-      </nav>
-      <!-- Mobile menu button (static) -->
-      <button class="md:hidden p-2 rounded-lg text-white/60 hover:bg-white/5">
-        <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
-      </button>
+
+      <!-- COMPRESS — live -->
+      <a href="/noservertools/compress-pdf/" class="tc" aria-label="Compress PDF tool">
+        <span class="tc-badge-live">Live</span>
+        <div class="tc-icon">🗜️</div>
+        <div class="tc-title">Compress PDF</div>
+        <div class="tc-desc">Reduce file size without uploading. Choose quality level.</div>
+        <span class="tc-arrow">compress-pdf →</span>
+      </a>
+
+      <!-- SPLIT — live -->
+      <a href="/noservertools/split-pdf/" class="tc" aria-label="Split PDF tool">
+        <span class="tc-badge-live">Live</span>
+        <div class="tc-icon">✂️</div>
+        <div class="tc-title">Split PDF</div>
+        <div class="tc-desc">Extract pages or split into individual files. Custom ranges.</div>
+        <span class="tc-arrow">split-pdf →</span>
+      </a>
+
+      <!-- PDF ↔ JPG — live -->
+      <a href="/noservertools/pdf-to-jpg/" class="tc" aria-label="PDF to JPG and JPG to PDF converter">
+        <span class="tc-badge-live">Live</span>
+        <div class="tc-icon">🔄</div>
+        <div class="tc-title">PDF ↔ JPG</div>
+        <div class="tc-desc">Convert PDF pages to JPG or combine images into a PDF. Switch modes instantly.</div>
+        <span class="tc-arrow">pdf-to-jpg →</span>
+      </a>
+
+      <!-- ROTATE — soon -->
+      <div class="tc soon" aria-hidden="true">
+        <span class="tc-badge-soon">Soon</span>
+        <div class="tc-icon" style="opacity:.4">🔄</div>
+        <div class="tc-title" style="color:rgba(255,255,255,.25)">Rotate PDF</div>
+        <div class="tc-desc" style="color:rgba(255,255,255,.15)">Rotate individual or all PDF pages.</div>
+      </div>
+
+      <!-- PROTECT — soon -->
+      <div class="tc soon" aria-hidden="true">
+        <span class="tc-badge-soon">Soon</span>
+        <div class="tc-icon" style="opacity:.4">🔐</div>
+        <div class="tc-title" style="color:rgba(255,255,255,.25)">Protect PDF</div>
+        <div class="tc-desc" style="color:rgba(255,255,255,.15)">Add AES-256 password protection.</div>
+      </div>
+
+      <!-- UNLOCK — soon -->
+      <div class="tc soon" aria-hidden="true">
+        <span class="tc-badge-soon">Soon</span>
+        <div class="tc-icon" style="opacity:.4">🔓</div>
+        <div class="tc-title" style="color:rgba(255,255,255,.25)">Unlock PDF</div>
+        <div class="tc-desc" style="color:rgba(255,255,255,.15)">Remove PDF password locally.</div>
+      </div>
+
+      <!-- WATERMARK — soon -->
+      <div class="tc soon" aria-hidden="true">
+        <span class="tc-badge-soon">Soon</span>
+        <div class="tc-icon" style="opacity:.4">💧</div>
+        <div class="tc-title" style="color:rgba(255,255,255,.25)">Watermark PDF</div>
+        <div class="tc-desc" style="color:rgba(255,255,255,.15)">Add custom text watermarks.</div>
+      </div>
+
+      <!-- REORDER — soon -->
+      <div class="tc soon" aria-hidden="true">
+        <span class="tc-badge-soon">Soon</span>
+        <div class="tc-icon" style="opacity:.4">📑</div>
+        <div class="tc-title" style="color:rgba(255,255,255,.25)">Reorder Pages</div>
+        <div class="tc-desc" style="color:rgba(255,255,255,.15)">Drag and rearrange PDF pages.</div>
+      </div>
+
+      <!-- PDF TO TEXT — soon -->
+      <div class="tc soon" aria-hidden="true">
+        <span class="tc-badge-soon">Soon</span>
+        <div class="tc-icon" style="opacity:.4">📝</div>
+        <div class="tc-title" style="color:rgba(255,255,255,.25)">PDF to Text</div>
+        <div class="tc-desc" style="color:rgba(255,255,255,.15)">Extract text content from PDFs.</div>
+      </div>
+
+      <!-- DELETE PAGES — soon -->
+      <div class="tc soon" aria-hidden="true">
+        <span class="tc-badge-soon">Soon</span>
+        <div class="tc-icon" style="opacity:.4">🗑️</div>
+        <div class="tc-title" style="color:rgba(255,255,255,.25)">Delete Pages</div>
+        <div class="tc-desc" style="color:rgba(255,255,255,.15)">Remove specific pages from a PDF.</div>
+      </div>
+
+      <!-- REPAIR PDF — soon -->
+      <div class="tc soon" aria-hidden="true">
+        <span class="tc-badge-soon">Soon</span>
+        <div class="tc-icon" style="opacity:.4">🔧</div>
+        <div class="tc-title" style="color:rgba(255,255,255,.25)">Repair PDF</div>
+        <div class="tc-desc" style="color:rgba(255,255,255,.15)">Fix corrupted or damaged PDF files.</div>
+      </div>
+
     </div>
-  </header>
+  </section>
 
-  <main class="relative z-10">
-
-    <!-- ─── HERO ─── -->
-    <section class="max-w-6xl mx-auto px-5 pt-20 pb-16 text-center">
-      <div class="fade-up flex justify-center mb-6">
-        <span class="badge">
-          <span style="width:6px;height:6px;border-radius:50%;background:#4ade80;display:inline-block;"></span>
-          Zero uploads · Zero servers · Zero tracking
-        </span>
+  <!-- PRIVACY STRIP -->
+  <section style="max-width:1200px;margin:0 auto;padding:0 20px 64px">
+    <div class="priv-strip">
+      <div class="priv-item">
+        <div class="priv-dot"></div>
+        <span style="font-size:13px;color:rgba(255,255,255,.6);font-weight:500">No file uploads</span>
+        <span style="font-size:12px;color:rgba(255,255,255,.25);margin-left:4px">Files stay on your device</span>
       </div>
-
-      <h1 class="fade-up-2 font-display font-extrabold text-5xl md:text-6xl lg:text-7xl leading-tight mb-6 text-white">
-        Tools that run<br/><span class="gradient-text">inside your browser.</span><br/>
-        <span class="text-white/40 text-4xl md:text-5xl font-bold">Not on our servers.</span>
-      </h1>
-
-      <p class="fade-up-3 text-lg md:text-xl text-white/55 max-w-2xl mx-auto leading-relaxed mb-4">
-        Every tool on this site processes your files locally using WebAssembly.
-        Your files never leave your device. We have no servers to store them on.
-      </p>
-
-      <p class="fade-up-4 text-sm text-white/35 max-w-xl mx-auto mb-10">
-        No account required. No email. No tracking. Nothing uploaded. Ever.
-      </p>
-
-      <div class="fade-up-4 flex flex-wrap justify-center gap-3">
-        <a href="#tools" class="px-6 py-3 bg-brand-600 hover:bg-brand-500 text-white font-semibold rounded-xl transition-all shadow-lg shadow-brand-600/20">
-          Browse all tools
-        </a>
-        <a href="#how" class="px-6 py-3 bg-white/5 hover:bg-white/10 border border-white/10 text-white/80 font-medium rounded-xl transition-all">
-          How it works
-        </a>
+      <div class="priv-item">
+        <div class="priv-dot"></div>
+        <span style="font-size:13px;color:rgba(255,255,255,.6);font-weight:500">Local processing</span>
+        <span style="font-size:12px;color:rgba(255,255,255,.25);margin-left:4px">WebAssembly in browser</span>
       </div>
-    </section>
-
-    <!-- ─── PRIVACY BAR ─── -->
-    <section class="max-w-5xl mx-auto px-5 mb-16">
-      <div class="privacy-bar p-5 md:p-6 grid grid-cols-2 md:grid-cols-4 gap-4">
-        <div class="flex items-center gap-3">
-          <div class="tool-icon text-base">🔒</div>
-          <div>
-            <div class="text-sm font-semibold text-white">No uploads</div>
-            <div class="text-xs text-white/40">Files stay on device</div>
-          </div>
-        </div>
-        <div class="flex items-center gap-3">
-          <div class="tool-icon text-base">⚡</div>
-          <div>
-            <div class="text-sm font-semibold text-white">Local processing</div>
-            <div class="text-xs text-white/40">WebAssembly in browser</div>
-          </div>
-        </div>
-        <div class="flex items-center gap-3">
-          <div class="tool-icon text-base">🚫</div>
-          <div>
-            <div class="text-sm font-semibold text-white">No accounts</div>
-            <div class="text-xs text-white/40">No email. No signup.</div>
-          </div>
-        </div>
-        <div class="flex items-center gap-3">
-          <div class="tool-icon text-base">👁️</div>
-          <div>
-            <div class="text-sm font-semibold text-white">No tracking</div>
-            <div class="text-xs text-white/40">We see nothing</div>
-          </div>
-        </div>
+      <div class="priv-item">
+        <div class="priv-dot"></div>
+        <span style="font-size:13px;color:rgba(255,255,255,.6);font-weight:500">No accounts</span>
+        <span style="font-size:12px;color:rgba(255,255,255,.25);margin-left:4px">No email, no sign-up</span>
       </div>
-    </section>
-
-    <!-- ─── HOW IT WORKS ─── -->
-    <section id="how" class="max-w-4xl mx-auto px-5 mb-20">
-      <h2 class="font-display font-bold text-2xl text-white text-center mb-3">How it actually works</h2>
-      <p class="text-center text-white/40 text-sm mb-10">Unlike most online tools — your files never go anywhere.</p>
-      <div class="grid md:grid-cols-3 gap-6">
-        <div class="bg-white/3 border border-white/7 rounded-2xl p-6">
-          <div class="step-num mb-4">01</div>
-          <h3 class="font-semibold text-white mb-2">You pick a file</h3>
-          <p class="text-sm text-white/45 leading-relaxed">Your browser reads the file directly from your disk. Nothing is uploaded to any server. The file path never leaves your tab.</p>
-        </div>
-        <div class="bg-white/3 border border-white/7 rounded-2xl p-6">
-          <div class="step-num mb-4">02</div>
-          <h3 class="font-semibold text-white mb-2">WebAssembly processes it</h3>
-          <p class="text-sm text-white/45 leading-relaxed">We use Pyodide — Python compiled to WebAssembly — to run real processing logic inside your browser tab. No network call is made.</p>
-        </div>
-        <div class="bg-white/3 border border-white/7 rounded-2xl p-6">
-          <div class="step-num mb-4">03</div>
-          <h3 class="font-semibold text-white mb-2">You download the result</h3>
-          <p class="text-sm text-white/45 leading-relaxed">The output is generated in memory and handed directly to you as a download. We never see it, store it, or touch it.</p>
-        </div>
+      <div class="priv-item">
+        <div class="priv-dot"></div>
+        <span style="font-size:13px;color:rgba(255,255,255,.6);font-weight:500">No tracking</span>
+        <span style="font-size:12px;color:rgba(255,255,255,.25);margin-left:4px">We see nothing</span>
       </div>
-    </section>
-
-    <!-- ─── TOOLS GRID ─── -->
-    <section id="tools" class="max-w-6xl mx-auto px-5 mb-24">
-      <div class="flex items-end justify-between mb-8">
-        <div>
-          <h2 class="font-display font-bold text-3xl text-white mb-1">All tools</h2>
-          <p class="text-white/40 text-sm">Every tool is 100% local. Pick one and go.</p>
-        </div>
-        <span class="font-mono-custom text-xs text-white/25 hidden md:block">5 live · 8 coming</span>
-      </div>
-
-      <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-
-        <!-- MERGE PDF — LIVE -->
-        <a href="/noservertools/merge-pdf/" class="tool-card block">
-          <div class="card-accent"></div>
-          <div class="p-6">
-            <div class="flex items-start justify-between mb-4">
-              <div class="tool-icon">📎</div>
-              <span class="font-mono-custom text-xs text-green-400/80 bg-green-400/10 border border-green-400/20 px-2 py-0.5 rounded-full">Live</span>
-            </div>
-            <h3 class="font-semibold text-white text-[15px] mb-1">Merge PDF</h3>
-            <p class="text-sm text-white/40 leading-relaxed">Combine multiple PDF files into one. Drag to reorder. No upload.</p>
-            <div class="mt-4 text-xs font-mono-custom text-brand-400/70">merge-pdf →</div>
-          </div>
-        </a>
-
-        <!-- COMPRESS PDF — LIVE -->
-        <a href="/noservertools/compress-pdf/" class="tool-card block">
-          <div class="card-accent"></div>
-          <div class="p-6">
-            <div class="flex items-start justify-between mb-4">
-              <div class="tool-icon">🗜️</div>
-              <span class="font-mono-custom text-xs text-green-400/80 bg-green-400/10 border border-green-400/20 px-2 py-0.5 rounded-full">Live</span>
-            </div>
-            <h3 class="font-semibold text-white text-[15px] mb-1">Compress PDF</h3>
-            <p class="text-sm text-white/40 leading-relaxed">Reduce PDF file size without uploading. Runs entirely in browser.</p>
-            <div class="mt-4 text-xs font-mono-custom text-brand-400/70">compress-pdf →</div>
-          </div>
-        </a>
-
-        <!-- SPLIT PDF — LIVE -->
-        <a href="/noservertools/split-pdf/" class="tool-card block">
-          <div class="card-accent"></div>
-          <div class="p-6">
-            <div class="flex items-start justify-between mb-4">
-              <div class="tool-icon">✂️</div>
-              <span class="font-mono-custom text-xs text-green-400/80 bg-green-400/10 border border-green-400/20 px-2 py-0.5 rounded-full">Live</span>
-            </div>
-            <h3 class="font-semibold text-white text-[15px] mb-1">Split PDF</h3>
-            <p class="text-sm text-white/40 leading-relaxed">Extract pages or split into individual files. Custom range support.</p>
-            <div class="mt-4 text-xs font-mono-custom text-brand-400/70">split-pdf →</div>
-          </div>
-        </a>
-
-        <!-- PDF TO JPG — LIVE -->
-        <a href="/noservertools/pdf-to-jpg/" class="tool-card block">
-          <div class="card-accent"></div>
-          <div class="p-6">
-            <div class="flex items-start justify-between mb-4">
-              <div class="tool-icon">🖼️</div>
-              <span class="font-mono-custom text-xs text-green-400/80 bg-green-400/10 border border-green-400/20 px-2 py-0.5 rounded-full">Live</span>
-            </div>
-            <h3 class="font-semibold text-white text-[15px] mb-1">PDF to JPG</h3>
-            <p class="text-sm text-white/40 leading-relaxed">Convert PDF pages to JPG images. Choose DPI. Download all at once.</p>
-            <div class="mt-4 text-xs font-mono-custom text-brand-400/70">pdf-to-jpg →</div>
-          </div>
-        </a>
-
-        <!-- JPG TO PDF — LIVE -->
-        <a href="/noservertools/jpg-to-pdf/" class="tool-card block">
-          <div class="card-accent"></div>
-          <div class="p-6">
-            <div class="flex items-start justify-between mb-4">
-              <div class="tool-icon">🗂️</div>
-              <span class="font-mono-custom text-xs text-green-400/80 bg-green-400/10 border border-green-400/20 px-2 py-0.5 rounded-full">Live</span>
-            </div>
-            <h3 class="font-semibold text-white text-[15px] mb-1">JPG to PDF</h3>
-            <p class="text-sm text-white/40 leading-relaxed">Convert JPG, PNG or WEBP images into a PDF. Drag to reorder pages.</p>
-            <div class="mt-4 text-xs font-mono-custom text-brand-400/70">jpg-to-pdf →</div>
-          </div>
-        </a>
-
-        <!-- ROTATE PDF — COMING -->
-        <div class="tool-card soon block">
-          <div style="height:3px;background:rgba(255,255,255,0.05);"></div>
-          <div class="p-6">
-            <div class="flex items-start justify-between mb-4">
-              <div class="tool-icon opacity-40">🔄</div>
-              <span class="font-mono-custom text-xs text-white/20 bg-white/5 border border-white/10 px-2 py-0.5 rounded-full">Soon</span>
-            </div>
-            <h3 class="font-semibold text-white/30 text-[15px] mb-1">Rotate PDF</h3>
-            <p class="text-sm text-white/20 leading-relaxed">Rotate individual or all PDF pages.</p>
-          </div>
-        </div>
-
-        <!-- PROTECT PDF — COMING -->
-        <div class="tool-card soon block">
-          <div style="height:3px;background:rgba(255,255,255,0.05);"></div>
-          <div class="p-6">
-            <div class="flex items-start justify-between mb-4">
-              <div class="tool-icon opacity-40">🔐</div>
-              <span class="font-mono-custom text-xs text-white/20 bg-white/5 border border-white/10 px-2 py-0.5 rounded-full">Soon</span>
-            </div>
-            <h3 class="font-semibold text-white/30 text-[15px] mb-1">Protect PDF</h3>
-            <p class="text-sm text-white/20 leading-relaxed">Add AES-256 password protection locally.</p>
-          </div>
-        </div>
-
-        <!-- UNLOCK PDF — COMING -->
-        <div class="tool-card soon block">
-          <div style="height:3px;background:rgba(255,255,255,0.05);"></div>
-          <div class="p-6">
-            <div class="flex items-start justify-between mb-4">
-              <div class="tool-icon opacity-40">🔓</div>
-              <span class="font-mono-custom text-xs text-white/20 bg-white/5 border border-white/10 px-2 py-0.5 rounded-full">Soon</span>
-            </div>
-            <h3 class="font-semibold text-white/30 text-[15px] mb-1">Unlock PDF</h3>
-            <p class="text-sm text-white/20 leading-relaxed">Remove PDF password protection locally.</p>
-          </div>
-        </div>
-
-        <!-- WATERMARK — COMING -->
-        <div class="tool-card soon block">
-          <div style="height:3px;background:rgba(255,255,255,0.05);"></div>
-          <div class="p-6">
-            <div class="flex items-start justify-between mb-4">
-              <div class="tool-icon opacity-40">💧</div>
-              <span class="font-mono-custom text-xs text-white/20 bg-white/5 border border-white/10 px-2 py-0.5 rounded-full">Soon</span>
-            </div>
-            <h3 class="font-semibold text-white/30 text-[15px] mb-1">Watermark PDF</h3>
-            <p class="text-sm text-white/20 leading-relaxed">Add custom text watermarks to PDFs.</p>
-          </div>
-        </div>
-
-        <!-- REORDER — COMING -->
-        <div class="tool-card soon block">
-          <div style="height:3px;background:rgba(255,255,255,0.05);"></div>
-          <div class="p-6">
-            <div class="flex items-start justify-between mb-4">
-              <div class="tool-icon opacity-40">📑</div>
-              <span class="font-mono-custom text-xs text-white/20 bg-white/5 border border-white/10 px-2 py-0.5 rounded-full">Soon</span>
-            </div>
-            <h3 class="font-semibold text-white/30 text-[15px] mb-1">Reorder Pages</h3>
-            <p class="text-sm text-white/20 leading-relaxed">Drag and rearrange PDF pages.</p>
-          </div>
-        </div>
-
-      </div>
-    </section>
-
-    <!-- ─── VS COMPETITION ─── -->
-    <section class="max-w-5xl mx-auto px-5 mb-24">
-      <h2 class="font-display font-bold text-2xl text-white text-center mb-3">Why NoServerTools is different</h2>
-      <p class="text-center text-white/40 text-sm mb-10">Most tools send your files to a server. We built it so we physically can't.</p>
-      <div class="overflow-x-auto">
-        <table class="w-full text-sm">
-          <thead>
-            <tr class="border-b border-white/8">
-              <th class="text-left py-3 px-4 text-white/40 font-normal font-mono-custom text-xs">Feature</th>
-              <th class="py-3 px-4 text-brand-400 font-semibold text-center">NoServerTools</th>
-              <th class="py-3 px-4 text-white/30 font-normal text-center">iLovePDF</th>
-              <th class="py-3 px-4 text-white/30 font-normal text-center">SmallPDF</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr class="border-b border-white/5">
-              <td class="py-3 px-4 text-white/50">Files uploaded to server</td>
-              <td class="py-3 px-4 text-center text-green-400 font-semibold">Never</td>
-              <td class="py-3 px-4 text-center text-red-400/70">Yes</td>
-              <td class="py-3 px-4 text-center text-red-400/70">Yes</td>
-            </tr>
-            <tr class="border-b border-white/5">
-              <td class="py-3 px-4 text-white/50">Account required</td>
-              <td class="py-3 px-4 text-center text-green-400 font-semibold">No</td>
-              <td class="py-3 px-4 text-center text-white/30">Optional</td>
-              <td class="py-3 px-4 text-center text-red-400/70">For most features</td>
-            </tr>
-            <tr class="border-b border-white/5">
-              <td class="py-3 px-4 text-white/50">Works offline</td>
-              <td class="py-3 px-4 text-center text-green-400 font-semibold">Yes*</td>
-              <td class="py-3 px-4 text-center text-red-400/70">No</td>
-              <td class="py-3 px-4 text-center text-red-400/70">No</td>
-            </tr>
-            <tr class="border-b border-white/5">
-              <td class="py-3 px-4 text-white/50">Processing location</td>
-              <td class="py-3 px-4 text-center text-green-400 font-semibold">Your browser</td>
-              <td class="py-3 px-4 text-center text-white/30">Their servers</td>
-              <td class="py-3 px-4 text-center text-white/30">Their servers</td>
-            </tr>
-            <tr>
-              <td class="py-3 px-4 text-white/50">Free</td>
-              <td class="py-3 px-4 text-center text-green-400 font-semibold">Yes — always</td>
-              <td class="py-3 px-4 text-center text-white/30">Limited</td>
-              <td class="py-3 px-4 text-center text-white/30">Very limited</td>
-            </tr>
-          </tbody>
-        </table>
-        <p class="text-xs text-white/20 mt-2 px-4">* After initial page load, Pyodide is cached in the browser.</p>
-      </div>
-    </section>
-
-    <!-- ─── ABOUT / PRIVACY ─── -->
-    <section class="max-w-3xl mx-auto px-5 mb-24 text-center">
-      <div class="bg-white/3 border border-white/7 rounded-2xl p-8 md:p-10">
-        <div class="text-3xl mb-4">🛡️</div>
-        <h2 class="font-display font-bold text-xl text-white mb-4">Our privacy promise</h2>
-        <p class="text-white/50 text-sm leading-relaxed mb-4">
-          NoServerTools was built with one principle: <strong class="text-white/80">we should never be able to see your files, even if we wanted to.</strong>
-          So we built it that way. There are no servers that receive files. No database. No logs of what you process.
-        </p>
-        <p class="text-white/40 text-sm leading-relaxed">
-          All tools use <strong class="text-white/60">Pyodide</strong> — Python compiled to WebAssembly — which runs entirely inside your browser tab.
-          When you close the tab, everything is gone. We have nothing.
-        </p>
-        <div class="mt-6 pt-6 border-t border-white/7 font-mono-custom text-xs text-white/25 tracking-wide">
-          No uploads &nbsp;·&nbsp; No accounts &nbsp;·&nbsp; No tracking &nbsp;·&nbsp; Free forever
-        </div>
-      </div>
-    </section>
-
-  </main>
-
-  <!-- ─── FOOTER ─── -->
-  <footer class="border-t border-white/5 bg-black/30">
-    <div class="max-w-6xl mx-auto px-5 py-10">
-      <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
-        <div>
-          <div class="flex items-center gap-2 mb-2">
-            <div class="w-6 h-6 rounded-md bg-brand-600 flex items-center justify-center">
-              <svg width="12" height="12" viewBox="0 0 14 14" fill="none">
-                <rect x="1" y="1" width="5" height="5" rx="1.5" fill="white"/>
-                <rect x="8" y="1" width="5" height="5" rx="1.5" fill="white" opacity="0.6"/>
-                <rect x="1" y="8" width="5" height="5" rx="1.5" fill="white" opacity="0.6"/>
-                <rect x="8" y="8" width="5" height="5" rx="1.5" fill="white" opacity="0.35"/>
-              </svg>
-            </div>
-            <span class="font-display font-bold text-white text-sm">NoServer<span class="text-brand-400">Tools</span></span>
-          </div>
-          <p class="text-xs text-white/25">Free private tools. No uploads. No servers. No tracking.</p>
-          <p class="text-xs text-white/20 mt-1">&copy; 2025 NoServerTools</p>
-        </div>
-        <nav class="flex flex-wrap gap-x-5 gap-y-2">
-          <a href="/noservertools/merge-pdf/" class="text-xs text-white/35 hover:text-brand-400 transition-colors">Merge PDF</a>
-          <a href="/noservertools/compress-pdf/" class="text-xs text-white/35 hover:text-brand-400 transition-colors">Compress PDF</a>
-          <a href="/noservertools/split-pdf/" class="text-xs text-white/35 hover:text-brand-400 transition-colors">Split PDF</a>
-          <a href="/noservertools/pdf-to-jpg/" class="text-xs text-white/35 hover:text-brand-400 transition-colors">PDF to JPG</a>
-          <a href="/noservertools/jpg-to-pdf/" class="text-xs text-white/35 hover:text-brand-400 transition-colors">JPG to PDF</a>
-          <a href="/noservertools/rotate-pdf/" class="text-xs text-white/20 cursor-default">Rotate PDF</a>
-          <a href="/noservertools/protect-pdf/" class="text-xs text-white/20 cursor-default">Protect PDF</a>
-          <a href="/noservertools/unlock-pdf/" class="text-xs text-white/20 cursor-default">Unlock PDF</a>
-        </nav>
+      <div class="priv-item">
+        <div class="priv-dot"></div>
+        <span style="font-size:13px;color:rgba(255,255,255,.6);font-weight:500">Free forever</span>
+        <span style="font-size:12px;color:rgba(255,255,255,.25);margin-left:4px">No limits, no premium</span>
       </div>
     </div>
-  </footer>
+  </section>
+
+  <!-- HOW IT WORKS -->
+  <section style="max-width:1200px;margin:0 auto;padding:0 20px 64px" id="how">
+    <h2 class="fd" style="font-size:22px;font-weight:700;color:#fff;text-align:center;margin:0 0 8px">How it actually works</h2>
+    <p style="text-align:center;color:rgba(255,255,255,.35);font-size:13.5px;margin:0 0 32px">Unlike most tools — your files never go anywhere</p>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px">
+      <div class="step">
+        <div class="step-n">01</div>
+        <h3 style="font-size:14.5px;font-weight:600;color:#fff;margin:0 0 8px">You pick a file</h3>
+        <p style="font-size:12.5px;color:rgba(255,255,255,.4);line-height:1.55;margin:0">Your browser reads the file directly from disk. Nothing is uploaded. The file path never leaves your tab.</p>
+      </div>
+      <div class="step">
+        <div class="step-n">02</div>
+        <h3 style="font-size:14.5px;font-weight:600;color:#fff;margin:0 0 8px">Browser processes it</h3>
+        <p style="font-size:12.5px;color:rgba(255,255,255,.4);line-height:1.55;margin:0">We use Pyodide (Python as WebAssembly) and PDF.js to run real processing logic inside your browser tab. No network call is made.</p>
+      </div>
+      <div class="step">
+        <div class="step-n">03</div>
+        <h3 style="font-size:14.5px;font-weight:600;color:#fff;margin:0 0 8px">You download the result</h3>
+        <p style="font-size:12.5px;color:rgba(255,255,255,.4);line-height:1.55;margin:0">The output is generated in memory and handed directly to you as a download. We never see it, store it, or touch it.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- VS COMPETITION -->
+  <section style="max-width:1200px;margin:0 auto;padding:0 20px 64px">
+    <h2 class="fd" style="font-size:22px;font-weight:700;color:#fff;text-align:center;margin:0 0 8px">Why NoServerTools is different</h2>
+    <p style="text-align:center;color:rgba(255,255,255,.35);font-size:13.5px;margin:0 0 32px">Most tools send your files to their servers. We built it so we physically cannot.</p>
+    <div style="background:rgba(255,255,255,.025);border:1px solid rgba(255,255,255,.07);border-radius:16px;overflow:hidden;overflow-x:auto">
+      <table class="ctable" aria-label="Feature comparison">
+        <thead>
+          <tr style="background:rgba(255,255,255,.03)">
+            <th style="text-align:left;color:rgba(255,255,255,.35);font-weight:500">Feature</th>
+            <th style="color:#5a87ff">NoServerTools</th>
+            <th style="color:rgba(255,255,255,.25);font-weight:400">iLovePDF</th>
+            <th style="color:rgba(255,255,255,.25);font-weight:400">SmallPDF</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td style="color:rgba(255,255,255,.45)">Files uploaded to server</td><td class="yes" style="text-align:center">Never</td><td class="no" style="text-align:center">Yes</td><td class="no" style="text-align:center">Yes</td></tr>
+          <tr><td style="color:rgba(255,255,255,.45)">Account required</td><td class="yes" style="text-align:center">No</td><td class="partial" style="text-align:center">Optional</td><td class="no" style="text-align:center">Most features</td></tr>
+          <tr><td style="color:rgba(255,255,255,.45)">Works offline*</td><td class="yes" style="text-align:center">Yes</td><td class="no" style="text-align:center">No</td><td class="no" style="text-align:center">No</td></tr>
+          <tr><td style="color:rgba(255,255,255,.45)">Processing location</td><td class="yes" style="text-align:center">Your browser</td><td class="no" style="text-align:center">Their servers</td><td class="no" style="text-align:center">Their servers</td></tr>
+          <tr><td style="color:rgba(255,255,255,.45)">Free with no limits</td><td class="yes" style="text-align:center">Yes</td><td class="partial" style="text-align:center">Limited</td><td class="partial" style="text-align:center">Very limited</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="fm" style="font-size:11px;color:rgba(255,255,255,.2);margin-top:10px;padding:0 4px">* After initial page load, engines are cached in the browser.</p>
+  </section>
+
+  <!-- ABOUT -->
+  <section style="max-width:680px;margin:0 auto;padding:0 20px 80px;text-align:center">
+    <div style="background:rgba(255,255,255,.025);border:1px solid rgba(255,255,255,.07);border-radius:20px;padding:40px 36px">
+      <div style="font-size:32px;margin-bottom:14px">🛡️</div>
+      <h2 class="fd" style="font-size:18px;font-weight:700;color:#fff;margin:0 0 14px">Our privacy promise</h2>
+      <p style="font-size:13.5px;color:rgba(255,255,255,.45);line-height:1.7;margin:0 0 12px">NoServerTools was built with one principle: we should never be able to see your files, even if we wanted to. So we built it that way. There are no servers that receive files. No database. No logs of what you process.</p>
+      <p style="font-size:13px;color:rgba(255,255,255,.3);line-height:1.7;margin:0">All tools use <strong style="color:rgba(255,255,255,.55)">Pyodide</strong> or <strong style="color:rgba(255,255,255,.55)">PDF.js</strong> — running entirely inside your browser tab. When you close the tab, everything is gone. We have nothing.</p>
+      <div style="margin-top:24px;padding-top:20px;border-top:1px solid rgba(255,255,255,.06)" class="fm" style="font-size:11px;color:rgba(255,255,255,.2);letter-spacing:.06em">
+        No uploads &nbsp;·&nbsp; No accounts &nbsp;·&nbsp; No tracking &nbsp;·&nbsp; Free forever
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<!-- FOOTER -->
+<footer style="border-top:1px solid rgba(255,255,255,.05);background:rgba(0,0,0,.3);position:relative;z-index:1">
+  <div style="max-width:1200px;margin:0 auto;padding:32px 20px;display:flex;flex-wrap:wrap;align-items:flex-start;justify-content:space-between;gap:24px">
+    <div>
+      <a href="/noservertools/" style="display:flex;align-items:center;gap:8px;text-decoration:none;margin-bottom:6px">
+        <div style="width:22px;height:22px;border-radius:6px;background:#1f45e0;display:flex;align-items:center;justify-content:center"><svg width="10" height="10" viewBox="0 0 14 14" fill="none" aria-hidden="true"><rect x="1" y="1" width="5" height="5" rx="1.5" fill="white"/><rect x="8" y="1" width="5" height="5" rx="1.5" fill="white" opacity=".6"/><rect x="1" y="8" width="5" height="5" rx="1.5" fill="white" opacity=".6"/><rect x="8" y="8" width="5" height="5" rx="1.5" fill="white" opacity=".3"/></svg></div>
+        <span class="fd" style="font-size:14px;font-weight:700;color:#fff">NoServer<span style="color:#5a87ff">Tools</span></span>
+      </a>
+      <p class="fm" style="font-size:11px;color:rgba(255,255,255,.2);margin:0">&copy; 2025 NoServerTools &nbsp;·&nbsp; Free forever</p>
+    </div>
+    <nav style="display:flex;flex-wrap:wrap;gap:10px 20px" aria-label="Footer navigation">
+      <a href="/noservertools/merge-pdf/" class="footer-link">Merge PDF</a>
+      <a href="/noservertools/compress-pdf/" class="footer-link">Compress PDF</a>
+      <a href="/noservertools/split-pdf/" class="footer-link">Split PDF</a>
+      <a href="/noservertools/pdf-to-jpg/" class="footer-link">PDF ↔ JPG</a>
+      <a href="/noservertools/rotate-pdf/" class="footer-link" style="opacity:.4">Rotate PDF</a>
+      <a href="/noservertools/protect-pdf/" class="footer-link" style="opacity:.4">Protect PDF</a>
+      <a href="/noservertools/unlock-pdf/" class="footer-link" style="opacity:.4">Unlock PDF</a>
+    </nav>
+  </div>
+  <div class="fm" style="text-align:center;padding:12px 20px;border-top:1px solid rgba(255,255,255,.04);font-size:10.5px;color:rgba(255,255,255,.15);letter-spacing:.05em">
+    NO UPLOADS &nbsp;·&nbsp; NO ACCOUNTS &nbsp;·&nbsp; NO TRACKING &nbsp;·&nbsp; NO SERVERS
+  </div>
+</footer>
 
 </body>
 </html>
