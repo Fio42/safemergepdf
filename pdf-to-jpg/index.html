@@ -404,7 +404,7 @@ let p2jFile = null, p2jDpi = 150, p2jImages = [], p2jUrls = [];
 
 // JPG→PDF state
 let j2pImages = [], j2pPageSize = 'fit', j2pObjUrl = null, j2pDragSrc = null;
-let pyodide = null, pyReady = false;
+let pyodide = null, pyReady = false, pyLoading = false;
 
 const fmt = b => b > 1048576 ? (b/1048576).toFixed(1)+' MB' : (b/1024).toFixed(0)+' KB';
 
@@ -655,13 +655,21 @@ function j2pRemove(i) {
 }
 
 async function initPyodide() {
-  if (pyodide || pyReady) return;
+  if (pyReady) return;
+  if (pyLoading) return; // already loading, wait
+  pyLoading = true;
   try {
     pyodide = await loadPyodide({ indexURL: 'https://cdn.jsdelivr.net/pyodide/v0.25.0/full/' });
     await pyodide.loadPackage('micropip');
     await pyodide.runPythonAsync(`import micropip; await micropip.install(['pypdf','pillow'])`);
     pyReady = true;
-  } catch(e) { console.error('Pyodide init failed:', e.message); }
+    pyLoading = false;
+  } catch(e) {
+    pyLoading = false;
+    pyodide = null;
+    console.error('Pyodide init failed:', e.message);
+    throw e; // re-throw so callers can handle
+  }
 }
 
 function j2pProg(pct, label, sub) {
@@ -676,15 +684,22 @@ async function j2pConvert() {
   clearErr();
   document.getElementById('j2p-list').style.display = 'none';
   document.getElementById('j2p-progress').style.display = '';
-  j2pProg(5, 'Loading engine...', 'First load takes a moment');
+  j2pProg(5, 'Loading engine...', 'First time: ~15 seconds, please wait');
   if (!pyReady) {
-    await initPyodide();
-    if (!pyReady) {
-      showErr('Failed to load engine. Please refresh and try again.');
+    try {
+      await initPyodide();
+    } catch(e) {
+      showErr('Failed to load engine: ' + e.message + '. Please refresh the page and try again.');
       document.getElementById('j2p-progress').style.display = 'none';
       document.getElementById('j2p-list').style.display = '';
       return;
     }
+  }
+  if (!pyReady) {
+    showErr('Failed to load engine. Please refresh and try again.');
+    document.getElementById('j2p-progress').style.display = 'none';
+    document.getElementById('j2p-list').style.display = '';
+    return;
   }
   j2pProg(25, 'Reading images...', '');
   try {

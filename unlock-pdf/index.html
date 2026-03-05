@@ -282,9 +282,9 @@
 const esc = s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
 const fmt = b => b>1048576?(b/1048576).toFixed(1)+' MB':(b/1024).toFixed(0)+' KB';
 
-let currentFile=null, pyodide=null, pyReady=false, resultURL=null;
+let currentFile=null, pyodide=null, pyReady=false, pyLoading=false, resultURL=null;
 
-function showError(msg){const b=document.getElementById('errorBox');b.textContent=msg;b.style.display='block';setTimeout(()=>b.style.display='none',7000)}
+function showError(msg){const b=document.getElementById('errorBox');b.textContent=msg;b.style.display='block';setTimeout(()=>b.style.display='none',9000)}
 function setProgress(pct,label){document.getElementById('progressWrap').style.display='block';document.getElementById('progressFill').style.width=pct+'%';document.getElementById('progressLabel').textContent=label;document.getElementById('progressPct').textContent=pct+'%'}
 
 function handleFile(f){
@@ -298,11 +298,18 @@ function handleFile(f){
   document.getElementById('dropZone').style.display='none';
   document.getElementById('toolUi').style.display='block';
   document.getElementById('resultWrap').style.display='none';
-  initPyodide();
+  if(pyReady){
+    document.getElementById('loadingEngine').style.display='none';
+    document.getElementById('btnUnlock').disabled=false;
+  } else {
+    initPyodide();
+  }
 }
 
 async function initPyodide(){
-  if(pyReady)return;
+  if(pyReady){document.getElementById('loadingEngine').style.display='none';document.getElementById('btnUnlock').disabled=false;return;}
+  if(pyLoading)return;
+  pyLoading=true;
   document.getElementById('loadingEngine').style.display='block';
   document.getElementById('btnUnlock').disabled=true;
   try{
@@ -310,9 +317,15 @@ async function initPyodide(){
     await pyodide.loadPackage('micropip');
     await pyodide.runPythonAsync(`import micropip; await micropip.install('pypdf')`);
     pyReady=true;
+    pyLoading=false;
     document.getElementById('loadingEngine').style.display='none';
-    document.getElementById('btnUnlock').disabled=false;
-  }catch(e){document.getElementById('loadingEngine').style.display='none';showError('Failed to load engine: '+e.message)}
+    if(currentFile) document.getElementById('btnUnlock').disabled=false;
+  }catch(e){
+    pyLoading=false;
+    pyodide=null;
+    document.getElementById('loadingEngine').style.display='none';
+    showError('Failed to load engine: '+e.message+'. Please refresh the page and try again.');
+  }
 }
 
 function toggleVisibility(){
