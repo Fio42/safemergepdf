@@ -227,13 +227,14 @@
 
   <!-- DROP ZONE -->
   <div class="drop-zone" id="dropZone"
+    onclick="document.getElementById('fileInput').click()"
     ondragover="event.preventDefault();this.classList.add('drag-over')"
     ondragleave="this.classList.remove('drag-over')"
     ondrop="event.preventDefault();this.classList.remove('drag-over');handleFile(event.dataTransfer.files[0])">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="40" height="40" style="color:var(--brand);margin-bottom:12px;opacity:.7"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14,2 14,8 20,8"/><line x1="12" y1="12" x2="12" y2="18"/><polyline points="9,15 12,18 15,15"/></svg>
     <h2 id="dz-title">Drop your PDF here</h2>
-    <p id="dz-sub">or click to browse your files</p>
-    <button class="btn-select" id="btn-browse" onclick="document.getElementById('fileInput').click()">Select PDF file</button>
+    <p id="dz-sub">or click anywhere here to browse</p>
+    <button class="btn-select" id="btn-browse" onclick="event.stopPropagation();document.getElementById('fileInput').click()">Select PDF file</button>
     <input type="file" id="fileInput" accept=".pdf,application/pdf" onchange="handleFile(this.files[0])">
   </div>
 
@@ -260,6 +261,10 @@
         <button class="btn-toolbar" onclick="resetOrder()">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><path d="M3 2v6h6"/><path d="M3 8a9 9 0 1018 4"/></svg>
           <span id="btn-reset-lbl">Reset</span>
+        </button>
+        <button class="btn-toolbar" onclick="openAnotherFile()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14,2 14,8 20,8"/><line x1="12" y1="12" x2="12" y2="18"/><polyline points="9,15 12,18 15,15"/></svg>
+          <span id="btn-open-lbl">Open file</span>
         </button>
         <button class="btn-toolbar primary" id="btnApply" onclick="doReorder()" disabled>
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7,10 12,15 17,10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
@@ -439,7 +444,7 @@ async function handleFile(f){
   initPyodide();
 }
 
-/* ── Render all rows ── */
+/* ── Render all rows (initial load only) ── */
 async function renderPageList(){
   const list = document.getElementById('pageList');
   list.innerHTML = '';
@@ -447,6 +452,45 @@ async function renderPageList(){
     const row = await buildRow(i);
     list.appendChild(row);
   }
+}
+
+/* ── Fast DOM update after move: no canvas re-render ── */
+function updateListAfterMove(){
+  const list  = document.getElementById('pageList');
+  const rows  = Array.from(list.querySelectorAll('.page-row'));
+  const n     = pageOrder.length;
+
+  // Reorder DOM nodes to match pageOrder (via position stored in dataset.origPage)
+  // We stored origPage in dataset so we can find each row by its original page
+  // Sort existing rows into the new order
+  const rowByOrig = {};
+  rows.forEach(r => { rowByOrig[r.dataset.origPage] = r; });
+
+  // Re-append in new order
+  pageOrder.forEach((origPage, posIdx) => {
+    const row = rowByOrig[origPage];
+    if(!row) return;
+    row.dataset.pos = posIdx;
+
+    // Update position number cell
+    const posCell = row.querySelector('.row-pos');
+    if(posCell) posCell.textContent = posIdx + 1;
+
+    // Update label
+    const strong = row.querySelector('.row-label strong');
+    if(strong) strong.textContent = T('page_word') + ' ' + (posIdx + 1);
+
+    // Update up/down disabled state
+    const btnUp   = row.querySelector('.btn-up');
+    const btnDown = row.querySelector('.btn-down');
+    if(btnUp)   btnUp.disabled   = (posIdx === 0);
+    if(btnDown) btnDown.disabled = (posIdx === n - 1);
+
+    // Update selection highlight
+    row.classList.toggle('selected', posIdx === selectedPos);
+
+    list.appendChild(row); // re-append in new order
+  });
 }
 
 /* ── Build one row ── */
@@ -463,8 +507,9 @@ async function buildRow(posIdx){
   await page.render({canvasContext: canvas.getContext('2d'), viewport: vp}).promise;
 
   const row = document.createElement('div');
-  row.className    = 'page-row';
-  row.dataset.pos  = posIdx;
+  row.className       = 'page-row';
+  row.dataset.pos     = posIdx;
+  row.dataset.origPage = origPage;  // stable key for DOM reuse
 
   /* col 1: position number */
   const posCell = document.createElement('div');
@@ -494,14 +539,22 @@ async function buildRow(posIdx){
   btnUp.title     = T('move_up');
   btnUp.disabled  = (posIdx === 0);
   btnUp.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="11" height="11"><polyline points="18,15 12,9 6,15"/></svg>';
-  btnUp.addEventListener('click', e => { e.stopPropagation(); movePage(posIdx, posIdx-1); });
+  btnUp.addEventListener('click', e => {
+    e.stopPropagation();
+    const cur = parseInt(e.currentTarget.closest('.page-row').dataset.pos);
+    movePage(cur, cur - 1);
+  });
 
   const btnDown = document.createElement('button');
   btnDown.className = 'row-btn btn-down';
   btnDown.title     = T('move_down');
   btnDown.disabled  = (posIdx === n - 1);
   btnDown.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="11" height="11"><polyline points="6,9 12,15 18,9"/></svg>';
-  btnDown.addEventListener('click', e => { e.stopPropagation(); movePage(posIdx, posIdx+1); });
+  btnDown.addEventListener('click', e => {
+    e.stopPropagation();
+    const cur = parseInt(e.currentTarget.closest('.page-row').dataset.pos);
+    movePage(cur, cur + 1);
+  });
 
   actCell.appendChild(btnUp);
   actCell.appendChild(btnDown);
@@ -512,7 +565,7 @@ async function buildRow(posIdx){
   row.appendChild(actCell);
 
   /* click to select + show preview */
-  row.addEventListener('click', () => selectRow(posIdx));
+  row.addEventListener('click', () => selectRow(parseInt(row.dataset.pos)));
 
   /* pointer-based drag */
   row.addEventListener('pointerdown', onRowPointerDown);
@@ -538,21 +591,17 @@ function scrollToRow(posIdx){
   if(row) row.scrollIntoView({block:'nearest', behavior:'smooth'});
 }
 
-/* ── Move page (core operation) ── */
+/* ── Move page (core operation — fast DOM swap, no canvas re-render) ── */
 function movePage(fromIdx, toIdx){
   if(toIdx < 0 || toIdx >= pageOrder.length) return;
+  if(fromIdx === toIdx) return;
   const [moved] = pageOrder.splice(fromIdx, 1);
   pageOrder.splice(toIdx, 0, moved);
   selectedPos = toIdx;
   previewPos  = toIdx;
-  renderPageList().then(() => {
-    // Re-apply selection highlight after re-render
-    document.querySelectorAll('.page-row').forEach(r =>{
-      r.classList.toggle('selected', parseInt(r.dataset.pos) === selectedPos);
-    });
-    showPreview(selectedPos);
-    setTimeout(() => scrollToRow(selectedPos), 60);
-  });
+  updateListAfterMove();
+  showPreview(toIdx);
+  setTimeout(() => scrollToRow(toIdx), 30);
 }
 
 /* ── Quick Move: type page number + new position ── */
@@ -624,6 +673,26 @@ function previewStep(delta){
   selectRow(next);
 }
 
+/* ── Open another file without going back to landing ── */
+function openAnotherFile(){
+  // Reset state but keep engine loaded
+  currentFile = null;
+  pdfDoc      = null;
+  pageOrder   = [];
+  selectedPos = -1;
+  previewPos  = -1;
+  if(resultObjectUrl){ URL.revokeObjectURL(resultObjectUrl); resultObjectUrl=null; }
+  document.getElementById('editorWrap').style.display = 'none';
+  document.getElementById('resultWrap').style.display = 'none';
+  document.getElementById('errorBox').style.display   = 'none';
+  document.getElementById('pageList').innerHTML        = '';
+  document.getElementById('fileInput').value           = '';
+  document.getElementById('btnApply').disabled         = true;
+  document.getElementById('dropZone').style.display   = '';
+  // Trigger file picker immediately
+  document.getElementById('fileInput').click();
+}
+
 /* ── Pointer-based drag for rows ── */
 let dragSrcPos = -1;
 let dragGhost  = null;
@@ -635,7 +704,7 @@ function onRowPointerDown(e){
   e.preventDefault();
 
   const row  = e.currentTarget;
-  dragSrcPos = parseInt(row.dataset.pos);
+  dragSrcPos = parseInt(row.dataset.pos);  // read live from DOM
   dragGhost  = document.getElementById('listGhost');
 
   const orig = pageOrder[dragSrcPos];
@@ -686,7 +755,7 @@ function onRowPointerUp(e){
   let dropIdx   = -1;
   let dropBefore = true;
   document.querySelectorAll('.page-row').forEach(r => {
-    if(r.classList.contains('is-dragging')) return;
+    if(parseInt(r.dataset.pos) === dragSrcPos) return; // skip the dragged row
     const rect = r.getBoundingClientRect();
     const midY = rect.top + rect.height / 2;
     if(e.clientY >= rect.top - 6 && e.clientY < midY){
@@ -709,13 +778,11 @@ function onRowPointerUp(e){
 function reverseAll(){
   if(selectedPos >= 0) selectedPos = pageOrder.length - 1 - selectedPos;
   pageOrder.reverse();
-  renderPageList().then(() => {
-    if(selectedPos >= 0){
-      document.querySelectorAll('.page-row').forEach(r =>
-        r.classList.toggle('selected', parseInt(r.dataset.pos) === selectedPos));
-      showPreview(selectedPos);
-    }
-  });
+  updateListAfterMove();
+  if(selectedPos >= 0){
+    showPreview(selectedPos);
+    setTimeout(() => scrollToRow(selectedPos), 30);
+  }
 }
 
 function resetOrder(){
@@ -723,7 +790,7 @@ function resetOrder(){
   pageOrder   = Array.from({length: pdfDoc.numPages}, (_,i)=>i+1);
   selectedPos = -1;
   previewPos  = -1;
-  renderPageList();
+  updateListAfterMove();
   clearPreview();
 }
 
@@ -837,7 +904,7 @@ const STRINGS = {
     click_preview:'Click any page to preview',
     jb_label:'Move page',jb_to:'to position',btn_go:'Go',
     qm_invalid:'Invalid. Enter numbers between 1 and',
-    btn_reverse:'Reverse',btn_reset:'Reset',btn_apply:'Apply & Download',
+    btn_reverse:'Reverse',btn_reset:'Reset',btn_apply:'Apply & Download',btn_open:'Open file',
     loading:'Loading engine (first time: ~15s)...',processing:'Processing...',
     result_title:'PDF reordered successfully',
     btn_dl:'Download Reordered PDF',btn_another:'Reorder another file',
@@ -870,7 +937,7 @@ const STRINGS = {
     click_preview:'Haz clic en cualquier pagina para previsualizar',
     jb_label:'Mover pagina',jb_to:'a posicion',btn_go:'Ir',
     qm_invalid:'Invalido. Escribe numeros entre 1 y',
-    btn_reverse:'Invertir',btn_reset:'Restablecer',btn_apply:'Aplicar y Descargar',
+    btn_reverse:'Invertir',btn_reset:'Restablecer',btn_apply:'Aplicar y Descargar',btn_open:'Abrir archivo',
     loading:'Cargando motor (primera vez: ~15s)...',processing:'Procesando...',
     result_title:'PDF reordenado con exito',
     btn_dl:'Descargar PDF reordenado',btn_another:'Reordenar otro archivo',
@@ -903,7 +970,7 @@ const STRINGS = {
     click_preview:'Clique em qualquer pagina para visualizar',
     jb_label:'Mover pagina',jb_to:'para posicao',btn_go:'Ir',
     qm_invalid:'Invalido. Digite numeros entre 1 e',
-    btn_reverse:'Inverter',btn_reset:'Redefinir',btn_apply:'Aplicar e Baixar',
+    btn_reverse:'Inverter',btn_reset:'Redefinir',btn_apply:'Aplicar e Baixar',btn_open:'Abrir arquivo',
     loading:'Carregando motor (primeira vez: ~15s)...',processing:'Processando...',
     result_title:'PDF reordenado com sucesso',
     btn_dl:'Baixar PDF reordenado',btn_another:'Reordenar outro arquivo',
@@ -936,7 +1003,7 @@ const STRINGS = {
     click_preview:'Cliquez sur une page pour la previsualiser',
     jb_label:'Deplacer la page',jb_to:'vers la position',btn_go:'OK',
     qm_invalid:'Invalide. Entrez des numeros entre 1 et',
-    btn_reverse:'Inverser',btn_reset:'Reinitialiser',btn_apply:'Appliquer et Telecharger',
+    btn_reverse:'Inverser',btn_reset:'Reinitialiser',btn_apply:'Appliquer et Telecharger',btn_open:'Ouvrir fichier',
     loading:'Chargement du moteur (~15s la premiere fois)...',processing:'Traitement...',
     result_title:'PDF reorganise avec succes',
     btn_dl:'Telecharger le PDF reorganise',btn_another:'Reorganiser un autre fichier',
@@ -969,7 +1036,7 @@ const STRINGS = {
     click_preview:'Klicken Sie auf eine Seite zur Vorschau',
     jb_label:'Seite verschieben',jb_to:'zu Position',btn_go:'Los',
     qm_invalid:'Ungueltig. Geben Sie Zahlen zwischen 1 und ein',
-    btn_reverse:'Umkehren',btn_reset:'Zuruecksetzen',btn_apply:'Anwenden und Herunterladen',
+    btn_reverse:'Umkehren',btn_reset:'Zuruecksetzen',btn_apply:'Anwenden und Herunterladen',btn_open:'Datei oeffnen',
     loading:'Engine wird geladen (erstes Mal: ~15s)...',processing:'Verarbeitung...',
     result_title:'PDF erfolgreich neu angeordnet',
     btn_dl:'Neu angeordnetes PDF herunterladen',btn_another:'Eine weitere Datei neu anordnen',
@@ -1010,6 +1077,7 @@ function applyLang(){
   set('btn-go-lbl',   s.btn_go);
   set('btn-reverse-lbl', s.btn_reverse);
   set('btn-reset-lbl',   s.btn_reset);
+  set('btn-open-lbl',    s.btn_open);
   set('btn-apply-lbl',   s.btn_apply);
   set('loading-text', s.loading);
   set('result-title', s.result_title);
