@@ -333,7 +333,11 @@ async function initPyodide(){
 }
 async function _loadEngineProtect(){
   pyodide=await loadPyodide({indexURL:'https://cdn.jsdelivr.net/pyodide/v0.27.0/full/'});
-  await pyodide.loadPackage(['micropip','pypdf']);
+  await pyodide.loadPackage(['micropip']);
+  await pyodide.runPythonAsync(`
+import micropip
+await micropip.install('pypdf')
+`);
   pyReady=true;
   pyLoading=false;
   document.getElementById('loadingEngine').style.display='none';
