@@ -1,0 +1,237 @@
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+NOSERVERTOOLS — LOG v8.0  (Cloudflare Analytics, DNS migration, head cleanup)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+════════════════════════════════════════════════════════════
+CAMBIOS v8.0
+════════════════════════════════════════════════════════════
+
+1. ANALYTICS — MIGRACIÓN PLAUSIBLE → CLOUDFLARE WEB ANALYTICS
+   ELIMINADO en todos los HTML:
+     <script defer data-domain="noservertools.com"
+             src="https://plausible.io/js/script.js"></script>
+
+   AÑADIDO en todos los HTML (justo antes de </head>):
+     <script defer
+       src="https://static.cloudflareinsights.com/beacon.min.js"
+       data-cf-beacon='{"token": "REPLACE_WITH_YOUR_CF_TOKEN"}'>
+     </script>
+
+   TOKEN ACTIVO: s52BRCjtQpxKmC2x3-ZnR84r5GZta7CKESfuXJdH
+   Insertado en los 11 archivos HTML. Listo para producción.
+
+   NOTA: Reemplaza el token si alguna vez lo regeneras en CF Dashboard.
+   real que obtienes en Cloudflare Dashboard → Web Analytics → Sites.
+
+   Ventajas del cambio:
+   - $0/mes (Plausible cuesta ~$9/mes tras trial)
+   - Sin cookies, GDPR compliant igual que Plausible
+   - Integrado con Cloudflare CDN/DNS — latencia cero
+   - Dashboard en el mismo panel donde gestionas el dominio
+   - Core Web Vitals (LCP, FID, CLS) incluidos automáticamente
+
+2. HEAD — LIMPIEZA Y ORDEN CORRECTO
+   Orden optimizado del <head>:
+     1. charset (primero siempre)
+     2. viewport
+     3. title
+     4. meta description / keywords
+     5. canonical + OG tags
+     6. robots
+     7. favicon (inline SVG, sin request extra)
+     8. preconnect fonts
+     9. Google Fonts stylesheet
+    10. Tailwind CDN (con config inline inmediata)
+    11. <style> bloque CSS
+    12. JSON-LD schema
+    13. CF Analytics (defer, último — no bloquea nada)
+
+   Sin cambios en el body — cero riesgo de bugs.
+
+3. SCRIPTS — VERIFICACIÓN defer
+   Todos los scripts externos ya usan defer o están al final del body.
+   No hay scripts render-blocking añadidos.
+
+4. COMPATIBILIDAD CLOUDFLARE
+   - Sin <meta http-equiv="Content-Security-Policy"> (Regla #29 respetada)
+   - Sin headers que bloqueen el beacon de CF
+   - GitHub Pages + Cloudflare proxy (orange cloud) = compatible
+
+════════════════════════════════════════════════════════════
+GUÍA COMPLETA: CLOUDFLARE SETUP PASO A PASO
+════════════════════════════════════════════════════════════
+
+── PASO 1: Crear cuenta Cloudflare
+   → https://dash.cloudflare.com/sign-up
+   → Email + contraseña → Verificar email
+
+── PASO 2: Añadir dominio noservertools.com
+   → Dashboard → "Add a Site" → escribir noservertools.com
+   → Elegir plan FREE → Continue
+   → Cloudflare escanea tus DNS automáticamente
+
+── PASO 3: Importar DNS de Namecheap → Cloudflare
+   ANTES de cambiar nameservers, verifica que CF importó estos registros:
+
+   TIPO   NOMBRE   VALOR                          PROXY
+   ─────────────────────────────────────────────────────
+   A      @        185.199.108.153                ✅ Proxied (naranja)
+   A      @        185.199.109.153                ✅ Proxied (naranja)
+   A      @        185.199.110.153                ✅ Proxied (naranja)
+   A      @        185.199.111.153                ✅ Proxied (naranja)
+   CNAME  www      USERNAME.github.io             ✅ Proxied (naranja)
+
+   (Estos son los IPs de GitHub Pages — si no aparecen, añádelos manualmente)
+
+   IMPORTANTE: el registro CNAME www debe apuntar a TU usuario:
+   fiocc.github.io  (reemplaza con tu usuario real de GitHub)
+
+── PASO 4: Cambiar nameservers en Namecheap
+   → Namecheap → Dashboard → noservertools.com → Manage
+   → "Nameservers" → seleccionar "Custom DNS"
+   → Pegar los 2 nameservers que Cloudflare te dio, ejemplo:
+       aria.ns.cloudflare.com
+       bob.ns.cloudflare.com
+   → Save ✅
+   → Propagación: 5 min – 48 horas (normalmente <30 min)
+
+── PASO 5: Configuración SSL en Cloudflare
+   → SSL/TLS → Overview → modo "Full" (no Full Strict, GitHub Pages no tiene cert propio)
+   → Edge Certificates → Always Use HTTPS → ON
+   → Minimum TLS Version → TLS 1.2
+
+── PASO 6: Activar Web Analytics
+   → Cloudflare Dashboard → tu dominio → "Web Analytics" (menú izquierdo)
+   → "Add a site" → noservertools.com
+   → Cloudflare genera un TOKEN único (aspecto: abc123def456...)
+   → Copia ese token
+
+── PASO 7: Insertar token en todos los HTML
+   Busca en cada archivo:
+     REPLACE_WITH_YOUR_CF_TOKEN
+   Reemplázalo con tu token real. Ejemplo final:
+     data-cf-beacon='{"token": "1a2b3c4d5e6f7890abcdef1234567890"}'
+
+   Archivos a actualizar (todos los que tienen el script CF):
+     index.html
+     compress-pdf/index.html
+     merge-pdf/index.html
+     split-pdf/index.html
+     rotate-pdf/index.html
+     protect-pdf/index.html
+     unlock-pdf/index.html
+     edit-pdf/index.html
+     pdf-to-jpg/index.html
+     delete-pages/index.html
+     reorder-pages/index.html
+
+   TIP: Usa Find & Replace en VS Code:
+     Buscar:    REPLACE_WITH_YOUR_CF_TOKEN
+     Reemplazar: [tu token real]
+     Scope:     todos los archivos del proyecto
+
+════════════════════════════════════════════════════════════
+GITHUB PAGES — VERIFICACIÓN POST-CLOUDFLARE
+════════════════════════════════════════════════════════════
+
+GitHub Pages necesita saber que el dominio sigue activo.
+→ Repositorio en GitHub → Settings → Pages
+→ Custom domain: noservertools.com → Save
+→ "Enforce HTTPS" → ✅ activado
+
+Si aparece error "Domain is not properly configured":
+→ Espera 30 min a que propaguen los DNS
+→ Recarga la página de Settings
+
+════════════════════════════════════════════════════════════
+COMANDOS DE DEPLOY — COPIAR Y EJECUTAR
+════════════════════════════════════════════════════════════
+
+cd C:/Users/fiocc/OneDrive/Desktop/noservertools
+
+copy index_-_compress.html     compress-pdf\index.html
+copy index_-_merge.html        merge-pdf\index.html
+copy index_-_split.html        split-pdf\index.html
+copy index_-_rotate.html       rotate-pdf\index.html
+copy index_-_protect.html      protect-pdf\index.html
+copy index_-_unlock.html       unlock-pdf\index.html
+copy index_-_edit.html         edit-pdf\index.html
+copy index_-_pdftojpg.html     pdf-to-jpg\index.html
+copy index_-_delete.html       delete-pages\index.html
+copy index_-_reorder.html      reorder-pages\index.html
+copy index.html               index.html
+
+git add -A
+git commit -m "v8.0: remove plausible, add cloudflare analytics (token live), head cleanup"
+git push origin main
+
+════════════════════════════════════════════════════════════
+CHECKLIST FINAL — CONFIRMAR TODO OK
+════════════════════════════════════════════════════════════
+
+DNS Y CLOUDFLARE
+[ ] Nameservers en Namecheap apuntan a Cloudflare (aria/bob.ns.cloudflare.com)
+[ ] Cloudflare muestra el dominio como "Active" (fondo naranja → verde)
+[ ] Los 4 registros A de GitHub Pages están en CF con proxy naranja
+[ ] CNAME www apunta a USERNAME.github.io con proxy naranja
+[ ] SSL/TLS en modo "Full" (no Strict)
+[ ] "Always Use HTTPS" activado en CF
+
+GITHUB PAGES
+[ ] Settings → Pages → Custom domain = noservertools.com ✅
+[ ] "Enforce HTTPS" activado ✅
+[ ] El sitio carga correctamente en https://noservertools.com
+[ ] El sitio carga correctamente en https://www.noservertools.com
+[ ] Todas las subpáginas funcionan (/merge-pdf/, /compress-pdf/, etc.)
+
+ANALYTICS
+[ ] Token CF insertado en TODOS los HTML (sin REPLACE_WITH_YOUR_CF_TOKEN)
+[ ] Visita el sitio desde una pestaña normal (no incógnito para primera prueba)
+[ ] Cloudflare Dashboard → Web Analytics → aparece 1 visita en ~5 minutos
+[ ] Core Web Vitals visibles en el dashboard de CF
+
+CÓDIGO
+[ ] grep -r "plausible" . devuelve 0 resultados (Plausible eliminado)
+[ ] grep -r "REPLACE_WITH_YOUR_CF_TOKEN" . devuelve 0 resultados
+[ ] grep -r "cloudflareinsights" . devuelve 11 resultados (1 por HTML)
+[ ] No hay errores en DevTools Console al cargar el sitio
+
+════════════════════════════════════════════════════════════
+REGLAS ACUMULADAS (v8.0 añade)
+════════════════════════════════════════════════════════════
+
+#27 — Pyodide siempre 0.27.0 (script src Y indexURL)
+#28 — Timeout 90s obligatorio en loadEngine()
+#29 — NUNCA <meta> CSP con Pyodide/WASM
+#30 — pypdf: loadPackage(['micropip']) + micropip.install('pypdf')
+#31 — Drop zone: NUNCA onclick en el div padre
+#32 — Strings JS con apóstrofe: usar comillas dobles
+#33 — Analytics: Cloudflare Web Analytics (beacon.min.js + token)
+       Script: <script defer src="https://static.cloudflareinsights.com/beacon.min.js"
+               data-cf-beacon='{"token": "TU_TOKEN"}'>
+       (Reemplaza Plausible — era data-domain noservertools.com)
+#34 — Nav max-width uniforme 1100px inline, Tailwind max-w-6xl
+#35 — Pyodide + archivos grandes SIEMPRE en Web Worker (Blob URL)
+       main thread nunca bloquea. Transfer ArrayBuffer zero-copy.
+#36 — Cuando se reemplaza un footer, preservar id="footerEl" si el JS lo usa
+#37 — Cloudflare proxy (naranja): GitHub Pages IPs = 185.199.108-111.153
+       SSL mode = Full (NO Full Strict). Always HTTPS = ON.
+#38 — Orden head: charset → viewport → title → meta → canonical → OG
+       → robots → favicon → preconnect → fonts → tailwind → style → schema → analytics
+
+════════════════════════════════════════════════════════════
+HISTORIAL COMPLETO
+════════════════════════════════════════════════════════════
+
+── v7.2   ── CSP meta bloqueaba WASM. Pyodide 0.25→0.27. Timeout 90s.
+── v7.3   ── pypdf loadPackage(['micropip']) + micropip.install().
+── v7.4   ── delete-pages doble onclick en dropzone. Pyodide 0.25→0.27.
+── v7.4.1 ── SyntaxError \' en delete-pages.
+── v7.5   ── Nuevo tool: reorder-pages (drag & drop, thumbnails, multilenguaje).
+── v7.6   ── Nav/footer uniforme. Reorder en nav. Plausible analytics. Pyodide 0.27 todos.
+── v7.7   ── Fix lang switcher todos. Doble logo protect/unlock/edit/pdfjpg.
+── v7.7.1 ── Fix SyntaxError script huérfano del lang switcher.
+── v7.7.2 ── Fix doble logo protect/unlock/edit/pdfjpg. Edit blank screen (footerEl). Hub 10 live.
+── v7.8   ── Compress: Web Worker (no freeze), 5 niveles, 200MB, PIL re-encode real.
+── v8.0   ── Migración Plausible → Cloudflare Web Analytics. DNS Namecheap → CF.
+             Head cleanup. Reglas #37 y #38 añadidas.

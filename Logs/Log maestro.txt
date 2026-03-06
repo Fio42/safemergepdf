@@ -1,0 +1,575 @@
+════════════════════════════════════════════════════════════════
+LOG MAESTRO v8.1 — NOSERVERTOOLS
+PEGAR EN CUALQUIER AI PARA CONTINUAR SIN PREGUNTAS
+════════════════════════════════════════════════════════════════
+
+PROYECTO: NoServerTools
+Tipo: App web estatica — un HTML por herramienta, CERO servidores propios
+Hosting: GitHub Pages — GRATIS — $0 forever
+URL RAIZ: https://noservertools.com/
+URL alternativa: https://fio42.github.io/noservertools/ (sigue funcionando)
+Repo: https://github.com/Fio42/noservertools
+Carpeta local: C:/Users/fiocc/OneDrive/Desktop/noservertools/
+Usuario GitHub: Fio42
+Ultimo deploy: v8.1 — reorder-pages UX overhaul (pointer events drag system)
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+IDENTIDAD DE MARCA
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Nombre:    NoServerTools
+Dominio:   noservertools.com (ACTIVO desde v6.2, HTTPS forzado)
+Tagline:   "Your files never leave your computer."
+Sub:       "Tools that run inside your browser. Not on our servers."
+SIN estadisticas inventadas. SIN reviews falsos. Sin excepcion.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+COMO SUBIR CAMBIOS AL REPO
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+cd "C:/Users/fiocc/OneDrive/Desktop/noservertools"
+git add .
+git commit -m "descripcion del cambio"
+git push
+
+Si git push falla con "rejected fetch first":
+  git pull --rebase
+  git push
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ESTRUCTURA DE ARCHIVOS — ESTADO ACTUAL v8.1
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+noservertools/
+  index.html               [v7.8] HUB — 11 tools live
+  sitemap.xml              [v7.6] 11 URLs indexadas
+  robots.txt               SEO (Allow: /, Sitemap: apuntando al xml)
+  CNAME                    noservertools.com (creado por GitHub)
+  _headers                 Cabeceras de seguridad HTTP (v7.2+)
+  LOG.txt                  Este archivo
+
+  merge-pdf/index.html     [v7.6] nav+footer 11 tools, Pyodide 0.27, analytics
+  compress-pdf/index.html  [v7.8] REESCRITO — Web Worker, 5 niveles, 200MB
+  split-pdf/index.html     [v7.6] nav+footer 11 tools, Pyodide 0.27
+  pdf-to-jpg/index.html    [v7.6] nav+footer 11 tools, Pyodide 0.27
+  rotate-pdf/index.html    [v7.6] preview visual, .nav-inner, Pyodide 0.27
+  protect-pdf/index.html   [v7.6] confirm password, nav+footer 11 tools
+  unlock-pdf/index.html    [v7.6] password opcional, nav+footer 11 tools
+  edit-pdf/index.html      [v7.7.2] .text-box drag, footerEl fix, doble logo fix
+  delete-pages/index.html  [v7.4] thumbnails visuales, dropzone fix
+  reorder-pages/index.html [v8.1] UX overhaul — pointer events drag system
+
+  translate-pdf/           [ELIMINADA v6.0 — borrar si existe en local]
+
+  -- PENDIENTES (orden prioridad SEO) --
+  watermark-pdf/           PRIORIDAD 1 — alto volumen busquedas
+  pdf-to-text/             PRIORIDAD 2 — alto volumen busquedas
+  view-pdf-metadata/       PRIORIDAD 3 — diferenciador privacidad
+  remove-metadata/         PRIORIDAD 4 — diferenciador privacidad
+  redact-pdf/              PRIORIDAD 5 — diferenciador privacidad
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+PATRON NAV — 11 TOOLS (v8.1)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Orden: Merge | Compress | Split | JPG | Rotate | Protect | Unlock | Edit | Delete | Reorder | [All tools]
+
+Hay 3 estilos de nav — RESPETAR EL ESTILO EXISTENTE DE CADA ARCHIVO:
+
+ESTILO A (merge/compress/split) — Tailwind classes px-3 py-1.5:
+  <a href="/rotate-pdf/" class="px-3 py-1.5 rounded-lg text-sm text-white/60 hover:bg-white/5">Rotate PDF</a>
+  ...igual para las demas tools...
+  <a href="/" class="ml-2 ...">All tools</a>
+  Footer: <a href="/reorder-pages/" class="text-xs text-white/35 hover:text-brand-400">Reorder Pages</a>
+
+ESTILO B (hub/pdftojpg/protect/unlock/edit/delete/reorder) — .nav-link class:
+  <a href="/reorder-pages/" class="nav-link">Reorder Pages</a>
+  <a href="/" class="nav-cta" style="margin-left:6px">All tools</a>
+  Footer: <a href="/reorder-pages/" class="fl">Reorder Pages</a>
+  Tool activa lleva class="fl on"
+
+ESTILO C (rotate) — rutas ../ relativas + .nav-inner para centrar:
+  <a href="../reorder-pages/">Reorder Pages</a>
+  Footer: <a href="../reorder-pages/">Reorder Pages</a>
+  CSS obligatorio en rotate:
+    nav{position:sticky;top:0;z-index:100;width:100%;height:54px;...}
+    .nav-inner{max-width:720px;margin:0 auto;height:54px;display:flex;
+               align-items:center;justify-content:space-between;padding:0 20px;gap:16px}
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+DNS Y DOMINIO (referencia permanente)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Namecheap Advanced DNS:
+  A Record  @    185.199.108.153  Automatic
+  A Record  @    185.199.109.153  Automatic
+  A Record  @    185.199.110.153  Automatic
+  A Record  @    185.199.111.153  Automatic
+  CNAME     www  fio42.github.io  Automatic
+GitHub Pages: Custom Domain = noservertools.com | Enforce HTTPS = activado
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+GOOGLE SEARCH CONSOLE — Estado (v7.4+)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+✓ Verificado con archivo HTML en raiz
+✓ Sitemap enviado: https://noservertools.com/sitemap.xml
+✓ Indexacion solicitada para todas las URLs activas
+Pendiente: agregar reorder-pages al sitemap + solicitar indexacion
+
+ANALITICAS: Plausible Analytics instalado en todas las tools (v7.6+)
+  Script: <script defer data-domain="noservertools.com" src="https://plausible.io/js/script.js"></script>
+  Sin cookies, GDPR compliant. Dashboard en https://plausible.io
+  Alternativa gratis: Umami (https://umami.is) hasta 100k pageviews/mes.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+DISENO VISUAL — SISTEMA GLOBAL
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Background:   #0e1117
+Fuentes:      Syne (titulos, clase .fd, font-weight 700/800)
+              Outfit (cuerpo, font-weight 400/500/600)
+              DM Mono (labels tecnicos/badges, clase .fm)
+Colores:
+  brand-400: #5a87ff  brand-500: #3363f5  brand-600: #1f45e0
+  green: #4ade80 (exito, badge privacidad, boton descarga texto)
+  red: #f87171 | yellow: #fbbf24
+  text: #e8eaf0 | muted: rgba(255,255,255,.45)
+  surface: rgba(255,255,255,.03) | border: rgba(255,255,255,.08)
+
+Background grid: body::before con rgba(83,99,255,.055) 52x52px
+Blobs: .blob-a arriba-izquierda | .blob-b derecha-centro (radial-gradient)
+Nav: sticky, backdrop-filter blur(14px), h=54px, bg rgba(14,17,23,.75)
+Logo: caja 28x28 azul #1f45e0 + SVG 4 cuadros + "NoServer" blanco + "Tools" brand-400
+Footer strip: "NO UPLOADS · NO ACCOUNTS · NO TRACKING · NO SERVERS"
+Boton descarga: bg #4ade80, texto #0e1117
+Privacy badge verde: "No upload · 100% local"
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+FAVICON — SOLUCION DEFINITIVA (v6.7+)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Tecnica: inline SVG data URI. Sin archivo .ico. Sin rutas. Sin problemas de CSP.
+Va inmediatamente despues de <meta charset="UTF-8"> en TODAS las tools:
+
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%231f45e0'/><rect x='4' y='4' width='10' height='10' rx='2' fill='white'/><rect x='18' y='4' width='10' height='10' rx='2' fill='white' opacity='.6'/><rect x='4' y='18' width='10' height='10' rx='2' fill='white' opacity='.6'/><rect x='18' y='18' width='10' height='10' rx='2' fill='white' opacity='.3'/></svg>">
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+LANGUAGE SWITCHER (v6.8+)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Idiomas: EN (default), ES, PT, FR, DE
+Posicion: fixed top-right, z-index:9999, NO interfiere con nav
+Persistencia: localStorage key 'nst_lang'
+Auto-deteccion: navigator.language en primer visit
+CSS id: #ls, #ls-btn, #ls-menu, .ls-opt
+JS: window.lsToggle(), window.lsSet(lang), window.i18n(key)
+El div #ls debe ir ANTES del <header> en el body.
+Elementos traducidos via data-i18n: badge, why_title, why_uploads,
+  why_storage, why_tracking, why_offline, footer_strip (y sus descripciones _d)
+
+Para nueva tool: copiar el bloque <script>'use strict';(function(){...})();</script>
+completo del archivo reorder-pages o delete-pages y pegarlo antes de </body>.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+STACK TECNICO
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Pyodide v0.27.0: https://cdn.jsdelivr.net/pyodide/v0.27.0/full/pyodide.js
+PDF.js 3.11.174: https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js
+                 worker: https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js
+Tailwind CDN: https://cdn.tailwindcss.com (solo tools que ya lo usan)
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+RECETAS TECNICAS — TODAS LAS HERRAMIENTAS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+MERGE PDF (Pyodide + pypdf):
+  PdfWriter.append(BytesIO(bytes)) por cada archivo
+  writer.write(output) -> descarga merged.pdf
+
+COMPRESS PDF (Pyodide + pypdf + Pillow — Web Worker v7.8):
+  TODO corre en un Web Worker creado via Blob URL (nunca bloquea UI)
+  Comunicacion via postMessage con ArrayBuffer zero-copy
+  5 niveles: SCREEN(15%), EBOOK(30%), BALANCED(50%), HIGH(72%), PRINT(88%)
+  Limite: 200MB. PIL re-encode de imagenes embebidas.
+  compress_identical_objects + img.replace(quality=N) con try/except
+  instalar: await pyodide.loadPackage(['micropip','pillow'])
+            + micropip.install('pypdf')
+  -> descarga filename-compressed.pdf
+
+SPLIT PDF (Pyodide + pypdf):
+  readTotalPages() via PDF.js al cargar — sin esperar Pyodide
+  writer.add_page(page) por paginas del rango -> split.pdf
+
+PDF->JPG (PDF.js, NO Pyodide):
+  page.render() -> canvas -> toDataURL('image/jpeg') -> page-N.jpg
+
+JPG->PDF (Pyodide + Pillow):
+  Image.open(BytesIO(bytes)) -> img.save(buf, format='PDF')
+  PdfWriter().append() -> filename.pdf
+
+ROTATE PDF (Pyodide + pypdf + PDF.js para preview):
+  pageRotations = {} — acumulador de angulos por pagina
+  rotatePreview(delta): suma delta a todas las paginas target + re-render PDF.js
+  Botones: Left(-90), Flip(180), Right(+90). Scope: all o range.
+  doRotate(): pasa rot_map_json al Python, page.rotate(angle)
+  Preview con PDF.js se carga al subir archivo (sin esperar Pyodide)
+  Layout: 2 columnas (controles | preview)
+  -> filename-rotated.pdf
+
+PROTECT PDF (Pyodide + pypdf):
+  writer.clone_reader_document_root(reader)
+  writer.encrypt(user_password=pw, owner_password=None, use_128bit=True)
+  UI: 2 campos (password + confirm), validacion coincidencia, toggle visibilidad
+  -> filename-protected.pdf
+
+UNLOCK PDF (Pyodide + pypdf):
+  Password es OPCIONAL — auto-detecta si el PDF esta encriptado
+  reader.decrypt(pw) — casos:
+    0 = password incorrecta -> error claro
+    1 = user password correcta
+    2 = owner password correcta
+    PDF no encriptado -> descarga igual con nota informativa
+  writer.clone_reader_document_root(reader) -> writer.write(out)
+  -> filename-unlocked.pdf
+
+EDIT PDF (PDF.js + canvas API + .text-box divs + PDF builder JS manual):
+  NO usa Pyodide — 100% JavaScript nativo
+  Modos: select, text, draw, highlight, image, firma (modal canvas)
+  Texto: .text-box div con barra azul draggable (.text-box-header con .text-box-drag-icon)
+    En modo Select: annCanvas.pointerEvents='none' -> clicks pasan a .text-box debajo
+    textInputs[pageNum] = array de .text-box wrapper divs
+    downloadPDF(): box.querySelector('textarea') para el texto, offset BAR_H=22px
+  Draw/highlight: paths {x,y}[] guardados en annotations[pageNum]
+  Imagenes: img-overlay divs con drag+resize
+  Firma: modal con sigCanvas -> PNG -> img-overlay
+  Descarga: buildPDFFromJpegs() — renderiza paginas a JPEG 2x + ensambla PDF 1.4
+    manual con XObjects. Nunca modificar buildPDFFromJpegs sin leer el LOG.
+  resetAll(): container.querySelectorAll('.text-box,.img-overlay').forEach(el=>el.remove())
+  Footer usa id="footerEl" — preservarlo siempre.
+  -> filename-edited.pdf
+
+DELETE PAGES (PDF.js + Pyodide + pypdf):
+  PDF.js renderiza thumbnails de todas las paginas
+  Click en thumbnail -> marca en rojo (Set selectedPages)
+  Botones: "Select all" / "Deselect all"
+  Validacion: no se puede eliminar TODAS las paginas (remaining > 0)
+  Python: writer.add_page solo si (i+1) not in to_delete
+  Dropzone: NUNCA onclick en el div padre — solo el boton hijo (Regla #31)
+  -> filename-deleted.pdf
+
+REORDER PAGES (PDF.js + Pyodide + pypdf — UX overhaul v8.1):
+  PDF.js renderiza thumbnails (grid visual)
+  Drag system: pointer events (pointerdown/pointermove/pointerup) — NO HTML5 drag API
+    Ghost: clone del thumbnail, position:fixed, sigue al cursor
+    Drop line: linea vertical 3px brand color, position:fixed, indica donde cae
+    dropSrcIndex: indice de la pagina que se arrastra
+    En pointerup: splice pageOrder[] y re-render
+  Drop zone completa clickeable: onclick en div completo + stopPropagation en boton
+  Python: writer.add_page(reader.pages[i]) en nuevo orden (pageOrder[])
+  -> filename-reordered.pdf
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+PATRON PYODIDE INIT — OBLIGATORIO EN TODA TOOL (v6.9+)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+NUNCA usar: if (pyodide || pyReady) return;
+SIEMPRE usar tres flags separados:
+
+  let pyodide = null, pyReady = false, pyLoading = false;
+
+  async function initPyodide() {
+    if (pyReady) { /* habilitar boton */ return; }
+    if (pyLoading) return;
+    pyLoading = true;
+    /* mostrar spinner */
+    try {
+      pyodide = await loadPyodide({
+        indexURL: 'https://cdn.jsdelivr.net/pyodide/v0.27.0/full/'
+      });
+      await pyodide.loadPackage(['micropip']);
+      await pyodide.runPythonAsync(`
+  import micropip
+  await micropip.install('pypdf')
+  `);
+      pyReady = true;
+      pyLoading = false;
+      /* ocultar spinner, habilitar boton */
+    } catch(e) {
+      pyLoading = false;
+      pyodide = null;   // CRITICO: reset para permitir reintento
+      /* mostrar error con instruccion de refresh */
+    }
+  }
+
+  // En handleFile():
+  function handleFile(f) {
+    ...
+    if (pyReady) { /* habilitar boton directamente */ }
+    else { initPyodide(); }
+  }
+
+Timeout 90s obligatorio: usar Promise.race con un setTimeout que rechaza.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+CHECKLIST NUEVA HERRAMIENTA
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+1. Carpeta nueva: /[tool-name]/index.html
+2. SIN <base href>
+3. head:
+   - <meta charset="UTF-8">
+   - Favicon inline SVG (ver seccion FAVICON — mismo snippet para todas)
+   - <meta name="viewport">
+   - SIN <meta CSP> — las cabeceras van en _headers del servidor
+   - <title>[Tool] Free Online — No Upload, 100% Private | NoServerTools</title>
+   - <meta name="description"> — keyword + "no upload" + "browser"
+   - <meta name="keywords"> — 5-6 keywords long-tail privacidad
+   - <link rel="canonical" href="https://noservertools.com/[tool-name]/">
+   - og:title, og:description, og:url, og:type
+   - <meta name="robots" content="index, follow">
+   - Google Fonts: Syne + Outfit + DM Mono
+   - CDN scripts (Pyodide 0.27, PDF.js segun aplique)
+   - JSON-LD WebApplication (name, url, description, offers price=0)
+   - Plausible analytics script
+   - <style> con CSS del sistema global
+4. body:
+   - #ls (language switcher) ANTES del header
+   - <header> sticky con nav (11 tools + CTA "All tools")
+   - <main>: hero con badge verde + H1 + drop zone + tool UI + result + steps + why
+   - <footer> con links 11 tools + id="footerEl" + strip inferior
+   - Lang switcher script antes de </body>
+5. script: 'use strict', esc(), fmt(), handleFile(), initPyodide() con pyLoading pattern, resetAll()
+6. Despues de crear:
+   - nav+footer de TODAS las tools existentes
+   - card en HUB (badge Live)
+   - sitemap.xml
+   - Solicitar indexacion en Google Search Console
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+SEO Y COPYWRITING
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Titulo pattern: [Tool] Free Online — No Upload, 100% Private | NoServerTools
+Description pattern: [Accion] in your browser. No file upload. No server. 100% private.
+Canonical pattern: https://noservertools.com/[tool-name]/
+JSON-LD: WebApplication, price 0, applicationCategory UtilitiesApplication
+Badge verde en hero: "No upload · 100% local"
+
+Why NoServerTools (4 puntos — en todas las tools):
+  Zero uploads | Zero storage | Zero tracking | Works offline
+
+Keywords long-tail diferenciadores (baja competencia, alta intencion privacidad):
+  "pdf tools without uploading files"
+  "private pdf editor no server"
+  "pdf tools 100% browser"
+  "secure pdf no account"
+
+Keywords por herramienta:
+  merge-pdf:      "merge pdf free", "combine pdf no upload"
+  compress-pdf:   "compress pdf free", "reduce pdf size no upload"
+  split-pdf:      "split pdf free", "separate pdf pages no upload"
+  pdf-to-jpg:     "pdf to jpg free", "convert pdf image no upload"
+  rotate-pdf:     "rotate pdf free", "rotate pdf pages no upload"
+  protect-pdf:    "password protect pdf free", "encrypt pdf no upload"
+  unlock-pdf:     "unlock pdf free", "remove pdf password no upload"
+  edit-pdf:       "edit pdf online free", "annotate pdf no upload"
+  delete-pages:   "delete pdf pages free", "remove pages from pdf no upload"
+  reorder-pages:  "reorder pdf pages free", "rearrange pdf pages no upload"
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+REGLAS PERMANENTES — NUNCA ROMPER
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+1.  CERO servidores propios. Todo corre en el browser del usuario.
+2.  NUNCA usar em dash (—) en textos visibles del HTML.
+3.  SIEMPRE usar esc() antes de insertar texto del usuario en el DOM.
+4.  Cada herramienta = su propia carpeta + index.html. Nunca mezclar.
+5.  SIEMPRE actualizar sitemap.xml al agregar herramienta nueva.
+6.  SIEMPRE actualizar nav y footer de TODAS las paginas al agregar tool.
+7.  SIEMPRE entregar el LOG actualizado al final de cada sesion como .txt.
+8.  El usuario es principiante — pasos simples, uno a la vez, sin asumir nada.
+9.  NUNCA inventar estadisticas falsas ni reviews falsos.
+10. La marca es NoServerTools — no limitada a PDF, puede agregar cualquier tool.
+11. SIN <meta CSP> en ninguna tool. Las cabeceras van en _headers del servidor.
+12. SIEMPRE usar 'use strict' en todos los bloques <script>.
+13. SIEMPRE usar esc() — nunca innerHTML con datos del usuario.
+14. translate-pdf ELIMINADA en v6.0. No recrear, no referenciar jamas.
+15. NUNCA agregar tools que envien datos a servidores externos sin aviso prominente.
+16. NUNCA agregar <base href> a ningun HTML.
+17. Links nav/footer: rutas absolutas /tool-name/ — EXCEPTO rotate que usa ../tool-name/
+18. SIEMPRE dar LOG actualizado + git commands completos al final de cada sesion.
+19. rotate-pdf: rutas ../ Y nav con .nav-inner (max-width:720px centrado). No tocar esa arquitectura.
+20. FAVICON: inline SVG data URI en todas las tools — mismo snippet para todas.
+21. LANGUAGE SWITCHER: incluir en cada nueva tool. #ls antes del <header>.
+22. COMPRESS: instalar ['micropip','pillow'] via loadPackage + micropip.install('pypdf').
+              Todo en Web Worker — nunca en main thread para archivos grandes.
+23. EDIT-PDF: estructura .text-box. NUNCA modificar buildPDFFromJpegs sin leer LOG.
+              NUNCA modificar makeDraggableBox sin leer LOG.
+              Footer tiene id="footerEl" — preservarlo siempre.
+24. NUEVAS TOOLS: favicon + lang switcher + nav/footer 11 tools + hub + sitemap + analytics.
+25. PYODIDE INIT: SIEMPRE usar patron pyLoading (ver seccion arriba). NUNCA if(pyodide||pyReady).
+26. SPLIT: leer totalPages con PDF.js en handleFile(), nunca esperar Pyodide para esto.
+27. PYODIDE: siempre 0.27.0 (script src Y indexURL, los dos lugares).
+28. TIMEOUT: 90s obligatorio en loadEngine() — Promise.race con setTimeout.
+29. NUNCA <meta> CSP con Pyodide/WASM. Pyodide necesita wasm-unsafe-eval que no se puede
+    poner en meta. Las cabeceras van en _headers (para cuando haya servidor/Netlify).
+30. pypdf es PyPI-only: loadPackage(['micropip']) + runPythonAsync micropip.install('pypdf').
+    NUNCA loadPackage(['micropip','pypdf']) — pypdf NO existe en el indice de Pyodide.
+31. DROP ZONE: NUNCA onclick en el div padre. Solo el boton hijo abre el fileInput.
+    <div class="drop-zone" ondragover="..." ondrop="...">
+      <button onclick="document.getElementById('fileInput').click()">Select</button>
+      <input type="file" id="fileInput" onchange="handleFile(...)">
+    </div>
+32. STRINGS JS con apostrofe (frances, etc.): usar comillas dobles en el objeto I18N.
+33. ANALYTICS: Plausible en todas las tools. Script en <head>.
+    <script defer data-domain="noservertools.com" src="https://plausible.io/js/script.js"></script>
+34. NAV max-width uniforme: 1100px inline, Tailwind max-w-6xl. Incluir TODOS los tools.
+35. PYODIDE + archivos grandes: SIEMPRE en Web Worker (Blob URL). Main thread no bloquea.
+    Comunicacion via postMessage + ArrayBuffer transferido zero-copy.
+36. Cuando se reemplaza un footer, preservar id="footerEl" si el JS lo usa (edit-pdf).
+37. REORDER-PAGES drag: usar Pointer Events (pointerdown/pointermove/pointerup), NO HTML5 drag API.
+    HTML5 drag causa scroll jumps y pierde visibilidad del elemento arrastrado en grids grandes.
+    Ghost: position:fixed, clone del elemento, offset calculado en pointerdown.
+    Drop line: linea position:fixed entre items, calculada comparando clientX vs rect.left+width/2.
+38. DROP ZONE completa clickeable en reorder-pages: onclick en div completo con stopPropagation
+    en boton interno para evitar doble trigger.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+HISTORIAL COMPLETO DE VERSIONES
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+v1-v5.2:  Merge, Compress, Split, HUB inicial
+v5.3:     REBRAND a NoServerTools + dark mode global
+v5.4:     Dark mode todas las tools + PDF to JPG inicial
+v5.4.1:   Fix: base href para GitHub Pages subpath
+v5.5:     PDF<->JPG con PDF.js + JPG to PDF con Pillow
+v5.6:     HUB revamp (grid primero, hero compacto)
+          PDF<->JPG combinado en una sola pagina con switch de modo
+          Hardening de seguridad general
+v5.7:     Translate PDF v1: Pyodide+pypdf extraccion, MyMemory API
+          UI en 5 idiomas, steps indicator, descarga TXT/HTML
+v5.8:     Fix descarga PDF en translate: jsPDF real, fallback .txt
+v5.9:     Translate PDF visual: PDF.js JPEG+coordenadas, buildVisualPdf()
+          Fallback LibreTranslate, email key MyMemory
+v6.0:     REVAMP ESTRATEGICO:
+          translate-pdf ELIMINADA (enviaba texto a API externa)
+          rotate-pdf nueva (Pyodide+pypdf, scope all/range)
+          Nuevo tagline: "Your files never leave your computer."
+          SEO strategy, copywriting, arquitectura documentados
+          Roadmap 11 tools con prioridad SEO
+v6.1:     protect-pdf nueva (encrypt use_128bit=True, confirm password)
+          unlock-pdf nueva (decrypt, 3 casos)
+          HUB: 8 tools live, nav/footer todas las tools
+v6.2:     Dominio noservertools.com conectado (Namecheap + GitHub Pages)
+          base href="/noservertools/" ELIMINADO de todos los HTML
+          Regla #16 agregada: nunca usar base href
+v6.3:     edit-pdf NUEVA — editor PDF completo en browser
+          texto (textarea overlay), freehand draw, highlight,
+          imagenes drag+resize, firma (modal canvas)
+          Descarga via builder PDF manual con JPEG XObjects
+          Nav/footer TODAS las tools actualizados a 9 tools
+          HUB: 9 live. sitemap 9 URLs.
+v6.4:     protect-pdf reconstruido (confirm password, nav/footer 9 correcto)
+v6.5:     unlock-pdf canonical fix + footer fix
+          rotate-pdf nav corregido (.nav-inner max-width:720px)
+v6.6:     favicon.ico + i18n 5 idiomas + edit-pdf texto movible (primer intento)
+v6.7:     Favicon inline SVG definitivo (sin .ico, sin rutas, sin CSP problems)
+          edit-pdf texto movible reescrito (.text-box, barra azul, mode Select)
+v6.8:     BUG FIX compress: instalar pillow, try/except en img.replace
+          rotate-pdf REESCRITO: layout 2 cols, preview PDF.js, botones L/F/R
+          delete-pages NUEVA: thumbnails, clic para marcar, Pyodide builder
+          Language switcher en TODAS las tools (pill top-right, localStorage)
+          HUB: 10 live
+v6.9:     BUG FIX "Loading engine" infinito en todas las tools:
+          pyLoading flag pattern en compress/protect/unlock/pdftojpg
+          Regla #25 establecida formalmente
+v7.0:     BUG FIX en rotate/protect/unlock/pdftojpg/split/edit:
+          pyLoading pattern, unlock password opcional, split usa PDF.js para totalPages
+          edit-pdf: .text-box drag handle con barra header
+v7.1:     AUDITORIA: "Loading engine" infinito — causa raiz era CSP connect-src faltante
+          connect-src cdn.jsdelivr.net agregado en todos los tools
+          CSP canonico documentado
+          edit-pdf: resetAll .text-box cleanup fix
+          merge+delete: pyLoading race fix
+v7.2:     FIX DEFINITIVO loading engine: eliminados TODOS los <meta CSP>
+          (bloqueaban wasm-unsafe-eval silenciosamente)
+          Eliminados X-Frame-Options y X-Content-Type-Options como meta
+          Creado _headers con cabeceras HTTP correctas
+          Pyodide 0.25 -> 0.27 (mas estable)
+          Timeout 90s agregado
+          Regla #29 establecida
+v7.3:     FIX "No known package 'pypdf'":
+          loadPackage(['micropip']) + micropip.install('pypdf') en protect+rotate
+          Regla #30 establecida
+v7.4:     FIX delete-pages: doble onclick en dropzone (Regla #31)
+          Pyodide 0.25 -> 0.27 en delete-pages
+          Google Search Console: verificado + sitemap enviado + indexacion solicitada
+v7.4.1:   FIX SyntaxError apostrofe en delete-pages lineas 346 y 419
+v7.5:     reorder-pages NUEVA TOOL: thumbnails PDF.js, drag & drop, multilenguaje
+v7.6:     Nav/footer uniforme en TODOS los archivos (max-width 1100px)
+          Reorder Pages en nav/footer de todos
+          Plausible analytics en todos (Regla #33)
+          Pyodide 0.25 -> 0.27 en compress/split/unlock/pdftojpg/merge
+          sitemap.xml actualizado con reorder-pages
+v7.7:     Fix lang switcher en todos los archivos
+v7.7.1:   Fix SyntaxError script huerfano del lang switcher
+v7.7.2:   Fix doble logo en protect/unlock/edit/pdftojpg
+          Fix edit blank screen (footerEl)
+          HUB: 11 live (reorder incluido)
+v7.8:     compress-pdf REESCRITO con Web Worker (no freeze con PDFs grandes)
+          5 niveles de compresion (antes 3), limite 200MB (antes 100MB)
+          PIL re-encode real de imagenes embebidas
+          Nav/footer confirmado completo en todos los 12 archivos
+          Regla #35 establecida
+v8.1:     reorder-pages UX OVERHAUL:
+          Reemplazado HTML5 drag API por Pointer Events
+          (pointerdown/pointermove/pointerup) — sin scroll jumps,
+          sin perdida de visibilidad del elemento arrastrado
+          Ghost thumbnail: clone del elemento, position:fixed, sigue al cursor
+          Drop line: linea vertical 3px entre items, position:fixed
+          Drop zone completa clickeable
+          Reglas #37 y #38 establecidas
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+PROXIMOS PASOS — ORDEN RECOMENDADO
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+1. watermark-pdf (PRIORIDAD 1 — alto trafico SEO):
+   Pyodide + pypdf. Texto diagonal en todas las paginas.
+   UI: input texto + selector opacidad + selector color + boton apply
+   Python: canvas.add_transformation_matrix + drawString diagonal
+
+2. pdf-to-text (PRIORIDAD 2 — alto trafico SEO):
+   Pyodide + pypdf. page.extract_text() por pagina.
+   Descarga como .txt. Muestra preview del texto extraido.
+
+3. view-pdf-metadata + remove-pdf-metadata (par privacidad):
+   view: reader.metadata -> tabla con Author, Creator, Producer, Subject, etc.
+   remove: writer.add_metadata({}) -> PDF limpio sin metadatos -> descarga
+
+4. Configurar Plausible Analytics:
+   Ir a https://plausible.io -> Add site -> noservertools.com
+   El script ya esta en todas las paginas. Solo crear la cuenta.
+   Alternativa gratis: Umami (https://umami.is)
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+PARA EL PROXIMO AI — LEER ESTO PRIMERO
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+1.  NoServerTools. GitHub Pages. noservertools.com. CERO servidores propios.
+2.  Fondo #0e1117. Syne (.fd) + Outfit + DM Mono (.fm). Brand #5a87ff/#3363f5/#1f45e0.
+3.  11 tools activas: merge, compress, split, pdf-to-jpg, rotate, protect,
+    unlock, edit-pdf, delete-pages, reorder-pages.
+4.  Nav orden: Merge|Compress|Split|JPG|Rotate|Protect|Unlock|Edit|Delete|Reorder|[All tools CTA]
+5.  3 estilos de nav — respetar el existente de cada archivo (ver seccion PATRON NAV).
+6.  rotate-pdf: rutas ../ relativas Y .nav-inner para centrar. No tocar esa arquitectura.
+7.  Pyodide v0.27.0 + pypdf (via micropip) para: merge,compress,split,rotate,protect,unlock,delete,reorder
+    PDF.js 3.11.174 para: pdf-to-jpg, edit-pdf, rotate (preview), delete (thumbs), reorder (thumbs)
+    compress usa Web Worker (Blob URL) + Pillow. edit-pdf NO usa Pyodide.
+8.  PATRON PYODIDE INIT: pyLoading flag (ver seccion). Timeout 90s. NUNCA if(pyodide||pyReady).
+9.  pypdf es PyPI-only: loadPackage(['micropip']) + runPythonAsync micropip.install('pypdf').
+    NUNCA loadPackage(['micropip','pypdf']).
+10. NUNCA <meta CSP> en ningun HTML. Las cabeceras van en _headers del servidor.
+11. translate-pdf ELIMINADA en v6.0. No recrear, no mencionar jamas.
+12. Al agregar tool nueva: favicon + lang switcher + nav/footer TODAS las tools
+    + card en hub + sitemap.xml + solicitar indexacion en Google Search Console.
+13. NUNCA estadisticas inventadas. NUNCA reviews falsos.
+14. Usuario principiante. Pasos exactos al final. Git commands listos para copiar.
+15. LOG completo al final de cada sesion como .txt descargable.
+16. Leer HTML completo antes de modificar. str_replace quirurgico. No reescribir enteros.
+17. Pyodide carga LAZY con spinner "Loading engine (first time: 10-20 seconds)".
+18. Boton descarga: bg #4ade80 texto #0e1117.
+19. Canonical URLs: https://noservertools.com/[tool]/ (sin /noservertools/ en el path).
+20. edit-pdf: .text-box structure. Leer seccion EDIT-PDF antes de modificar cualquier cosa.
+21. reorder-pages: Pointer Events drag system. Leer Reglas #37 y #38. No usar HTML5 drag API.
+22. DROP ZONE: nunca onclick en el div padre. Solo el boton hijo abre el fileInput.
+
+════════════════════════════════════════════════════════════════
+FIN DEL LOG MAESTRO v8.1 — NoServerTools
+════════════════════════════════════════════════════════════════
