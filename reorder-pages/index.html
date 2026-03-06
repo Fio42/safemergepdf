@@ -897,5 +897,28 @@ document.addEventListener('click', e=>{
 
 applyLang();
 </script>
+<script>
+(function(){
+  var FLAGS={'en':'🇺🇸','es':'🇪🇸','pt':'🇧🇷','fr':'🇫🇷','de':'🇩🇪'};
+  var LABELS={'en':'EN','es':'ES','pt':'PT','fr':'FR','de':'DE'};
+  var SAVED='nst_lang';
+  var cur='en';
+  function detect(){var s=localStorage.getItem(SAVED);if(s&&FLAGS[s])return s;var n=(navigator.language||'en').toLowerCase().slice(0,2);return FLAGS[n]?n:'en';}
+  function apply(lang){
+    cur=lang;
+    var f=document.getElementById('ls-flag');var l=document.getElementById('ls-lbl');
+    if(f)f.textContent=FLAGS[lang];if(l)l.textContent=LABELS[lang];
+    document.querySelectorAll('.ls-opt').forEach(function(b,i){b.classList.toggle('active',['en','es','pt','fr','de'][i]===lang);});
+    document.querySelectorAll('[data-i18n]').forEach(function(el){var t=window._T&&window._T[lang];if(t&&t[el.getAttribute('data-i18n')]!==undefined)el.textContent=t[el.getAttribute('data-i18n')];});
+  }
+  window.lsToggle=function(){
+    var m=document.getElementById('ls-menu');var b=document.getElementById('ls-btn');
+    var o=m.classList.toggle('open');b.setAttribute('aria-expanded',o);
+    if(o){setTimeout(function(){document.addEventListener('click',function c(e){if(!document.getElementById('ls').contains(e.target)){m.classList.remove('open');b.setAttribute('aria-expanded','false');document.removeEventListener('click',c);}});},10);}
+  };
+  window.lsSet=function(lang){localStorage.setItem(SAVED,lang);apply(lang);document.getElementById('ls-menu').classList.remove('open');document.getElementById('ls-btn').setAttribute('aria-expanded','false');};
+  document.addEventListener('DOMContentLoaded',function(){apply(detect());});
+})();
+</script>
 </body>
 </html>
